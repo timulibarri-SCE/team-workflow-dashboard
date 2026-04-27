@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Workflow Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <path d="M7 9h18v15H7z" />
+              <path d="M11 13h5M11 17h10M11 21h7M20 6v6M12 6v6" />
+            </svg>
+          </div>
+          <div>
+            <strong>Team Workflow</strong>
+            <span>Projects, vendors, dates</span>
+          </div>
+        </div>
+
+        <nav class="nav-stack" aria-label="Dashboard areas">
+          <a class="nav-item active" href="#overview" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Z" /></svg>
+            </span>
+            Overview
+          </a>
+          <a class="nav-item" href="#team-projects">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7m7-5 2 2 4-5" /></svg>
+            </span>
+            Team Projects
+          </a>
+          <a class="nav-item" href="#vendor-tracker">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 7h10v10H4zM14 10h4l3 3v4h-7V10Zm-7 9a2 2 0 1 0 4 0m6 0a2 2 0 1 0 4 0" /></svg>
+            </span>
+            Vendors
+          </a>
+          <a class="nav-item" href="#events-calendar">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 2v4m10-4v4M4 9h16M5 5h14v16H5V5Zm4 8h3m3 0h3m-9 4h3" /></svg>
+            </span>
+            Events
+          </a>
+          <a class="nav-item" href="#pto-calendar">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 21c4-2.4 7-6.2 7-11V5l-7-3-7 3v5c0 4.8 3 8.6 7 11Zm-3-9 2 2 4-5" /></svg>
+            </span>
+            PTO
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span class="system-dot"></span>
+          <div>
+            <strong>Workflow synced</strong>
+            <span id="lastSync">Updated just now</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Team operations / Delivery pipeline / Coverage planning</p>
+            <h1>Team Workflow Dashboard</h1>
+          </div>
+          <div class="topbar-actions">
+            <label class="search-field" aria-label="Search workflow dashboard">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" /></svg>
+              <input id="globalSearch" type="search" placeholder="Search projects, vendors, owners" />
+            </label>
+            <div class="segmented" aria-label="View range">
+              <button class="segment active" type="button" data-range="This Week">This Week</button>
+              <button class="segment" type="button" data-range="Next 30">Next 30</button>
+              <button class="segment" type="button" data-range="Quarter">Quarter</button>
+            </div>
+            <button class="icon-button" id="refreshButton" type="button" aria-label="Refresh dashboard">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6" /></svg>
+            </button>
+          </div>
+        </header>
+
+        <section id="overview" class="status-strip" aria-label="Workflow summary">
+          <article class="metric-card">
+            <span class="metric-label">Team Projects</span>
+            <strong id="teamProjectCount">8</strong>
+            <small id="teamProjectMeta">4 due this week</small>
+          </article>
+          <article class="metric-card caution">
+            <span class="metric-label">Blocked Items</span>
+            <strong id="blockedCount">3</strong>
+            <small>2 internal, 1 vendor dependency</small>
+          </article>
+          <article class="metric-card good">
+            <span class="metric-label">Vendor Deliverables</span>
+            <strong id="vendorCount">6</strong>
+            <small id="vendorMeta">3 need attention</small>
+          </article>
+          <article class="metric-card info">
+            <span class="metric-label">Upcoming Events</span>
+            <strong id="eventCount">6</strong>
+            <small id="eventMeta">Next: Monday standup</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">PTO Coverage</span>
+            <strong id="ptoCount">5</strong>
+            <small id="ptoMeta">2 overlapping days</small>
+          </article>
+        </section>
+
+        <section class="tracker-grid">
+          <section class="panel team-panel" id="team-projects" aria-labelledby="teamProjectsTitle">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Internal Tracker</p>
+                <h2 id="teamProjectsTitle">Team Project Tracker</h2>
+              </div>
+              <div class="control-row">
+                <select id="projectStatusFilter" aria-label="Filter team projects by status">
+                  <option value="All">All Statuses</option>
+                  <option value="On Track">On Track</option>
+                  <option value="At Risk">At Risk</option>
+                  <option value="Blocked">Blocked</option>
+                  <option value="Done">Done</option>
+                </select>
+                <select id="projectOwnerFilter" aria-label="Filter team projects by owner">
+                  <option value="All">All Owners</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="board" id="projectBoard" aria-live="polite"></div>
+          </section>
+
+          <section class="panel queue-panel" aria-labelledby="focusTitle">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Today</p>
+                <h2 id="focusTitle">Focus Queue</h2>
+              </div>
+              <button class="text-button" id="toggleRisks" type="button">Risks Only</button>
+            </div>
+            <div class="focus-list" id="focusList" aria-live="polite"></div>
+          </section>
+        </section>
+
+        <section class="lower-grid">
+          <section class="panel" id="vendor-tracker" aria-labelledby="vendorTitle">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">External Tracker</p>
+                <h2 id="vendorTitle">Vendor Tracker</h2>
+              </div>
+              <select id="vendorStatusFilter" aria-label="Filter vendors by status">
+                <option value="All">All Vendors</option>
+                <option value="On Track">On Track</option>
+                <option value="Needs Review">Needs Review</option>
+                <option value="Waiting">Waiting</option>
+                <option value="Blocked">Blocked</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Vendor</th>
+                    <th scope="col">Deliverable</th>
+                    <th scope="col">Owner</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Due</th>
+                    <th scope="col">Next Step</th>
+                  </tr>
+                </thead>
+                <tbody id="vendorRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel calendar-panel" id="events-calendar" aria-labelledby="eventsTitle">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Upcoming</p>
+                <h2 id="eventsTitle">Events Calendar</h2>
+              </div>
+              <div class="calendar-controls">
+                <button class="icon-button" id="eventPrev" type="button" aria-label="Previous events month">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+                </button>
+                <span id="eventMonthLabel">April 2026</span>
+                <button class="icon-button" id="eventNext" type="button" aria-label="Next events month">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                </button>
+              </div>
+            </div>
+            <div class="calendar-wrap">
+              <div class="calendar-grid" id="eventCalendar" aria-label="Upcoming events calendar"></div>
+              <div class="day-detail" id="eventDetail" aria-live="polite"></div>
+            </div>
+          </section>
+
+          <section class="panel calendar-panel" id="pto-calendar" aria-labelledby="ptoTitle">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Coverage</p>
+                <h2 id="ptoTitle">PTO Calendar</h2>
+              </div>
+              <div class="calendar-controls">
+                <button class="icon-button" id="ptoPrev" type="button" aria-label="Previous PTO month">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+                </button>
+                <span id="ptoMonthLabel">April 2026</span>
+                <button class="icon-button" id="ptoNext" type="button" aria-label="Next PTO month">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                </button>
+              </div>
+            </div>
+            <div class="calendar-wrap">
+              <div class="calendar-grid pto" id="ptoCalendar" aria-label="PTO calendar"></div>
+              <div class="day-detail" id="ptoDetail" aria-live="polite"></div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
