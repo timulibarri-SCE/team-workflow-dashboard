@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>QR Reader</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f7f2;
+        --panel: #ffffff;
+        --ink: #121826;
+        --muted: #647084;
+        --line: #dfe5dd;
+        --primary: #0f766e;
+        --primary-dark: #0b5f59;
+        --accent: #2563eb;
+        --warn: #b45309;
+        --danger: #b42318;
+        --shadow: 0 18px 50px rgba(15, 23, 42, 0.16);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111317;
+          --panel: #191c22;
+          --ink: #eef2f7;
+          --muted: #aab4c3;
+          --line: #313741;
+          --primary: #2dd4bf;
+          --primary-dark: #14b8a6;
+          --accent: #60a5fa;
+          --warn: #f59e0b;
+          --danger: #fb7185;
+          --shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(160deg, rgba(15, 118, 110, 0.16), transparent 36%),
+          linear-gradient(25deg, rgba(37, 99, 235, 0.12), transparent 34%),
+          var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .shell {
+        width: min(100%, 860px);
+        min-height: 100svh;
+        margin: 0 auto;
+        padding: max(18px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+        display: grid;
+        gap: 14px;
+        align-content: center;
+      }
+
+      .scanner-panel,
+      .result-panel {
+        background: color-mix(in srgb, var(--panel) 94%, transparent);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+      }
+
+      .scanner-panel {
+        overflow: hidden;
+      }
+
+      .topbar {
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      h1,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(1.8rem, 9vw, 3.5rem);
+        line-height: 0.95;
+      }
+
+      .eyebrow,
+      .section-title {
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .status-pill {
+        min-width: 84px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .status-pill.scanning {
+        border-color: color-mix(in srgb, var(--primary) 56%, var(--line));
+        color: var(--primary-dark);
+      }
+
+      .status-pill.found {
+        border-color: color-mix(in srgb, var(--accent) 56%, var(--line));
+        color: var(--accent);
+      }
+
+      .status-pill.error {
+        border-color: color-mix(in srgb, var(--danger) 56%, var(--line));
+        color: var(--danger);
+      }
+
+      .home-link {
+        min-height: 36px;
+        padding: 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .home-link svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        stroke-width: 2.25;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+
+      .scanner {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        min-height: 280px;
+        max-height: min(68svh, 720px);
+        overflow: hidden;
+        background: #06080c;
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .empty-state,
+      .reticle {
+        position: absolute;
+        pointer-events: none;
+      }
+
+      .empty-state {
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.78);
+        font-weight: 800;
+      }
+
+      .empty-state.hidden {
+        display: none;
+      }
+
+      .reticle {
+        inset: 15%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+      }
+
+      .reticle::before,
+      .reticle::after,
+      .reticle span::before,
+      .reticle span::after {
+        content: "";
+        position: absolute;
+        width: 42px;
+        height: 42px;
+        border-color: #ffffff;
+        border-style: solid;
+      }
+
+      .reticle::before {
+        top: -2px;
+        left: -2px;
+        border-width: 4px 0 0 4px;
+        border-top-left-radius: 8px;
+      }
+
+      .reticle::after {
+        top: -2px;
+        right: -2px;
+        border-width: 4px 4px 0 0;
+        border-top-right-radius: 8px;
+      }
+
+      .reticle span::before {
+        bottom: -2px;
+        left: -2px;
+        border-width: 0 0 4px 4px;
+        border-bottom-left-radius: 8px;
+      }
+
+      .reticle span::after {
+        right: -2px;
+        bottom: -2px;
+        border-width: 0 4px 4px 0;
+        border-bottom-right-radius: 8px;
+      }
+
+      .message {
+        min-height: 48px;
+        padding: 12px 18px 0;
+        color: var(--muted);
+        line-height: 1.35;
+      }
+
+      .controls,
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .controls {
+        padding: 14px 18px 18px;
+      }
+
+      .actions {
+        margin-top: 14px;
+      }
+
+      .button,
+      .file-control {
+        min-height: 48px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .button svg {
+        width: 19px;
+        height: 19px;
+        stroke: currentColor;
+        stroke-width: 2.25;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+        flex: 0 0 auto;
+      }
+
+      .button.primary {
+        border-color: color-mix(in srgb, var(--primary) 72%, #000000);
+        background: var(--primary);
+        color: #ffffff;
+      }
+
+      .button:disabled {
+        cursor: not-allowed;
+        opacity: 0.48;
+      }
+
+      .file-control {
+        grid-column: 1 / -1;
+      }
+
+      .file-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      .result-panel {
+        padding: 18px;
+      }
+
+      .payload {
+        width: 100%;
+        min-height: 118px;
+        margin-top: 10px;
+        padding: 14px;
+        display: block;
+        overflow-wrap: anywhere;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg) 58%, var(--panel));
+        color: var(--ink);
+        line-height: 1.35;
+        white-space: pre-wrap;
+      }
+
+      .report {
+        margin-top: 18px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .verdict {
+        padding: 12px 0 12px 14px;
+        border-left: 4px solid var(--line);
+        color: var(--muted);
+        font-weight: 800;
+        line-height: 1.35;
+      }
+
+      .verdict.ok {
+        border-color: var(--primary);
+        color: var(--primary-dark);
+      }
+
+      .verdict.warn {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+
+      .verdict.danger {
+        border-color: var(--danger);
+        color: var(--danger);
+      }
+
+      .data-table {
+        margin: 0;
+        display: grid;
+        gap: 9px;
+      }
+
+      .data-row {
+        display: grid;
+        grid-template-columns: minmax(92px, 0.46fr) minmax(0, 1fr);
+        gap: 10px;
+        padding-top: 9px;
+        border-top: 1px solid var(--line);
+      }
+
+      .data-row dt,
+      .report-section h2 {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .data-row dd {
+        min-width: 0;
+        margin: 0;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
+      }
+
+      .report-section {
+        display: grid;
+        gap: 9px;
+      }
+
+      .report-list,
+      .flag-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+      }
+
+      .report-list li,
+      .flag-list li {
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+        overflow-wrap: anywhere;
+        line-height: 1.35;
+      }
+
+      .flag-list li::before {
+        content: attr(data-level);
+        min-width: 58px;
+        margin-right: 8px;
+        display: inline-block;
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .flag-list li[data-level="warn"]::before {
+        color: var(--warn);
+      }
+
+      .flag-list li[data-level="risk"]::before {
+        color: var(--danger);
+      }
+
+      .raw-details {
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+      }
+
+      .raw-details summary {
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .raw-block {
+        max-height: 190px;
+        margin: 10px 0 0;
+        padding: 12px;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg) 62%, var(--panel));
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font: 0.84rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+
+      .note {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.45;
+      }
+
+      .note summary {
+        color: var(--ink);
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      @media (min-width: 760px) {
+        .shell {
+          grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+          align-items: center;
+        }
+
+        .result-panel {
+          align-self: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="scanner-panel" aria-label="QR scanner">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow">Chrome iPhone</p>
+            <h1>QR Reader</h1>
+          </div>
+          <div class="top-actions">
+            <a class="home-link" href="index.html" aria-label="Go to main page">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg>
+              <span>Home</span>
+            </a>
+            <span class="status-pill" id="statusPill">Ready</span>
+          </div>
+        </div>
+
+        <div class="scanner">
+          <video id="video" playsinline muted aria-label="Camera preview"></video>
+          <canvas id="scanCanvas" hidden></canvas>
+          <div class="reticle" aria-hidden="true"><span></span></div>
+          <div class="empty-state" id="emptyState">Tap Start</div>
+        </div>
+
+        <p class="message" id="message" role="status">Start the camera to scan a QR code.</p>
+
+        <div class="controls">
+          <button class="button primary" id="startButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12l3 5v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9l3-5Z"></path><circle cx="12" cy="14" r="4"></circle><path d="M8 4v3"></path></svg>
+            <span>Start</span>
+          </button>
+          <button class="button" id="stopButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>
+            <span>Stop</span>
+          </button>
+          <button class="button" id="torchButton" type="button" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6l-1 8h4l-7 12 1-9H7l2-11Z"></path></svg>
+            <span>Light</span>
+          </button>
+          <label class="file-control" for="fileInput">
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 3v6h6" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span>Scan Image</span>
+          </label>
+          <input class="file-input" id="fileInput" type="file" accept="image/*">
+        </div>
+      </section>
+
+      <section class="result-panel" aria-label="QR result">
+        <p class="section-title">Result</p>
+        <output class="payload" id="resultText">Nothing scanned yet.</output>
+        <div class="actions">
+          <button class="button" id="copyButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>Copy</span>
+          </button>
+          <button class="button" id="openButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M8 7h9v9"></path></svg>
+            <span>Open</span>
+          </button>
+          <button class="button" id="clearButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 14H6L5 6"></path></svg>
+            <span>Clear</span>
+          </button>
+        </div>
+        <div class="report" id="reportPanel" aria-live="polite">
+          <p class="section-title">Inspection report</p>
+          <div class="verdict" id="verdict">Scan a QR code to inspect the exact embedded payload.</div>
+          <dl class="data-table" id="summaryTable"></dl>
+          <div class="report-section">
+            <h2>Highlights</h2>
+            <ul class="flag-list" id="flagList">
+              <li data-level="info">No QR payload has been scanned yet.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h2>Decoded structure</h2>
+            <ul class="report-list" id="detailList">
+              <li>Waiting for a scan.</li>
+            </ul>
+          </div>
+          <details class="raw-details">
+            <summary>Exact raw view</summary>
+            <pre class="raw-block" id="escapedPayload">Nothing scanned yet.</pre>
+            <pre class="raw-block" id="bytePayload">No bytes yet.</pre>
+          </details>
+        </div>
+        <details class="note">
+          <summary>Launch note</summary>
+          <p>Camera scanning on iPhone requires HTTPS. Host this file on a secure site, then open that link in Chrome.</p>
+        </details>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("scanCanvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        const startButton = document.getElementById("startButton");
+        const stopButton = document.getElementById("stopButton");
+        const torchButton = document.getElementById("torchButton");
+        const fileInput = document.getElementById("fileInput");
+        const statusPill = document.getElementById("statusPill");
+        const message = document.getElementById("message");
+        const resultText = document.getElementById("resultText");
+        const copyButton = document.getElementById("copyButton");
+        const openButton = document.getElementById("openButton");
+        const clearButton = document.getElementById("clearButton");
+        const emptyState = document.getElementById("emptyState");
+        const verdict = document.getElementById("verdict");
+        const summaryTable = document.getElementById("summaryTable");
+        const flagList = document.getElementById("flagList");
+        const detailList = document.getElementById("detailList");
+        const escapedPayload = document.getElementById("escapedPayload");
+        const bytePayload = document.getElementById("bytePayload");
+
+        let stream = null;
+        let detector = null;
+        let usingNativeDetector = false;
+        let scanning = false;
+        let scanInFlight = false;
+        let lastScanAt = 0;
+        let lastValue = "";
+        let lastPayload = "";
+        let lastValueAt = 0;
+        let rafId = 0;
+        let torchOn = false;
+
+        const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+
+        function setStatus(text, state = "") {
+          statusPill.textContent = text;
+          statusPill.className = `status-pill ${state}`.trim();
+        }
+
+        function setMessage(text) {
+          message.textContent = text;
+        }
+
+        function isLikelyUrl(value) {
+          try {
+            const url = new URL(value.trim());
+            return ["http:", "https:", "mailto:", "tel:", "sms:"].includes(url.protocol);
+          } catch {
+            return false;
+          }
+        }
+
+        function codePointLabel(codePoint) {
+          return `U+${codePoint.toString(16).toUpperCase().padStart(4, "0")}`;
+        }
+
+        function isInvisibleUnicode(codePoint) {
+          return (codePoint >= 0x200B && codePoint <= 0x200F)
+            || (codePoint >= 0x202A && codePoint <= 0x202E)
+            || (codePoint >= 0x2060 && codePoint <= 0x206F)
+            || codePoint === 0x061C
+            || codePoint === 0xFEFF;
+        }
+
+        function escapePayload(value) {
+          return Array.from(value).map((char) => {
+            const codePoint = char.codePointAt(0);
+            if (char === "\n") return "\\n";
+            if (char === "\r") return "\\r";
+            if (char === "\t") return "\\t";
+            if (codePoint < 0x20 || codePoint === 0x7F) {
+              return `\\u${codePoint.toString(16).padStart(4, "0")}`;
+            }
+            if (isInvisibleUnicode(codePoint)) {
+              return `\\u{${codePoint.toString(16).toUpperCase()}}`;
+            }
+            return char;
+          }).join("");
+        }
+
+        function bytesToHex(value) {
+          const bytes = new TextEncoder().encode(value);
+          const visible = Array.from(bytes.slice(0, 256))
+            .map((byte) => byte.toString(16).padStart(2, "0").toUpperCase())
+            .join(" ");
+          const suffix = bytes.length > 256 ? `\n... ${bytes.length - 256} more byte(s)` : "";
+          return `UTF-8 bytes (${bytes.length}):\n${visible || "(none)"}${suffix}`;
+        }
+
+        function addFlag(flags, level, text) {
+          flags.push({ level, text });
+        }
+
+        function appendDataRow(label, value) {
+          const row = document.createElement("div");
+          const term = document.createElement("dt");
+          const description = document.createElement("dd");
+          row.className = "data-row";
+          term.textContent = label;
+          description.textContent = String(value);
+          row.append(term, description);
+          summaryTable.append(row);
+        }
+
+        function renderList(list, items, fallback, isFlagList = false) {
+          list.replaceChildren();
+          const visibleItems = items.length ? items : [{ level: "info", text: fallback }];
+          visibleItems.forEach((item) => {
+            const element = document.createElement("li");
+            element.textContent = typeof item === "string" ? item : item.text;
+            if (isFlagList) {
+              element.dataset.level = item.level === "risk" ? "risk" : item.level === "warn" ? "warn" : "info";
+            }
+            list.append(element);
+          });
+        }
+
+        function parseEscapedFields(body) {
+          const segments = [];
+          let current = "";
+          let escaped = false;
+
+          for (const char of body) {
+            if (escaped) {
+              current += char;
+              escaped = false;
+            } else if (char === "\\") {
+              escaped = true;
+            } else if (char === ";") {
+              segments.push(current);
+              current = "";
+            } else {
+              current += char;
+            }
+          }
+
+          if (current) segments.push(current);
+
+          return segments.reduce((fields, segment) => {
+            const divider = segment.indexOf(":");
+            if (divider > -1) {
+              fields.push({
+                key: segment.slice(0, divider).trim().toUpperCase(),
+                value: segment.slice(divider + 1)
+              });
+            }
+            return fields;
+          }, []);
+        }
+
+        function fieldValue(fields, key) {
+          const match = fields.find((field) => field.key === key);
+          return match ? match.value : "";
+        }
+
+        function inspectWifi(text, flags) {
+          if (!text.toUpperCase().startsWith("WIFI:")) return null;
+
+          const fields = parseEscapedFields(text.slice(5).replace(/;;$/, ""));
+          const details = [];
+          const authType = fieldValue(fields, "T") || "unspecified";
+          const ssid = fieldValue(fields, "S") || "(blank)";
+          const password = fieldValue(fields, "P");
+          const hidden = fieldValue(fields, "H");
+
+          details.push(`Network name: ${ssid}`);
+          details.push(`Security: ${authType}`);
+          details.push(`Hidden network: ${hidden || "false"}`);
+
+          if (password) {
+            details.push(`Password: ${password}`);
+            addFlag(flags, "warn", "This QR code embeds a Wi-Fi password.");
+          }
+          if (hidden && hidden.toLowerCase() === "true") {
+            addFlag(flags, "info", "The Wi-Fi hidden-network flag is set.");
+          }
+
+          return { type: "Wi-Fi network", details };
+        }
+
+        function inspectDelimitedCard(text, flags) {
+          const upper = text.toUpperCase();
+          if (!upper.startsWith("MECARD:") && !upper.startsWith("MATMSG:")) return null;
+
+          const prefix = upper.startsWith("MECARD:") ? "MECARD:" : "MATMSG:";
+          const fields = parseEscapedFields(text.slice(prefix.length).replace(/;;$/, ""));
+          const labels = {
+            N: "Name",
+            TEL: "Phone",
+            EMAIL: "Email",
+            ADR: "Address",
+            URL: "URL",
+            TO: "To",
+            SUB: "Subject",
+            BODY: "Body"
+          };
+          const details = fields.map((field) => `${labels[field.key] || field.key}: ${field.value}`);
+
+          if (fields.some((field) => ["TEL", "EMAIL", "ADR"].includes(field.key))) {
+            addFlag(flags, "info", "This QR code contains contact details.");
+          }
+          if (fields.some((field) => ["TO", "SUB", "BODY"].includes(field.key))) {
+            addFlag(flags, "info", "This QR code contains a prefilled email message.");
+          }
+
+          return { type: prefix === "MECARD:" ? "Contact card" : "Email draft", details };
+        }
+
+        function splitStructuredLines(text) {
+          return text.split(/\r\n|\n|\r/).map((line) => line.trim()).filter(Boolean);
+        }
+
+        function inspectVCardOrCalendar(text, flags) {
+          const upper = text.toUpperCase();
+          if (!upper.startsWith("BEGIN:VCARD") && !upper.startsWith("BEGIN:VCALENDAR") && !upper.includes("BEGIN:VEVENT")) {
+            return null;
+          }
+
+          const lines = splitStructuredLines(text);
+          const wanted = new Map([
+            ["FN", "Full name"],
+            ["N", "Name"],
+            ["ORG", "Organization"],
+            ["TITLE", "Title"],
+            ["TEL", "Phone"],
+            ["EMAIL", "Email"],
+            ["ADR", "Address"],
+            ["URL", "URL"],
+            ["NOTE", "Note"],
+            ["SUMMARY", "Summary"],
+            ["LOCATION", "Location"],
+            ["DTSTART", "Start"],
+            ["DTEND", "End"],
+            ["DESCRIPTION", "Description"]
+          ]);
+          const details = [];
+          const sensitiveKeys = new Set(["TEL", "EMAIL", "ADR", "LOCATION", "DESCRIPTION", "NOTE"]);
+
+          lines.forEach((line) => {
+            const divider = line.indexOf(":");
+            if (divider === -1) return;
+            const key = line.slice(0, divider).split(";")[0].toUpperCase();
+            const value = line.slice(divider + 1);
+            if (wanted.has(key)) {
+              details.push(`${wanted.get(key)}: ${value}`);
+            }
+            if (sensitiveKeys.has(key)) {
+              addFlag(flags, "info", `Contains ${wanted.get(key).toLowerCase()} data.`);
+            }
+          });
+
+          return {
+            type: upper.startsWith("BEGIN:VCARD") ? "Contact card" : "Calendar event",
+            details: details.length ? details : ["Structured card detected, but no common fields were found."]
+          };
+        }
+
+        function inspectSmsto(text, flags) {
+          if (!text.toUpperCase().startsWith("SMSTO:")) return null;
+          const parts = text.split(":");
+          const details = [
+            `Phone: ${parts[1] || "(blank)"}`,
+            `Message: ${parts.slice(2).join(":") || "(blank)"}`
+          ];
+          addFlag(flags, "info", "This QR code contains a prefilled SMS message.");
+          return { type: "SMS draft", details };
+        }
+
+        function isIpAddress(hostname) {
+          return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname) || hostname.includes(":");
+        }
+
+        function inspectUrl(text, flags) {
+          let url;
+          try {
+            url = new URL(text);
+          } catch {
+            return null;
+          }
+
+          const details = [];
+          const protocol = url.protocol.replace(":", "");
+          const shorteners = new Set([
+            "bit.ly", "buff.ly", "cutt.ly", "goo.gl", "is.gd", "lnkd.in", "ow.ly",
+            "rebrand.ly", "s.id", "shorturl.at", "t.co", "tiny.cc", "tinyurl.com"
+          ]);
+          const suspiciousProtocols = new Set(["javascript:", "data:", "file:", "vbscript:"]);
+          const host = url.hostname.toLowerCase();
+
+          details.push(`Scheme: ${protocol || "(none)"}`);
+          if (url.host) details.push(`Host: ${url.host}`);
+          if (url.pathname && url.pathname !== "/") details.push(`Path: ${url.pathname}`);
+
+          if (suspiciousProtocols.has(url.protocol)) {
+            addFlag(flags, "risk", `${url.protocol} links can execute or expose local/app data. Do not open this unless you trust it.`);
+          } else if (url.protocol === "http:") {
+            addFlag(flags, "warn", "This link uses unencrypted HTTP.");
+          } else if (!["https:", "mailto:", "tel:", "sms:", "geo:", "bitcoin:", "ethereum:"].includes(url.protocol)) {
+            addFlag(flags, "warn", `This uses a nonstandard or app-specific scheme: ${url.protocol}`);
+          }
+
+          if (url.username || url.password) {
+            addFlag(flags, "risk", "The URL contains embedded username/password fields.");
+          }
+          if (host.startsWith("xn--") || host.includes(".xn--")) {
+            addFlag(flags, "warn", "The host contains punycode, which can be used for lookalike domains.");
+          }
+          if (host && isIpAddress(host)) {
+            addFlag(flags, "info", "The host is an IP address instead of a domain name.");
+          }
+          if (shorteners.has(host)) {
+            addFlag(flags, "warn", "This is a shortened URL, so the final destination is hidden until opened.");
+          }
+          if (url.hash) {
+            details.push(`Fragment: ${url.hash}`);
+            addFlag(flags, "info", "The URL contains a fragment after #.");
+          }
+
+          const params = Array.from(url.searchParams.entries());
+          if (params.length) {
+            details.push(`Query parameters: ${params.length}`);
+          }
+
+          params.slice(0, 30).forEach(([key, value]) => {
+            const lowerKey = key.toLowerCase();
+            details.push(`Param ${key}: ${value || "(empty)"}`);
+
+            if (/^utm_|^(fbclid|gclid|gbraid|wbraid|msclkid|dclid|yclid|igshid|mc_cid|mc_eid)$/i.test(key)) {
+              addFlag(flags, "info", `Tracking parameter present: ${key}`);
+            }
+            if (/(token|auth|access|refresh|key|secret|password|passwd|pass|session|signature|jwt|code)/i.test(key)) {
+              addFlag(flags, "warn", `Potential credential or token parameter present: ${key}`);
+            }
+            if (/^(url|u|to|link|target|dest|destination|redirect|redirect_url|redirect_uri|return|return_url|next|continue)$/i.test(key)
+              && /^[a-z][a-z0-9+.-]*:/i.test(value)) {
+              addFlag(flags, "warn", `Redirect-like parameter points to another URL: ${key}`);
+            }
+            if (lowerKey === "body" && ["mailto:", "sms:"].includes(url.protocol)) {
+              addFlag(flags, "info", "This link includes a prefilled message body.");
+            }
+          });
+
+          if (params.length > 30) {
+            details.push(`${params.length - 30} additional parameter(s) not shown.`);
+          }
+
+          return { type: ["http", "https"].includes(protocol) ? "Web URL" : `${protocol.toUpperCase()} link`, details };
+        }
+
+        function decodeBase64Url(part) {
+          const normalized = part.replace(/-/g, "+").replace(/_/g, "/");
+          const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
+          const binary = atob(padded);
+          const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+          return new TextDecoder().decode(bytes);
+        }
+
+        function inspectJwt(text, flags) {
+          const parts = text.split(".");
+          if (parts.length !== 3 || !parts.every((part) => /^[A-Za-z0-9_-]+$/.test(part))) return null;
+
+          try {
+            const header = JSON.parse(decodeBase64Url(parts[0]));
+            const payload = JSON.parse(decodeBase64Url(parts[1]));
+            const details = [
+              `Header keys: ${Object.keys(header).join(", ") || "(none)"}`,
+              `Claim keys: ${Object.keys(payload).join(", ") || "(none)"}`
+            ];
+
+            ["iss", "sub", "aud", "exp", "nbf", "iat"].forEach((key) => {
+              if (Object.prototype.hasOwnProperty.call(payload, key)) {
+                const numericValue = Number(payload[key]);
+                const value = ["exp", "nbf", "iat"].includes(key) && Number.isFinite(numericValue)
+                  ? `${payload[key]} (${new Date(numericValue * 1000).toISOString()})`
+                  : payload[key];
+                details.push(`${key}: ${value}`);
+              }
+            });
+
+            addFlag(flags, "risk", "This looks like a JWT/authentication token.");
+            return { type: "JWT token", details };
+          } catch {
+            return null;
+          }
+        }
+
+        function inspectJson(text, flags) {
+          if (!/^\s*[\[{]/.test(text)) return null;
+
+          try {
+            const parsed = JSON.parse(text);
+            const keys = parsed && typeof parsed === "object" && !Array.isArray(parsed)
+              ? Object.keys(parsed)
+              : [];
+            const details = [
+              Array.isArray(parsed) ? `Array items: ${parsed.length}` : `Top-level keys: ${keys.join(", ") || "(none)"}`
+            ];
+            const sensitiveKeys = keys.filter((key) => /(token|auth|secret|password|pass|session|key)/i.test(key));
+
+            sensitiveKeys.forEach((key) => addFlag(flags, "warn", `JSON contains a sensitive-looking key: ${key}`));
+            return { type: "JSON data", details };
+          } catch {
+            return null;
+          }
+        }
+
+        function inspectBase64(text, flags) {
+          const compact = text.replace(/\s+/g, "");
+          if (compact.length < 16 || compact.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(compact)) {
+            return null;
+          }
+
+          try {
+            const binary = atob(compact);
+            const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+            const decoded = new TextDecoder().decode(bytes);
+            const printable = Array.from(decoded).filter((char) => {
+              const codePoint = char.codePointAt(0);
+              return codePoint === 9 || codePoint === 10 || codePoint === 13 || codePoint >= 32;
+            }).length;
+            const ratio = decoded.length ? printable / Array.from(decoded).length : 0;
+
+            if (ratio < 0.85) return null;
+
+            addFlag(flags, "warn", "Payload appears to contain Base64-encoded text.");
+            return {
+              type: "Base64 text",
+              details: [
+                `Decoded bytes: ${bytes.length}`,
+                `Decoded preview: ${escapePayload(decoded).slice(0, 500)}${decoded.length > 500 ? "..." : ""}`
+              ]
+            };
+          } catch {
+            return null;
+          }
+        }
+
+        function inspectPayload(value, detection) {
+          const flags = [];
+          const trimmed = value.trim();
+          const characters = Array.from(value);
+          const bytes = new TextEncoder().encode(value);
+          const controlCodes = characters
+            .map((char) => char.codePointAt(0))
+            .filter((codePoint) => codePoint < 0x20 || codePoint === 0x7F);
+          const hiddenControlCodes = controlCodes.filter((codePoint) => ![9, 10, 13].includes(codePoint));
+          const invisibleCodes = characters
+            .map((char) => char.codePointAt(0))
+            .filter((codePoint) => isInvisibleUnicode(codePoint));
+          const lines = value.length ? value.split(/\r\n|\n|\r/).length : 0;
+
+          if (value !== trimmed) {
+            addFlag(flags, "warn", "Leading or trailing whitespace is embedded in the payload.");
+          }
+          if (hiddenControlCodes.length) {
+            addFlag(flags, "risk", `Non-printing control character(s) found: ${[...new Set(hiddenControlCodes)].map(codePointLabel).join(", ")}`);
+          }
+          if (invisibleCodes.length) {
+            addFlag(flags, "risk", `Invisible Unicode/control formatting character(s) found: ${[...new Set(invisibleCodes)].map(codePointLabel).join(", ")}`);
+          }
+          if (bytes.length > 1024) {
+            addFlag(flags, "warn", "Payload is unusually long for a casual QR code.");
+          }
+
+          let type = "Plain text";
+          let details = ["No structured format was detected. Review the exact raw view for invisible characters."];
+          const inspectors = [
+            () => inspectWifi(trimmed, flags),
+            () => inspectDelimitedCard(trimmed, flags),
+            () => inspectVCardOrCalendar(trimmed, flags),
+            () => inspectSmsto(trimmed, flags),
+            () => inspectJwt(trimmed, flags),
+            () => inspectJson(trimmed, flags),
+            () => inspectUrl(trimmed, flags),
+            () => inspectBase64(trimmed, flags)
+          ];
+
+          for (const inspect of inspectors) {
+            const match = inspect();
+            if (match) {
+              type = match.type;
+              details = match.details;
+              break;
+            }
+          }
+
+          const hasRisk = flags.some((flag) => flag.level === "risk");
+          const hasWarning = flags.some((flag) => flag.level === "warn");
+          const level = hasRisk ? "danger" : hasWarning ? "warn" : "ok";
+          const verdictText = hasRisk
+            ? "Risky or hidden-looking content found. Review before opening."
+            : hasWarning
+              ? "Review recommended. The report found extra or sensitive-looking content."
+              : "No obvious hidden content found in the decoded payload.";
+
+          const summary = [
+            ["Type", type],
+            ["Decoder", detection.decoder || "Unknown"],
+            ["Characters", characters.length],
+            ["UTF-8 bytes", bytes.length],
+            ["Lines", lines],
+            ["Controls", controlCodes.length ? `${controlCodes.length} total` : "None"],
+            ["Invisible", invisibleCodes.length ? `${invisibleCodes.length} found` : "None"]
+          ];
+
+          if (detection.format) {
+            summary.splice(2, 0, ["Format", detection.format]);
+          }
+          if (detection.byteLength) {
+            summary.splice(3, 0, ["QR bytes", detection.byteLength]);
+          }
+          if (detection.chunkCount) {
+            summary.splice(4, 0, ["QR chunks", detection.chunkCount]);
+          }
+
+          return {
+            type,
+            level,
+            verdictText,
+            flags,
+            details,
+            summary
+          };
+        }
+
+        function renderReport(value, detection = {}) {
+          const report = inspectPayload(value, detection);
+          verdict.textContent = report.verdictText;
+          verdict.className = `verdict ${report.level}`;
+          summaryTable.replaceChildren();
+          report.summary.forEach(([label, rowValue]) => appendDataRow(label, rowValue));
+          renderList(flagList, report.flags, "No suspicious extras were detected in the decoded payload.", true);
+          renderList(detailList, report.details, "No decoded structure available.");
+          escapedPayload.textContent = escapePayload(value);
+          bytePayload.textContent = bytesToHex(value);
+        }
+
+        function resetReport() {
+          verdict.textContent = "Scan a QR code to inspect the exact embedded payload.";
+          verdict.className = "verdict";
+          summaryTable.replaceChildren();
+          renderList(flagList, [{ level: "info", text: "No QR payload has been scanned yet." }], "", true);
+          renderList(detailList, ["Waiting for a scan."], "");
+          escapedPayload.textContent = "Nothing scanned yet.";
+          bytePayload.textContent = "No bytes yet.";
+        }
+
+        function showResult(detection) {
+          const cleanValue = typeof detection === "string" ? detection : detection.value;
+          if (!cleanValue && cleanValue !== "0") return;
+
+          const now = Date.now();
+          const isRepeat = cleanValue === lastValue && now - lastValueAt < 2200;
+          lastValue = cleanValue;
+          lastPayload = cleanValue;
+          lastValueAt = now;
+
+          resultText.textContent = cleanValue;
+          copyButton.disabled = false;
+          openButton.disabled = !isLikelyUrl(cleanValue);
+          clearButton.disabled = false;
+          renderReport(cleanValue, typeof detection === "string" ? {} : detection);
+          setStatus("Found", "found");
+          setMessage(isLikelyUrl(cleanValue) ? "QR code found. Review the report before opening the link." : "QR code found. Review the inspection report.");
+
+          if (!isRepeat && "vibrate" in navigator) {
+            navigator.vibrate(70);
+          }
+        }
+
+        function getVideoTrack() {
+          return stream ? stream.getVideoTracks()[0] : null;
+        }
+
+        function isCameraAllowedHere() {
+          if (window.location.protocol === "file:") return false;
+          return window.isSecureContext || localHosts.has(window.location.hostname);
+        }
+
+        async function createDetector() {
+          usingNativeDetector = false;
+          detector = null;
+
+          if ("BarcodeDetector" in window) {
+            try {
+              const formats = BarcodeDetector.getSupportedFormats
+                ? await BarcodeDetector.getSupportedFormats()
+                : ["qr_code"];
+              if (!formats.length || formats.includes("qr_code")) {
+                detector = new BarcodeDetector({ formats: ["qr_code"] });
+                usingNativeDetector = true;
+                return;
+              }
+            } catch {
+              detector = null;
+            }
+          }
+
+          if (typeof window.jsQR !== "function") {
+            setMessage("QR decoder is still loading. If this stays here, check the network connection and refresh.");
+          }
+        }
+
+        function updateTorchControl() {
+          const track = getVideoTrack();
+          const capabilities = track && track.getCapabilities ? track.getCapabilities() : {};
+          const hasTorch = Boolean(capabilities && capabilities.torch);
+          torchButton.hidden = !hasTorch;
+          if (hasTorch) {
+            torchButton.querySelector("span").textContent = torchOn ? "Light On" : "Light";
+          }
+        }
+
+        async function startCamera() {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setStatus("No camera", "error");
+            setMessage("This browser does not expose camera access. Try current Chrome or Safari on the iPhone.");
+            return;
+          }
+
+          if (!isCameraAllowedHere()) {
+            setStatus("HTTPS", "error");
+            setMessage("Camera access needs HTTPS on iPhone. Put this file on a secure site, then open that link in Chrome.");
+            return;
+          }
+
+          await stopCamera();
+          setStatus("Starting");
+          setMessage("Requesting camera access.");
+
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: false,
+              video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              }
+            });
+
+            video.srcObject = stream;
+            await video.play();
+            await createDetector();
+
+            scanning = true;
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            emptyState.classList.add("hidden");
+            updateTorchControl();
+            setStatus("Scanning", "scanning");
+            setMessage(usingNativeDetector ? "Scanning with the browser detector." : "Scanning with the QR decoder.");
+            scanLoop();
+          } catch (error) {
+            await stopCamera({ keepStatus: true });
+            setStatus("Blocked", "error");
+            setMessage(error && error.name === "NotAllowedError"
+              ? "Camera permission was blocked. Allow camera access in Chrome, then try again."
+              : "Could not start the camera on this device.");
+          }
+        }
+
+        async function stopCamera(options = {}) {
+          scanning = false;
+          scanInFlight = false;
+          cancelAnimationFrame(rafId);
+          rafId = 0;
+          torchOn = false;
+
+          if (stream) {
+            stream.getTracks().forEach((track) => track.stop());
+          }
+
+          stream = null;
+          video.srcObject = null;
+          startButton.disabled = false;
+          stopButton.disabled = true;
+          torchButton.hidden = true;
+          emptyState.classList.remove("hidden");
+          if (!options.keepStatus) {
+            setStatus("Ready");
+          }
+        }
+
+        function drawToCanvas(source) {
+          const sourceWidth = source.videoWidth || source.naturalWidth || source.width;
+          const sourceHeight = source.videoHeight || source.naturalHeight || source.height;
+
+          if (!sourceWidth || !sourceHeight) return null;
+
+          const longestSide = Math.max(sourceWidth, sourceHeight);
+          const scale = Math.min(1, 960 / longestSide);
+          canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+          canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+          ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+          return ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        function decodeWithJsQr(source) {
+          if (typeof window.jsQR !== "function") return null;
+          const imageData = drawToCanvas(source);
+          if (!imageData) return null;
+
+          const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth"
+          });
+          return code && code.data ? {
+            value: code.data,
+            decoder: "jsQR",
+            byteLength: code.binaryData ? code.binaryData.length : null,
+            chunkCount: code.chunks ? code.chunks.length : null
+          } : null;
+        }
+
+        async function detectSource(source) {
+          if (usingNativeDetector && detector) {
+            try {
+              const matches = await detector.detect(source);
+              if (matches.length && matches[0].rawValue) {
+                return {
+                  value: matches[0].rawValue,
+                  decoder: "Browser BarcodeDetector",
+                  format: matches[0].format || "qr_code"
+                };
+              }
+            } catch {
+              usingNativeDetector = false;
+              detector = null;
+            }
+          }
+
+          return decodeWithJsQr(source);
+        }
+
+        async function scanLoop(timestamp = 0) {
+          if (!scanning) return;
+
+          rafId = requestAnimationFrame(scanLoop);
+          if (scanInFlight || timestamp - lastScanAt < 160 || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+            return;
+          }
+
+          scanInFlight = true;
+          lastScanAt = timestamp;
+
+          try {
+            const detection = await detectSource(video);
+            if (detection) {
+              showResult(detection);
+            } else if (statusPill.textContent === "Found" && Date.now() - lastValueAt > 2600) {
+              setStatus("Scanning", "scanning");
+            }
+          } finally {
+            scanInFlight = false;
+          }
+        }
+
+        function loadImage(file) {
+          return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+              URL.revokeObjectURL(url);
+              resolve(img);
+            };
+            img.onerror = () => {
+              URL.revokeObjectURL(url);
+              reject(new Error("Image failed to load"));
+            };
+            img.src = url;
+          });
+        }
+
+        async function scanImageFile(file) {
+          if (!file) return;
+
+          setStatus("Reading");
+          setMessage("Reading image.");
+
+          try {
+            await createDetector();
+            const image = await loadImage(file);
+            const detection = await detectSource(image);
+
+            if (detection) {
+              showResult(detection);
+            } else {
+              setStatus(scanning ? "Scanning" : "Ready", scanning ? "scanning" : "");
+              setMessage("No QR code was found in that image.");
+            }
+          } catch {
+            setStatus("Error", "error");
+            setMessage("Could not read that image.");
+          }
+        }
+
+        async function copyResult() {
+          const value = lastPayload;
+          if (!value || copyButton.disabled) return;
+
+          try {
+            await navigator.clipboard.writeText(value);
+            setMessage("Copied.");
+          } catch {
+            setMessage("Copy was blocked by the browser. Select the result text and copy it manually.");
+          }
+        }
+
+        function openResult() {
+          const value = lastPayload.trim();
+          if (isLikelyUrl(value)) {
+            window.location.href = value;
+          }
+        }
+
+        function clearResult() {
+          lastValue = "";
+          lastPayload = "";
+          lastValueAt = 0;
+          resultText.textContent = "Nothing scanned yet.";
+          copyButton.disabled = true;
+          openButton.disabled = true;
+          clearButton.disabled = true;
+          resetReport();
+          setStatus(scanning ? "Scanning" : "Ready", scanning ? "scanning" : "");
+          setMessage(scanning ? "Scanning." : "Start the camera to scan a QR code.");
+        }
+
+        async function toggleTorch() {
+          const track = getVideoTrack();
+          if (!track || !track.applyConstraints) return;
+
+          try {
+            torchOn = !torchOn;
+            await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+            updateTorchControl();
+          } catch {
+            torchOn = false;
+            updateTorchControl();
+            setMessage("The light is not available from this browser.");
+          }
+        }
+
+        startButton.addEventListener("click", startCamera);
+        stopButton.addEventListener("click", stopCamera);
+        torchButton.addEventListener("click", toggleTorch);
+        copyButton.addEventListener("click", copyResult);
+        openButton.addEventListener("click", openResult);
+        clearButton.addEventListener("click", clearResult);
+        fileInput.addEventListener("change", (event) => {
+          scanImageFile(event.target.files[0]);
+          fileInput.value = "";
+        });
+
+        window.addEventListener("pagehide", stopCamera);
+
+        if (!isCameraAllowedHere()) {
+          setStatus("HTTPS", "error");
+          setMessage("Camera access needs HTTPS on iPhone. Host this file on a secure site, then open that link in Chrome.");
+        }
+      })();
+    </script>
+  </body>
+</html>
