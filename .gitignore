@@ -1,0 +1,14 @@
+ops/newt/.env
+ops/newt/newt.env
+ops/newt/*.secret
+ops/newt/*.secrets
+ops/newt/*.local
+ops/frp/**/*.env
+!ops/frp/**/*.env.example
+ops/frp/**/tokens/
+ops/frp/**/*.token
+hoptimize/**/*.env
+!hoptimize/**/*.env.example
+hoptimize/**/*.sqlite
+hoptimize/**/*.sqlite3
+hoptimize/.venv/

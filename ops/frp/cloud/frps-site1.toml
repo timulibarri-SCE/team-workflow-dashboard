@@ -1,0 +1,32 @@
+# Cloud FRP server for one building site.
+# Keep this file free of tokens and public-user credentials.
+
+bindAddr = "0.0.0.0"
+bindPort = 7000
+
+# HTTP proxy traffic is only accepted locally from Nginx.
+proxyBindAddr = "127.0.0.1"
+vhostHTTPPort = 8088
+vhostHTTPTimeout = 60
+
+detailedErrorsToClient = false
+
+auth.method = "token"
+auth.additionalScopes = ["HeartBeats", "NewWorkConns"]
+auth.tokenSource.type = "file"
+auth.tokenSource.file.path = "/etc/frp/tokens/{{ .Envs.FRP_SITE_ID }}.token"
+
+transport.tcpKeepalive = 30
+transport.maxPoolCount = 5
+transport.tls.force = true
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7500
+webServer.user = "{{ .Envs.FRP_DASHBOARD_USER }}"
+webServer.password = "{{ .Envs.FRP_DASHBOARD_PASSWORD }}"
+
+enablePrometheus = true
+
+log.to = "/var/log/frp/frps-{{ .Envs.FRP_SITE_ID }}.log"
+log.level = "info"
+log.maxDays = 30

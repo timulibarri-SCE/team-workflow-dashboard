@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Single sign-on access information for Facilities Engineering resources."
+    >
+    <title>SSO Access | Facilities Engineering</title>
+    <link rel="stylesheet" href="../styles.css?v=profiles-4">
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="brand" href="../home/">Facilities Engineering</a>
+        <div class="nav-links">
+          <a href="../home/">Home</a>
+          <a href="../home/#capabilities">Capabilities</a>
+          <a href="../home/#approach">Approach</a>
+          <a href="../dashboard/">Dashboard</a>
+        </div>
+        <a class="login-button" href="../login/">Login</a>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero compact">
+        <p class="eyebrow">Authorized access</p>
+        <h1>Single Sign-On</h1>
+        <p class="lead">
+          Central access information for Facilities Engineering resources,
+          protected systems, and future identity provider integration.
+        </p>
+      </section>
+
+      <section class="sso-layout" aria-label="Single sign-on information">
+        <article class="sso-panel">
+          <span class="status-pill">Provider pending</span>
+          <h2>Organization SSO access</h2>
+          <p>
+            This page is the current repository for Facilities Engineering
+            single sign-on details. The login handoff will be connected after
+            the approved identity provider, application registration, and
+            callback endpoint are assigned.
+          </p>
+          <a class="primary-action" href="README.md">Open SSO Information Record</a>
+        </article>
+
+        <aside class="sso-detail" aria-labelledby="sso-status-title">
+          <h2 id="sso-status-title">Implementation Status</h2>
+          <ul>
+            <li>Public login entry point is available from the site header.</li>
+            <li>SSO information repository is stored under <strong>/sso</strong>.</li>
+            <li>Identity provider and protocol details are pending assignment.</li>
+            <li>Protected application routes should remain restricted until SSO is active.</li>
+          </ul>
+        </aside>
+
+        <article class="sso-detail">
+          <h2>Configuration Details to Capture</h2>
+          <ul>
+            <li>Identity provider name and administrator contact</li>
+            <li>Protocol selection: SAML 2.0, OIDC, or enterprise SSO platform</li>
+            <li>Application client ID, issuer URL, and metadata endpoint</li>
+            <li>Redirect URI or assertion consumer service endpoint</li>
+            <li>Authorized user groups and access approval process</li>
+            <li>Session timeout, MFA policy, and audit requirements</li>
+          </ul>
+        </article>
+
+        <article class="sso-detail">
+          <h2>Planned Access Flow</h2>
+          <ol>
+            <li>User selects Login from Facilities Engineering.</li>
+            <li>Site redirects the user to the approved SSO provider.</li>
+            <li>Provider validates identity, MFA, and group assignment.</li>
+            <li>User returns to the authorized Facilities Engineering resource.</li>
+            <li>Access events are logged according to team policy.</li>
+          </ol>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <span>Facilities Engineering</span>
+        <span>Single sign-on information repository.</span>
+      </div>
+    </footer>
+  </body>
+</html>

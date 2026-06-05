@@ -1,0 +1,28 @@
+# Pangolin blueprint example for the Lion-HopVAC FUXA proxy.
+#
+# Replace the site ID with the actual Pangolin site ID created for Newt.
+# Do not put a private BMS server IP address in the Facilities Engineering
+# frontend. The upstream below assumes FUXA is reachable from the Newt host on
+# localhost. If FUXA listens on a different local port, update only the port.
+
+public-resources:
+  lion-hopvac-proxy:
+    name: Lion-HopVAC FUXA Proxy
+    protocol: http
+    full-domain: www.facilities-engineering.com
+    enabled: true
+    auth:
+      sso-enabled: true
+      whitelist-users:
+        - tim.ulibarri@c-openai.com
+    targets:
+      - site: lion-hopvac-abm-bms
+        hostname: localhost
+        port: 1881
+        method: http
+        enabled: true
+        path: /lion-hopvac-proxy
+        path-match: prefix
+        rewrite-match: stripPrefix
+        rewrite-path: /
+        priority: 113

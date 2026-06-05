@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en" class="require-auth">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Facilities Engineering settings for adding users, passwords, profiles, and page permissions."
+    >
+    <title>Settings | Facilities Engineering</title>
+    <link rel="stylesheet" href="../styles.css?v=profiles-4">
+    <style>
+      .require-auth body {
+        display: none;
+      }
+    </style>
+    <script src="../scripts/access-directory.js?v=profiles-9"></script>
+    <script>
+      if (AccessDirectory.requirePageAccess("settings", "../login/?redirect=../settings/")) {
+        document.documentElement.classList.remove("require-auth");
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="brand" href="../home/">Facilities Engineering</a>
+        <div class="nav-links">
+          <a href="../home/">Home</a>
+          <a href="../home/#capabilities">Capabilities</a>
+          <a href="../home/#approach">Approach</a>
+          <a href="../dashboard/">Dashboard</a>
+        </div>
+        <a class="login-button" href="../login/">Login</a>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero compact">
+        <p class="eyebrow">Access administration</p>
+        <h1>Settings</h1>
+        <p class="lead">
+          Add people, define their email login and password, assign a profile,
+          and choose which widgets each profile can see.
+        </p>
+      </section>
+
+      <section class="settings-layout" aria-label="Access settings">
+        <form class="settings-panel" id="user-form">
+          <input type="hidden" id="editing-id" name="editing-id">
+
+          <div class="settings-panel-header">
+            <div>
+              <p class="eyebrow">People</p>
+              <h2>Add or update a login</h2>
+            </div>
+            <button class="secondary-action dark" type="button" id="reset-form">New Entry</button>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              Full name
+              <input id="name" name="name" type="text" placeholder="Jane Smith" required>
+            </label>
+
+            <label>
+              Email address
+              <input id="email" name="email" type="email" placeholder="jane@company.com" required>
+            </label>
+
+            <label>
+              Password
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Leave blank to keep current password"
+              >
+            </label>
+
+            <label>
+              Profile
+              <select id="profile" name="profile" required></select>
+            </label>
+
+            <label class="toggle-row">
+              <input id="active" name="active" type="checkbox" checked>
+              Active access record
+            </label>
+          </div>
+
+          <button class="primary-action" type="submit">Save Access Record</button>
+          <p class="settings-footnote">
+            These login records are stored in this browser for planning and demo
+            use. Production authentication should be enforced by a secure
+            identity service, not by static site files.
+          </p>
+        </form>
+
+        <section class="settings-panel" aria-labelledby="directory-title">
+          <div class="settings-panel-header">
+            <div>
+              <p class="eyebrow">Directory</p>
+              <h2 id="directory-title">Current access records</h2>
+            </div>
+            <button class="secondary-action dark" type="button" id="clear-session">Sign Out Local Session</button>
+          </div>
+
+          <div class="access-table-wrap">
+            <table class="access-table">
+              <thead>
+                <tr>
+                  <th>Login Details</th>
+                  <th>Profile</th>
+                  <th>Status</th>
+                  <th>Allowed Pages</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="user-table"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="settings-panel profile-settings-panel" aria-labelledby="profile-settings-title">
+          <div class="settings-panel-header">
+            <div>
+              <p class="eyebrow">Profiles</p>
+              <h2 id="profile-settings-title">Profile settings</h2>
+            </div>
+            <button class="primary-action" type="button" id="save-profile-settings">Save Profiles</button>
+          </div>
+
+          <p class="settings-footnote">
+            Select the pages and widgets each profile can access.
+          </p>
+
+          <div class="profile-widget-grid" id="profile-settings"></div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const form = document.querySelector("#user-form");
+      const editingId = document.querySelector("#editing-id");
+      const nameInput = document.querySelector("#name");
+      const emailInput = document.querySelector("#email");
+      const passwordInput = document.querySelector("#password");
+      const profileInput = document.querySelector("#profile");
+      const activeInput = document.querySelector("#active");
+      const profileSettings = document.querySelector("#profile-settings");
+      const userTable = document.querySelector("#user-table");
+      const resetButton = document.querySelector("#reset-form");
+      const clearSessionButton = document.querySelector("#clear-session");
+      const saveProfileSettingsButton = document.querySelector("#save-profile-settings");
+
+      function renderProfileOptions() {
+        profileInput.innerHTML = AccessDirectory.profiles.map((profile) => `
+          <option value="${profile.id}">${profile.label}</option>
+        `).join("");
+      }
+
+      function renderProfileSettings() {
+        const pageAssignments = AccessDirectory.readProfilePages();
+        const widgetAssignments = AccessDirectory.readProfileWidgets();
+        profileSettings.innerHTML = AccessDirectory.profiles.map((profile) => {
+          const selectedPages = new Set(pageAssignments[profile.id] || []);
+          const selectedWidgets = new Set(widgetAssignments[profile.id] || []);
+          return `
+            <article class="profile-widget-card">
+              <h3>${escapeHtml(profile.label)}</h3>
+              <div class="profile-setting-group">
+                <h4>Allowed pages after login</h4>
+                <div class="profile-checkbox-list">
+                  ${AccessDirectory.pages.map((page) => `
+                    <label class="profile-option">
+                      <input
+                        type="checkbox"
+                        data-profile-page="${profile.id}"
+                        value="${page.id}"
+                        ${selectedPages.has(page.id) ? "checked" : ""}
+                      >
+                      <span>${escapeHtml(page.label)}</span>
+                    </label>
+                  `).join("")}
+                </div>
+              </div>
+              <div class="profile-setting-group">
+                <h4>Dashboard widgets</h4>
+                <div class="profile-checkbox-list">
+                ${AccessDirectory.widgets.map((widget) => `
+                  <label class="profile-option">
+                    <input
+                      type="checkbox"
+                      data-profile-widget="${profile.id}"
+                      value="${widget.id}"
+                      ${selectedWidgets.has(widget.id) ? "checked" : ""}
+                    >
+                    <span>${escapeHtml(widget.label)}</span>
+                  </label>
+                `).join("")}
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      function pageLabels(user) {
+        return AccessDirectory.getAllowedPages(user)
+          .map((page) => page.label)
+          .join(", ");
+      }
+
+      function escapeHtml(value) {
+        return String(value || "").replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#39;"
+        }[character]));
+      }
+
+      function renderTable() {
+        const users = AccessDirectory.readUsers();
+        userTable.innerHTML = users.map((user) => `
+          <tr>
+            <td>
+              <strong>${escapeHtml(user.name)}</strong>
+              <span>${escapeHtml(user.email)}</span>
+              <span>${user.password ? "Password set locally" : "Local password not set"}</span>
+            </td>
+            <td>${escapeHtml(AccessDirectory.profileLabel(user.profile))}</td>
+            <td>${user.active ? "Active" : "Inactive"}</td>
+            <td>${escapeHtml(pageLabels(user) || "No pages assigned")}</td>
+            <td>
+              <button type="button" class="table-action" data-edit="${user.id}">Edit</button>
+              <button type="button" class="table-action danger" data-delete="${user.id}">Delete</button>
+            </td>
+          </tr>
+        `).join("");
+      }
+
+      function resetForm() {
+        form.reset();
+        editingId.value = "";
+        profileInput.value = "engineer";
+        activeInput.checked = true;
+      }
+
+      function fillForm(user) {
+        editingId.value = user.id;
+        nameInput.value = user.name;
+        emailInput.value = user.email;
+        passwordInput.value = "";
+        profileInput.value = AccessDirectory.normalizeProfile(user.profile || user.role);
+        activeInput.checked = Boolean(user.active);
+        nameInput.focus();
+      }
+
+      renderProfileOptions();
+      renderProfileSettings();
+      renderTable();
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const existingId = editingId.value;
+        const currentUsers = AccessDirectory.readUsers();
+        const existing = currentUsers.find((user) => user.id === existingId);
+
+        const saved = AccessDirectory.upsertUser({
+          name: data.get("name"),
+          email: data.get("email"),
+          password: data.get("password") || (existing && existing.password) || "",
+          profile: data.get("profile"),
+          active: data.has("active")
+        });
+
+        if (existing && existing.email !== saved.email) {
+          AccessDirectory.deleteUser(existing.id);
+          AccessDirectory.upsertUser(saved);
+        }
+
+        resetForm();
+        renderTable();
+      });
+
+      resetButton.addEventListener("click", resetForm);
+
+      saveProfileSettingsButton.addEventListener("click", () => {
+        const nextPageAssignments = AccessDirectory.profiles.reduce((assignments, profile) => {
+          assignments[profile.id] = Array.from(profileSettings.querySelectorAll(`input[data-profile-page="${profile.id}"]:checked`))
+            .map((input) => input.value);
+          return assignments;
+        }, {});
+
+        const nextWidgetAssignments = AccessDirectory.profiles.reduce((assignments, profile) => {
+          assignments[profile.id] = Array.from(profileSettings.querySelectorAll(`input[data-profile-widget="${profile.id}"]:checked`))
+            .map((input) => input.value);
+          return assignments;
+        }, {});
+
+        AccessDirectory.writeProfilePages(nextPageAssignments);
+        AccessDirectory.writeProfileWidgets(nextWidgetAssignments);
+        renderProfileSettings();
+        renderTable();
+        saveProfileSettingsButton.textContent = "Profiles Saved";
+        setTimeout(() => {
+          saveProfileSettingsButton.textContent = "Save Profiles";
+        }, 1500);
+      });
+
+      clearSessionButton.addEventListener("click", () => {
+        AccessDirectory.clearSession();
+        clearSessionButton.textContent = "Local Session Cleared";
+        setTimeout(() => {
+          clearSessionButton.textContent = "Sign Out Local Session";
+        }, 1500);
+      });
+
+      userTable.addEventListener("click", (event) => {
+        const editId = event.target.getAttribute("data-edit");
+        const deleteId = event.target.getAttribute("data-delete");
+
+        if (editId) {
+          const user = AccessDirectory.readUsers().find((entry) => entry.id === editId);
+          if (user) {
+            fillForm(user);
+          }
+        }
+
+        if (deleteId) {
+          AccessDirectory.deleteUser(deleteId);
+          renderTable();
+          if (editingId.value === deleteId) {
+            resetForm();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

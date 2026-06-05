@@ -1,0 +1,24 @@
+[Unit]
+Description=FRP client for site1 approved HTTP service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=frp
+Group=frp
+EnvironmentFile=/etc/frp/frpc-site1.env
+ExecStartPre=/usr/local/bin/frpc verify -c /etc/frp/frpc-site1.toml
+ExecStartPre=/usr/bin/logger -t frpc "starting site=$FRP_SITE_ID service=$FRP_LOCAL_SERVICE_NAME local=$FRP_LOCAL_SERVICE_HOST:$FRP_LOCAL_SERVICE_PORT public_route=$FRP_PUBLIC_HOST"
+ExecStart=/usr/local/bin/frpc -c /etc/frp/frpc-site1.toml
+ExecStopPost=/usr/bin/logger -t frpc "stopped site=$FRP_SITE_ID service=$FRP_LOCAL_SERVICE_NAME public_route=$FRP_PUBLIC_HOST"
+Restart=always
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ReadWritePaths=/var/log/frp
+
+[Install]
+WantedBy=multi-user.target

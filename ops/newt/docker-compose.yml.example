@@ -1,0 +1,12 @@
+services:
+  newt:
+    image: fosrl/newt:latest
+    container_name: lion-hopvac-newt
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env
+    environment:
+      BLUEPRINT_FILE: /etc/newt/lion-hopvac-public-resource.yml
+    volumes:
+      - ./lion-hopvac-public-resource.yml:/etc/newt/lion-hopvac-public-resource.yml:ro

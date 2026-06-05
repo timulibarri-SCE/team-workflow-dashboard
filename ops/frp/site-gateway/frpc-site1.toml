@@ -1,0 +1,42 @@
+# Site gateway FRP client for one approved local HTTP service.
+# Do not add raw BACnet/IP, UDP, or arbitrary TCP proxy blocks.
+
+user = "{{ .Envs.FRP_SITE_ID }}"
+serverAddr = "{{ .Envs.FRP_SERVER_ADDR }}"
+serverPort = {{ .Envs.FRP_SERVER_PORT }}
+loginFailExit = true
+
+auth.method = "token"
+auth.additionalScopes = ["HeartBeats", "NewWorkConns"]
+auth.tokenSource.type = "file"
+auth.tokenSource.file.path = "/etc/frp/tokens/{{ .Envs.FRP_SITE_ID }}.token"
+
+transport.tls.enable = true
+transport.poolCount = 1
+transport.tcpMux = true
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7400
+webServer.user = "{{ .Envs.FRP_ADMIN_USER }}"
+webServer.password = "{{ .Envs.FRP_ADMIN_PASSWORD }}"
+
+log.to = "/var/log/frp/frpc-{{ .Envs.FRP_SITE_ID }}.log"
+log.level = "info"
+log.maxDays = 30
+
+[[proxies]]
+name = "{{ .Envs.FRP_LOCAL_SERVICE_NAME }}"
+type = "http"
+localIP = "{{ .Envs.FRP_LOCAL_SERVICE_HOST }}"
+localPort = {{ .Envs.FRP_LOCAL_SERVICE_PORT }}
+customDomains = ["{{ .Envs.FRP_PUBLIC_HOST }}"]
+
+healthCheck.type = "http"
+healthCheck.path = "/"
+healthCheck.timeoutSeconds = 3
+healthCheck.maxFailed = 3
+healthCheck.intervalSeconds = 10
+
+requestHeaders.set.x-frp-site-id = "{{ .Envs.FRP_SITE_ID }}"
+requestHeaders.set.x-frp-exposed-service = "{{ .Envs.FRP_LOCAL_SERVICE_NAME }}"
+requestHeaders.set.x-frp-public-route = "{{ .Envs.FRP_PUBLIC_HOST }}"

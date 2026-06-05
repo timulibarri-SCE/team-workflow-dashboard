@@ -1,0 +1,63 @@
+# Install with:
+#   sudo visudo -f /etc/sudoers.d/hoptimize
+#
+# This file intentionally avoids unrestricted systemctl or shell access.
+# Keep command paths aligned with HOPTIMIZE_SYSTEMCTL_PATH and
+# HOPTIMIZE_JOURNALCTL_PATH in /etc/hoptimize/hoptimize.env.
+
+Defaults:hoptimize !requiretty
+
+Cmnd_Alias HOPTIMIZE_SYSTEMD_STATUS = \
+    /usr/bin/systemctl status frpc --no-pager, \
+    /usr/bin/systemctl status bms-api --no-pager, \
+    /usr/bin/systemctl status fuxa --no-pager, \
+    /usr/bin/systemctl status nginx --no-pager, \
+    /usr/bin/systemctl status traefik --no-pager, \
+    /usr/bin/systemctl status docker --no-pager, \
+    /usr/bin/systemctl status hoptimize --no-pager
+
+Cmnd_Alias HOPTIMIZE_SYSTEMD_RESTART = \
+    /usr/bin/systemctl restart frpc, \
+    /usr/bin/systemctl restart bms-api, \
+    /usr/bin/systemctl restart fuxa, \
+    /usr/bin/systemctl restart nginx, \
+    /usr/bin/systemctl restart traefik, \
+    /usr/bin/systemctl restart hoptimize
+
+Cmnd_Alias HOPTIMIZE_JOURNAL_50 = \
+    /usr/bin/journalctl -u frpc -n 50 --no-pager, \
+    /usr/bin/journalctl -u bms-api -n 50 --no-pager, \
+    /usr/bin/journalctl -u fuxa -n 50 --no-pager, \
+    /usr/bin/journalctl -u nginx -n 50 --no-pager, \
+    /usr/bin/journalctl -u traefik -n 50 --no-pager, \
+    /usr/bin/journalctl -u docker -n 50 --no-pager, \
+    /usr/bin/journalctl -u hoptimize -n 50 --no-pager
+
+Cmnd_Alias HOPTIMIZE_JOURNAL_100 = \
+    /usr/bin/journalctl -u frpc -n 100 --no-pager, \
+    /usr/bin/journalctl -u bms-api -n 100 --no-pager, \
+    /usr/bin/journalctl -u fuxa -n 100 --no-pager, \
+    /usr/bin/journalctl -u nginx -n 100 --no-pager, \
+    /usr/bin/journalctl -u traefik -n 100 --no-pager, \
+    /usr/bin/journalctl -u docker -n 100 --no-pager, \
+    /usr/bin/journalctl -u hoptimize -n 100 --no-pager
+
+Cmnd_Alias HOPTIMIZE_JOURNAL_200 = \
+    /usr/bin/journalctl -u frpc -n 200 --no-pager, \
+    /usr/bin/journalctl -u bms-api -n 200 --no-pager, \
+    /usr/bin/journalctl -u fuxa -n 200 --no-pager, \
+    /usr/bin/journalctl -u nginx -n 200 --no-pager, \
+    /usr/bin/journalctl -u traefik -n 200 --no-pager, \
+    /usr/bin/journalctl -u docker -n 200 --no-pager, \
+    /usr/bin/journalctl -u hoptimize -n 200 --no-pager
+
+Cmnd_Alias HOPTIMIZE_JOURNAL_500 = \
+    /usr/bin/journalctl -u frpc -n 500 --no-pager, \
+    /usr/bin/journalctl -u bms-api -n 500 --no-pager, \
+    /usr/bin/journalctl -u fuxa -n 500 --no-pager, \
+    /usr/bin/journalctl -u nginx -n 500 --no-pager, \
+    /usr/bin/journalctl -u traefik -n 500 --no-pager, \
+    /usr/bin/journalctl -u docker -n 500 --no-pager, \
+    /usr/bin/journalctl -u hoptimize -n 500 --no-pager
+
+hoptimize ALL=(root) NOPASSWD: HOPTIMIZE_SYSTEMD_STATUS, HOPTIMIZE_SYSTEMD_RESTART, HOPTIMIZE_JOURNAL_50, HOPTIMIZE_JOURNAL_100, HOPTIMIZE_JOURNAL_200, HOPTIMIZE_JOURNAL_500

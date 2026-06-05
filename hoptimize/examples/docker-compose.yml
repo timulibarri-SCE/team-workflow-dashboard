@@ -1,0 +1,16 @@
+services:
+  hoptimize:
+    build:
+      context: ..
+    container_name: hoptimize
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
+    env_file:
+      - ./hoptimize.env
+    volumes:
+      - hoptimize-data:/var/lib/hoptimize
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  hoptimize-data:

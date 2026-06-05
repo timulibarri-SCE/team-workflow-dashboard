@@ -1,0 +1,22 @@
+[Unit]
+Description=Hoptimize controlled local operations agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hoptimize
+Group=hoptimize
+WorkingDirectory=/opt/hoptimize
+EnvironmentFile=/etc/hoptimize/hoptimize.env
+ExecStart=/opt/hoptimize/.venv/bin/uvicorn app.main:app --host ${HOPTIMIZE_HOST} --port ${HOPTIMIZE_PORT}
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ReadWritePaths=/var/lib/hoptimize /var/log/hoptimize
+
+[Install]
+WantedBy=multi-user.target

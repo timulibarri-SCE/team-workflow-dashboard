@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Facilities Engineering login page for authorized staff access."
+    >
+    <title>Login | Facilities Engineering</title>
+    <link rel="stylesheet" href="../styles.css?v=profiles-4">
+  </head>
+  <body class="login-page">
+    <header class="site-header">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="brand" href="../home/">Facilities Engineering</a>
+        <div class="nav-links">
+          <a href="../home/">Home</a>
+          <a href="../home/#capabilities">Capabilities</a>
+          <a href="../home/#approach">Approach</a>
+          <a href="../dashboard/">Dashboard</a>
+        </div>
+        <a class="login-button active" href="./" aria-current="page">Login</a>
+      </nav>
+    </header>
+
+    <main class="login-shell">
+      <section class="login-card" aria-labelledby="login-title">
+        <img
+          class="login-graphic"
+          src="../assets/frogo-fe2.png"
+          alt="Facility Engineer mascot graphic"
+          width="1254"
+          height="1254"
+        >
+        <p class="eyebrow">Authorized access</p>
+        <h1 id="login-title">Facilities Engineering Login</h1>
+        <p>
+          Enter your approved email address and password to view the pages
+          assigned to your access record. On first local browser login, the
+          password you enter initializes your local access record.
+        </p>
+
+        <form class="access-form" id="login-form">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="name@company.com"
+            required
+          >
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Enter password"
+            required
+          >
+          <button class="primary-action" type="submit">Continue</button>
+        </form>
+
+        <div class="access-message" id="login-message" role="status" aria-live="polite"></div>
+
+        <div class="access-result" id="access-result" hidden>
+          <h2>Assigned Pages</h2>
+          <p id="access-summary"></p>
+          <div class="allowed-page-list" id="allowed-page-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="../scripts/access-directory.js?v=profiles-9"></script>
+    <script>
+      const form = document.querySelector("#login-form");
+      const message = document.querySelector("#login-message");
+      const result = document.querySelector("#access-result");
+      const summary = document.querySelector("#access-summary");
+      const pageList = document.querySelector("#allowed-page-list");
+
+      function getSafeRedirect(user) {
+        let redirect = new URLSearchParams(window.location.search).get("redirect");
+        if (!redirect || redirect.includes("://") || redirect.startsWith("//")) {
+          return "";
+        }
+
+        redirect = redirect.replace(/Lion-HopV[aA][cC]|lion-hopvac/g, "lion-HopVAC");
+
+        return AccessDirectory.getAllowedPages(user).some((page) => redirect.startsWith(page.path))
+          ? redirect
+          : "";
+      }
+
+      function getLoginDestination(user) {
+        return getSafeRedirect(user) || (AccessDirectory.userCanAccess(user, "dashboard") ? "../dashboard/" : "");
+      }
+
+      function renderAccess(user) {
+        const allowedPages = AccessDirectory.getAllowedPages(user);
+        result.hidden = false;
+        summary.textContent = `${user.name} has access to ${allowedPages.length} page${allowedPages.length === 1 ? "" : "s"}.`;
+        pageList.innerHTML = allowedPages.map((page) => `
+          <a class="allowed-page" href="${page.path}">
+            <strong>${page.label}</strong>
+            <span>${page.description}</span>
+          </a>
+        `).join("");
+      }
+
+      const currentUser = AccessDirectory.getCurrentUser();
+      if (currentUser) {
+        const destination = getLoginDestination(currentUser);
+        if (destination) {
+          window.location.href = destination;
+        }
+        message.className = "access-message success";
+        message.textContent = `Signed in locally as ${currentUser.name}.`;
+        renderAccess(currentUser);
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const user = AccessDirectory.findUserByCredentials(data.get("email"), data.get("password"));
+
+        if (!user || !user.active) {
+          result.hidden = true;
+          pageList.innerHTML = "";
+          message.className = "access-message error";
+          message.textContent = "No active access record was found for that email address and password.";
+          return;
+        }
+
+        AccessDirectory.saveSession(user);
+        const destination = getLoginDestination(user);
+        if (destination) {
+          window.location.href = destination;
+          return;
+        }
+
+        message.className = "access-message success";
+        message.textContent = `Access record found for ${user.name}.`;
+        renderAccess(user);
+      });
+    </script>
+  </body>
+</html>

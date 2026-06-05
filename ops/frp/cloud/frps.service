@@ -1,0 +1,24 @@
+[Unit]
+Description=FRP server for site1 HTTP reverse tunnel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=frp
+Group=frp
+EnvironmentFile=/etc/frp/frps-site1.env
+ExecStartPre=/usr/local/bin/frps verify -c /etc/frp/frps-site1.toml
+ExecStartPre=/usr/bin/logger -t frps "starting site=$FRP_SITE_ID public_route=$FRP_PUBLIC_HOST bind_port=7000 vhost=127.0.0.1:8088"
+ExecStart=/usr/local/bin/frps -c /etc/frp/frps-site1.toml
+ExecStopPost=/usr/bin/logger -t frps "stopped site=$FRP_SITE_ID public_route=$FRP_PUBLIC_HOST"
+Restart=always
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ReadWritePaths=/var/log/frp
+
+[Install]
+WantedBy=multi-user.target

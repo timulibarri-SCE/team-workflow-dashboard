@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="require-auth">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,6 +7,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>QR Reader</title>
+    <style>
+      .require-auth body {
+        display: none;
+      }
+    </style>
+    <script src="../scripts/access-directory.js?v=profiles-9"></script>
+    <script>
+      if (AccessDirectory.requirePageAccess("dashboard", "../login/?redirect=../dashboard/qr-reader.html")) {
+        document.documentElement.classList.remove("require-auth");
+      }
+    </script>
     <script defer src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
       :root {

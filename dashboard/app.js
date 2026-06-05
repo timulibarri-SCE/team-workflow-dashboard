@@ -255,6 +255,9 @@ const eventDetail = document.querySelector("#eventDetail");
 const ptoDetail = document.querySelector("#ptoDetail");
 const eventMonthLabel = document.querySelector("#eventMonthLabel");
 const ptoMonthLabel = document.querySelector("#ptoMonthLabel");
+const profileWidgetLabel = document.querySelector("#profile-widget-label");
+const profileWidgetList = document.querySelector("#profile-widget-list");
+const currentAccessUser = window.AccessDirectory ? AccessDirectory.getCurrentUser() : null;
 
 let risksOnly = false;
 let eventMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -309,6 +312,29 @@ function statusTone(status) {
   if (status === "Blocked") return "critical";
   if (status === "Waiting") return "info";
   return "violet";
+}
+
+function renderProfileWidgets() {
+  if (!profileWidgetList || !window.AccessDirectory || !currentAccessUser) {
+    return;
+  }
+
+  const profileName = AccessDirectory.profileLabel(currentAccessUser.profile);
+  const widgets = AccessDirectory.getWidgetsForUser(currentAccessUser);
+  profileWidgetLabel.textContent = `${profileName} profile`;
+  profileWidgetList.innerHTML = widgets.map((widget) => {
+    const opensNewTab = widget.url.startsWith("http");
+    return `
+      <a
+        class="profile-widget"
+        href="${widget.url}"
+        ${opensNewTab ? 'target="_blank" rel="noopener noreferrer"' : ""}
+      >
+        <strong>${widget.label}</strong>
+        <span>${widget.description}</span>
+      </a>
+    `;
+  }).join("") || `<span class="empty-state">No widgets are assigned to this profile.</span>`;
 }
 
 function priorityTone(priority) {
@@ -587,6 +613,7 @@ function refreshDashboard() {
 }
 
 function renderAll() {
+  renderProfileWidgets();
   renderProjects();
   renderVendors();
   renderFocusList();
