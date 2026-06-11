@@ -3,15 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Team Dashboard</title>
-    <link rel="icon" type="image/svg+xml" href="assets/facility-tab-icon.svg" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="assets/favicon.ico?v=frog-tab-1" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?v=frog-tab-1">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png?v=frog-tab-1">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=frog-tab-1">
+    <title>Facilities Engineering | Adaptive Dashboard</title>
+    <link rel="stylesheet" href="styles.css?v=facilities-os-2" />
     <style>
       .require-auth body {
         display: none;
       }
     </style>
-    <script src="../scripts/access-directory.js?v=profiles-9"></script>
+    <script src="../scripts/access-directory.js?v=facilities-os-1"></script>
     <script>
       if (AccessDirectory.requirePageAccess("dashboard", "../login/?redirect=../dashboard/")) {
         document.documentElement.classList.remove("require-auth");
@@ -19,278 +22,348 @@
     </script>
   </head>
   <body>
-    <div class="app-shell">
-      <aside class="sidebar" aria-label="Primary navigation">
-        <div class="brand">
-          <div class="brand-mark" aria-hidden="true">
-            <img src="../assets/frogo-fe2.png" alt="">
-          </div>
-          <div>
-            <strong>Team Dashboard</strong>
-            <span>Projects, vendors, dates</span>
-          </div>
+    <div class="facilities-shell">
+      <aside class="sidebar" aria-label="Facilities Engineering navigation">
+        <a class="brand" href="#dashboard" aria-label="Facilities Engineering dashboard">
+          <span class="brand-mark" aria-hidden="true">FE</span>
+          <span>
+            <strong>Facilities Engineering</strong>
+            <small>Mission Control</small>
+          </span>
+        </a>
+
+        <div class="johny-card" aria-label="Johny assistant status">
+          <span class="johny-avatar" aria-hidden="true">
+            <span class="johny-icon"></span>
+          </span>
+          <span>
+            <strong>Johny</strong>
+            <small>Online / site-aware</small>
+          </span>
         </div>
 
-        <nav class="nav-stack" aria-label="Dashboard areas">
-          <a class="nav-item" href="../home/">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9H5v-6h5v6" /></svg>
-            </span>
-            Home
+        <label class="site-selector">
+          <span>Site</span>
+          <select id="siteSelector">
+            <option value="DAL-B1">Dallas Building 1</option>
+            <option value="DAL-B2">Dallas Building 2</option>
+            <option value="AUS-C1">Austin Campus</option>
+          </select>
+        </label>
+
+        <nav class="nav-stack" aria-label="Primary">
+          <a class="nav-item active" href="#dashboard" data-module="Dashboard">
+            <span class="nav-icon dashboard-icon" aria-hidden="true"></span>
+            Dashboard
           </a>
-          <a class="nav-item" href="../login/">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3m14-8h3v16h-3" /></svg>
-            </span>
-            Login
+          <a class="nav-item" href="http://192.168.0.6:3010" target="_blank" rel="noopener noreferrer" data-module="Assets">
+            <span class="nav-icon assets-icon" aria-hidden="true"></span>
+            Assets
           </a>
-          <a class="nav-item" href="../settings/">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"></path><path d="m19.4 15 1.1 1.9-2 3.4-2.2-.8a7.8 7.8 0 0 1-2.1 1.2L13.8 23h-3.6l-.4-2.3a7.8 7.8 0 0 1-2.1-1.2l-2.2.8-2-3.4L4.6 15a8 8 0 0 1 0-2.4l-1.1-1.9 2-3.4 2.2.8a7.8 7.8 0 0 1 2.1-1.2l.4-2.3h3.6l.4 2.3a7.8 7.8 0 0 1 2.1 1.2l2.2-.8 2 3.4-1.1 1.9a8 8 0 0 1 0 2.4Z"></path></svg>
-            </span>
-            Settings
+          <a class="nav-item" href="http://192.168.0.6:1881" target="_blank" rel="noopener noreferrer" data-module="Systems">
+            <span class="nav-icon systems-icon" aria-hidden="true"></span>
+            Systems
           </a>
-          <a class="nav-item active" href="#overview" aria-current="page">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Z" /></svg>
-            </span>
-            Overview
+          <a class="nav-item" href="http://192.168.0.6:8081" target="_blank" rel="noopener noreferrer" data-module="Projects">
+            <span class="nav-icon projects-icon" aria-hidden="true"></span>
+            Projects
           </a>
-          <a class="nav-item" href="#team-projects">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7m7-5 2 2 4-5" /></svg>
-            </span>
-            Team Projects
+          <a class="nav-item" href="http://192.168.0.6:3001" target="_blank" rel="noopener noreferrer" data-module="Analytics">
+            <span class="nav-icon analytics-icon" aria-hidden="true"></span>
+            Analytics
           </a>
-          <a class="nav-item" href="#vendor-tracker">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 7h10v10H4zM14 10h4l3 3v4h-7V10Zm-7 9a2 2 0 1 0 4 0m6 0a2 2 0 1 0 4 0" /></svg>
-            </span>
-            Vendors
+          <a class="nav-item" href="#alarms" data-module="Alarms">
+            <span class="nav-icon alarms-icon" aria-hidden="true"></span>
+            Alarms
           </a>
-          <a class="nav-item" href="#events-calendar">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M7 2v4m10-4v4M4 9h16M5 5h14v16H5V5Zm4 8h3m3 0h3m-9 4h3" /></svg>
-            </span>
-            Events
+          <a class="nav-item" href="http://192.168.0.6:8083" target="_blank" rel="noopener noreferrer" data-module="Wireless">
+            <span class="nav-icon wireless-icon" aria-hidden="true"></span>
+            Wireless
           </a>
-          <a class="nav-item" href="#pto-calendar">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 21c4-2.4 7-6.2 7-11V5l-7-3-7 3v5c0 4.8 3 8.6 7 11Zm-3-9 2 2 4-5" /></svg>
-            </span>
-            PTO
+          <a class="nav-item" href="#mail" data-module="Mail">
+            <span class="nav-icon mail-icon" aria-hidden="true"></span>
+            Mail
           </a>
-          <a class="nav-item" href="qr-reader.html">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v6h-6v-2h4z" /></svg>
-            </span>
-            QR Inspector
+          <a class="nav-item" href="http://192.168.0.6:3000" target="_blank" rel="noopener noreferrer" data-module="Johny">
+            <span class="nav-icon johny-icon" aria-hidden="true"></span>
+            Johny
+          </a>
+          <a class="nav-item" href="../settings/" data-module="Administration">
+            <span class="nav-icon administration-icon" aria-hidden="true"></span>
+            Administration
           </a>
         </nav>
 
-        <div class="sidebar-footer">
-          <span class="system-dot"></span>
-          <div>
-            <strong>Team dashboard synced</strong>
-            <span id="lastSync">Updated just now</span>
-          </div>
+        <div class="sidebar-status">
+          <span class="state-dot running" aria-hidden="true"></span>
+          <span>
+            <strong>Connected</strong>
+            <small id="lastSync">Updated just now</small>
+          </span>
         </div>
       </aside>
 
       <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Team operations / Delivery pipeline / Coverage planning</p>
-            <h1>Team Dashboard</h1>
+            <p class="eyebrow">Site-first operations / <span id="siteContext">Dallas Building 1</span></p>
+            <h1>Facilities Engineering Dashboard</h1>
           </div>
-          <div class="topbar-actions">
-            <label class="search-field" aria-label="Search team dashboard">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" /></svg>
-              <input id="globalSearch" type="search" placeholder="Search projects, vendors, owners" />
+          <div class="topbar-actions" aria-label="Global actions">
+            <label class="search-field">
+              <span aria-hidden="true"></span>
+              <input id="moduleSearch" type="search" placeholder="Search modules, equipment, mail" />
             </label>
-            <div class="segmented" aria-label="View range">
-              <button class="segment active" type="button" data-range="This Week">This Week</button>
-              <button class="segment" type="button" data-range="Next 30">Next 30</button>
-              <button class="segment" type="button" data-range="Quarter">Quarter</button>
-            </div>
-            <button class="icon-button" id="refreshButton" type="button" aria-label="Refresh dashboard">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6" /></svg>
-            </button>
+            <a class="shortcut" href="#mail">Mail</a>
+            <a class="shortcut" href="http://192.168.0.6:3000" target="_blank" rel="noopener noreferrer">Johny</a>
+            <button class="icon-button" id="refreshButton" type="button" aria-label="Refresh dashboard"></button>
           </div>
         </header>
 
-        <section class="identity-band" aria-label="Facility engineer dashboard identity">
-          <div class="identity-copy">
-            <p class="eyebrow">Facility Engineer</p>
-            <h2>Team dashboard</h2>
-            <p>Project tracking, vendor work, events, and PTO coverage stay visible for the team.</p>
-            <div class="identity-tags" aria-label="Dashboard focus areas">
-              <span>Team projects</span>
-              <span>Vendors</span>
-              <span>PTO coverage</span>
+        <section class="hero-panel" id="dashboard" aria-labelledby="dashboardTitle">
+          <div class="hero-copy">
+            <p class="eyebrow">Adaptive role-based landing page</p>
+            <h2 id="dashboardTitle">One mission-control surface for facility operations.</h2>
+            <p>
+              Assets, systems graphics, projects, analytics, alarms, wireless, mail, and Johny
+              are organized as Facilities Engineering modules for the selected site.
+            </p>
+            <div class="role-switcher" aria-label="Dashboard mode">
+              <button class="role-tab active" type="button" data-role="Operator">Operator</button>
+              <button class="role-tab" type="button" data-role="Maintenance">Maintenance</button>
+              <button class="role-tab" type="button" data-role="Manager">Manager</button>
+              <button class="role-tab" type="button" data-role="Administrator">Administrator</button>
             </div>
           </div>
-          <img
-            class="identity-image"
-            src="../assets/frogo-fe2.png"
-            alt="Facility Engineer mascot graphic"
-          />
-        </section>
-
-        <section class="widget-panel" aria-labelledby="profile-widgets-title">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow" id="profile-widget-label">Profile widgets</p>
-              <h2 id="profile-widgets-title">Available Widgets</h2>
+          <div class="equipment-overview" aria-label="Hybrid 3D and 2D system overview">
+            <div class="equipment-cube" aria-hidden="true">
+              <span class="floor floor-top"></span>
+              <span class="floor floor-mid"></span>
+              <span class="floor floor-low"></span>
             </div>
-            <a class="text-button" href="../settings/">Settings</a>
+            <div class="process-graphic" aria-hidden="true">
+              <span class="pipe horizontal"></span>
+              <span class="pipe vertical"></span>
+              <span class="fan"></span>
+              <span class="valve"></span>
+              <span class="flow-arrow"></span>
+            </div>
           </div>
-          <div class="profile-widget-list" id="profile-widget-list"></div>
         </section>
 
-        <section id="overview" class="status-strip" aria-label="Workflow summary">
+        <section class="role-panel" aria-live="polite">
+          <div>
+            <p class="eyebrow" id="roleEyebrow">Operator dashboard</p>
+            <h2 id="roleTitle">Active alarms, system overview, critical equipment, recent activity</h2>
+          </div>
+          <div class="role-items" id="roleItems"></div>
+        </section>
+
+        <section class="status-strip" aria-label="Facilities Engineering status">
+          <article class="metric-card alarm">
+            <span class="metric-label">Active alarms</span>
+            <strong>8</strong>
+            <small>High-priority events</small>
+          </article>
+          <article class="metric-card maintenance">
+            <span class="metric-label">Out of service</span>
+            <strong>5</strong>
+            <small>Systems under review</small>
+          </article>
+          <article class="metric-card running">
+            <span class="metric-label">System health</span>
+            <strong>92%</strong>
+            <small>Good operating state</small>
+          </article>
+          <article class="metric-card running">
+            <span class="metric-label">Comfort index</span>
+            <strong>94%</strong>
+            <small>Normal occupied zones</small>
+          </article>
           <article class="metric-card">
-            <span class="metric-label">Team Projects</span>
-            <strong id="teamProjectCount">8</strong>
-            <small id="teamProjectMeta">4 due this week</small>
-          </article>
-          <article class="metric-card caution">
-            <span class="metric-label">Blocked Items</span>
-            <strong id="blockedCount">3</strong>
-            <small>2 internal, 1 vendor dependency</small>
-          </article>
-          <article class="metric-card good">
-            <span class="metric-label">Vendor Deliverables</span>
-            <strong id="vendorCount">6</strong>
-            <small id="vendorMeta">3 need attention</small>
-          </article>
-          <article class="metric-card info">
-            <span class="metric-label">Upcoming Events</span>
-            <strong id="eventCount">6</strong>
-            <small id="eventMeta">Next: Monday standup</small>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">PTO Coverage</span>
-            <strong id="ptoCount">5</strong>
-            <small id="ptoMeta">2 overlapping days</small>
+            <span class="metric-label">PM compliance</span>
+            <strong>82%</strong>
+            <small>On track this month</small>
           </article>
         </section>
 
-        <section class="tracker-grid">
-          <section class="panel team-panel" id="team-projects" aria-labelledby="teamProjectsTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">Internal Tracker</p>
-                <h2 id="teamProjectsTitle">Team Project Tracker</h2>
-              </div>
-              <div class="control-row">
-                <select id="projectStatusFilter" aria-label="Filter team projects by status">
-                  <option value="All">All Statuses</option>
-                  <option value="On Track">On Track</option>
-                  <option value="At Risk">At Risk</option>
-                  <option value="Blocked">Blocked</option>
-                  <option value="Done">Done</option>
-                </select>
-                <select id="projectOwnerFilter" aria-label="Filter team projects by owner">
-                  <option value="All">All Owners</option>
-                </select>
-              </div>
-            </div>
+        <section class="visual-standards" aria-labelledby="visualStandardsTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Visual standards</p>
+            <h2 id="visualStandardsTitle">Hybrid operations states and animations</h2>
+          </div>
+          <div class="equipment-state-grid">
+            <article class="equipment-state is-running">
+              <div class="equipment-box" aria-hidden="true"><span class="mini-fan"></span></div>
+              <strong>Running</strong>
+              <small>Green glow / live motion</small>
+            </article>
+            <article class="equipment-state is-stopped">
+              <div class="equipment-box" aria-hidden="true"><span class="mini-fan stopped"></span></div>
+              <strong>Stopped</strong>
+              <small>Neutral charcoal state</small>
+            </article>
+            <article class="equipment-state is-alarm">
+              <div class="equipment-box" aria-hidden="true"><span class="alarm-node"></span></div>
+              <strong>Alarm</strong>
+              <small>Red pulse / highest priority</small>
+            </article>
+            <article class="equipment-state is-maintenance">
+              <div class="equipment-box" aria-hidden="true"><span class="valve-node"></span></div>
+              <strong>Maintenance</strong>
+              <small>Amber watch state</small>
+            </article>
+          </div>
+          <div class="animation-principles">
+            <article>
+              <span class="flow-line" aria-hidden="true"></span>
+              <strong>Air flow</strong>
+              <small>Directional arrows show movement without hiding equipment.</small>
+            </article>
+            <article>
+              <span class="mini-fan" aria-hidden="true"></span>
+              <strong>Fan speed</strong>
+              <small>Rotation speed reflects the control signal.</small>
+            </article>
+            <article>
+              <span class="valve-node animating" aria-hidden="true"></span>
+              <strong>Valve position</strong>
+              <small>Motion and percentage always communicate current state.</small>
+            </article>
+          </div>
+        </section>
 
-            <div class="board" id="projectBoard" aria-live="polite"></div>
+        <section class="module-grid" aria-labelledby="modulesTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Site modules</p>
+            <h2 id="modulesTitle">Facilities Engineering modules</h2>
+          </div>
+
+          <a class="module-card" href="http://192.168.0.6:3010" target="_blank" rel="noopener noreferrer" data-search="assets asset inventory equipment records">
+            <span class="module-icon assets-icon" aria-hidden="true"></span>
+            <strong>Assets</strong>
+            <small>Asset records, health, maintenance identity</small>
+          </a>
+          <a class="module-card" href="http://192.168.0.6:1881" target="_blank" rel="noopener noreferrer" data-search="systems graphics ahu pump bms">
+            <span class="module-icon systems-icon" aria-hidden="true"></span>
+            <strong>Systems</strong>
+            <small>Pressure, process graphics, live system view</small>
+          </a>
+          <a class="module-card" href="http://192.168.0.6:8081" target="_blank" rel="noopener noreferrer" data-search="projects work orders tasks schedule">
+            <span class="module-icon projects-icon" aria-hidden="true"></span>
+            <strong>Projects</strong>
+            <small>Work orders, project delivery, PM coordination</small>
+          </a>
+          <a class="module-card" href="http://192.168.0.6:3001" target="_blank" rel="noopener noreferrer" data-search="analytics reports kpi energy trend">
+            <span class="module-icon analytics-icon" aria-hidden="true"></span>
+            <strong>Analytics</strong>
+            <small>Trends, reports, energy, KPIs</small>
+          </a>
+          <a class="module-card" href="#alarms" data-search="alarms critical notification active alarm">
+            <span class="module-icon alarms-icon" aria-hidden="true"></span>
+            <strong>Alarms</strong>
+            <small>Alarm routing, active events, notification queue</small>
+          </a>
+          <a class="module-card" href="http://192.168.0.6:8083" target="_blank" rel="noopener noreferrer" data-search="wireless lorawan gateways sensors">
+            <span class="module-icon wireless-icon" aria-hidden="true"></span>
+            <strong>Wireless</strong>
+            <small>Gateways, LoRaWAN devices, sensor connectivity</small>
+          </a>
+          <a class="module-card" href="#mail" data-search="mail inbox smtp imap templates alerts notifications">
+            <span class="module-icon mail-icon" aria-hidden="true"></span>
+            <strong>Mail</strong>
+            <small>Inbox, alerts, templates, sender settings</small>
+          </a>
+          <a class="module-card" href="http://192.168.0.6:3000" target="_blank" rel="noopener noreferrer" data-search="johny ai assistant robot help">
+            <span class="module-icon johny-icon" aria-hidden="true"></span>
+            <strong>Johny</strong>
+            <small>AI assistant for site, systems, reports, mail</small>
+          </a>
+          <a class="module-card" href="../settings/" data-search="administration users integrations settings">
+            <span class="module-icon administration-icon" aria-hidden="true"></span>
+            <strong>Administration</strong>
+            <small>Users, integrations, system health, notification settings</small>
+          </a>
+        </section>
+
+        <section class="operations-grid">
+          <section class="glass-panel" id="alarms" aria-labelledby="alarmsTitle">
+            <div class="section-heading compact">
+              <p class="eyebrow">Alarms</p>
+              <h2 id="alarmsTitle">Priority event queue</h2>
+            </div>
+            <div class="alarm-list">
+              <article class="alarm-row critical">
+                <span class="state-dot alarm" aria-hidden="true"></span>
+                <div>
+                  <strong>AHU-01</strong>
+                  <small>DAL-B1-AHU-01 / Supply air high temperature</small>
+                </div>
+                <span class="status-pill critical">Critical</span>
+              </article>
+              <article class="alarm-row maintenance">
+                <span class="state-dot maintenance" aria-hidden="true"></span>
+                <div>
+                  <strong>PUMP-03</strong>
+                  <small>DAL-B1-PMP-03 / Seal inspection due</small>
+                </div>
+                <span class="status-pill maintenance">Maintenance</span>
+              </article>
+              <article class="alarm-row manual">
+                <span class="state-dot manual" aria-hidden="true"></span>
+                <div>
+                  <strong>VAV-12</strong>
+                  <small>DAL-B1-VAV-12 / Operator override active</small>
+                </div>
+                <span class="status-pill manual">Manual Override</span>
+              </article>
+            </div>
           </section>
 
-          <section class="panel queue-panel" aria-labelledby="focusTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">Today</p>
-                <h2 id="focusTitle">Focus Queue</h2>
-              </div>
-              <button class="text-button" id="toggleRisks" type="button">Risks Only</button>
+          <section class="glass-panel" id="mail" aria-labelledby="mailTitle">
+            <div class="section-heading compact">
+              <p class="eyebrow">Mail</p>
+              <h2 id="mailTitle">Mail dashboard</h2>
             </div>
-            <div class="focus-list" id="focusList" aria-live="polite"></div>
+            <div class="mail-grid">
+              <a href="http://192.168.0.6:8088/admin" target="_blank" rel="noopener noreferrer">Inbox</a>
+              <a href="http://192.168.0.6:8088/admin" target="_blank" rel="noopener noreferrer">Alerts</a>
+              <a href="#mail-templates">Templates</a>
+              <a href="#mail-settings">Mail Settings</a>
+            </div>
+            <div class="mail-widgets">
+              <span><strong>Unread alerts</strong><small>0</small></span>
+              <span><strong>Failed notifications</strong><small>0</small></span>
+              <span><strong>SMTP status</strong><small>Setup required</small></span>
+              <span><strong>IMAP status</strong><small>Setup required</small></span>
+              <span><strong>Notification queue</strong><small>Ready</small></span>
+            </div>
           </section>
         </section>
 
-        <section class="lower-grid">
-          <section class="panel" id="vendor-tracker" aria-labelledby="vendorTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">External Tracker</p>
-                <h2 id="vendorTitle">Vendor Tracker</h2>
-              </div>
-              <select id="vendorStatusFilter" aria-label="Filter vendors by status">
-                <option value="All">All Vendors</option>
-                <option value="On Track">On Track</option>
-                <option value="Needs Review">Needs Review</option>
-                <option value="Waiting">Waiting</option>
-                <option value="Blocked">Blocked</option>
-              </select>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Vendor</th>
-                    <th scope="col">Deliverable</th>
-                    <th scope="col">Owner</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Due</th>
-                    <th scope="col">Next Step</th>
-                  </tr>
-                </thead>
-                <tbody id="vendorRows"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="panel calendar-panel" id="events-calendar" aria-labelledby="eventsTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">Upcoming</p>
-                <h2 id="eventsTitle">Events Calendar</h2>
-              </div>
-              <div class="calendar-controls">
-                <button class="icon-button" id="eventPrev" type="button" aria-label="Previous events month">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
-                </button>
-                <span id="eventMonthLabel">April 2026</span>
-                <button class="icon-button" id="eventNext" type="button" aria-label="Next events month">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
-                </button>
-              </div>
-            </div>
-            <div class="calendar-wrap">
-              <div class="calendar-grid" id="eventCalendar" aria-label="Upcoming events calendar"></div>
-              <div class="day-detail" id="eventDetail" aria-live="polite"></div>
-            </div>
-          </section>
-
-          <section class="panel calendar-panel" id="pto-calendar" aria-labelledby="ptoTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">Coverage</p>
-                <h2 id="ptoTitle">PTO Calendar</h2>
-              </div>
-              <div class="calendar-controls">
-                <button class="icon-button" id="ptoPrev" type="button" aria-label="Previous PTO month">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
-                </button>
-                <span id="ptoMonthLabel">April 2026</span>
-                <button class="icon-button" id="ptoNext" type="button" aria-label="Next PTO month">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
-                </button>
-              </div>
-            </div>
-            <div class="calendar-wrap">
-              <div class="calendar-grid pto" id="ptoCalendar" aria-label="PTO calendar"></div>
-              <div class="day-detail" id="ptoDetail" aria-live="polite"></div>
-            </div>
-          </section>
+        <section class="settings-grid" aria-label="Mail configuration placeholders">
+          <article class="glass-panel" id="mail-settings">
+            <p class="eyebrow">Mail Settings</p>
+            <h2>SMTP and IMAP configuration</h2>
+            <p>
+              Configure sender identity, SMTP submission, IMAP access, user email
+              preferences, and work order email integration here.
+            </p>
+          </article>
+          <article class="glass-panel" id="mail-templates">
+            <p class="eyebrow">Templates</p>
+            <h2>Email templates</h2>
+            <p>
+              Template placeholders are reserved for alarms, work orders, reports,
+              and maintenance notices. Templates should use system IDs when unique
+              equipment identity is required.
+            </p>
+          </article>
         </section>
       </main>
     </div>
 
-    <script src="app.js?v=profiles-6"></script>
+    <script src="app.js?v=facilities-os-2"></script>
+    <script src="../scripts/local-preview.js?v=preview-1"></script>
   </body>
 </html>

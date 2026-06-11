@@ -3,11 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="../assets/favicon.ico?v=frog-tab-1" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png?v=frog-tab-1">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png?v=frog-tab-1">
+    <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=frog-tab-1">
     <meta
       name="description"
-      content="Facilities Engineering HopVAC FUXA workspace for the ABM Lion BMS."
+      content="Facilities Engineering Lion-BMS FUXA workspace for the ABM Lion BMS."
     >
-    <title>Lion-HopVAC | Facilities Engineering</title>
+    <title>Lion-BMS | Facilities Engineering</title>
     <style>
       :root {
         color-scheme: light;
@@ -18,6 +22,10 @@
 
       * {
         box-sizing: border-box;
+      }
+
+      [hidden] {
+        display: none !important;
       }
 
       html,
@@ -146,6 +154,33 @@
         line-height: 1.55;
       }
 
+      .proxy-status {
+        margin-top: 1rem;
+      }
+
+      .proxy-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-top: 1rem;
+      }
+
+      .proxy-actions a {
+        border: 1px solid rgb(255 255 255 / 22%);
+        border-radius: 6px;
+        color: #ffffff;
+        font-size: 0.86rem;
+        font-weight: 800;
+        padding: 0.58rem 0.78rem;
+        text-decoration: none;
+      }
+
+      .proxy-actions a:hover,
+      .proxy-actions a:focus {
+        background: rgb(255 255 255 / 12%);
+        outline: none;
+      }
+
       .placeholder-card code {
         border-radius: 5px;
         background: rgb(0 0 0 / 24%);
@@ -164,7 +199,7 @@
         }
       }
     </style>
-    <script src="../scripts/access-directory.js?v=profiles-9"></script>
+    <script src="../scripts/access-directory.js?v=profiles-10"></script>
     <script>
       if (AccessDirectory.requirePageAccess("hvac-login", "../login/?redirect=../lion-HopVAC/")) {
         document.documentElement.classList.remove("require-auth");
@@ -172,10 +207,10 @@
     </script>
   </head>
   <body>
-    <header class="controller-workbar" aria-label="Lion-HopVAC navigation">
+    <header class="controller-workbar" aria-label="Lion-BMS navigation">
       <div class="workbar-title">
-        <strong>Lion-HopVAC</strong>
-        <span>HopVAC / FUXA / ABM Lion BMS</span>
+        <strong>Lion-BMS</strong>
+        <span>FUXA / ABM Lion BMS</span>
       </div>
       <nav class="workbar-links" id="workbar-links" aria-label="Widget navigation">
         <a href="../dashboard/">Dashboard</a>
@@ -186,16 +221,16 @@
       <iframe
         class="controller-frame"
         id="controller-frame"
-        title="HopVAC FUXA controller workspace"
+        title="Lion-BMS FUXA controller workspace"
         referrerpolicy="no-referrer"
         hidden
       ></iframe>
 
       <section class="controller-placeholder" id="controller-placeholder" aria-labelledby="placeholder-title">
         <div class="placeholder-card">
-          <h1 id="placeholder-title">Lion-HopVAC</h1>
+          <h1 id="placeholder-title">Lion-BMS</h1>
           <p>
-            The HopVAC FUXA software target must be reached through a frontend proxy
+            The Lion-BMS FUXA software target must be reached through a frontend proxy
             path on this site. Do not place the ABM Lion BMS server IP address
             or private hostname in this page.
           </p>
@@ -203,20 +238,28 @@
             The workbar hides during use. Move the mouse to the top edge of the
             page to bring back Dashboard and widget navigation.
           </p>
+          <p class="proxy-status" id="proxy-status">
+            Loading the approved Lion-BMS proxy route.
+          </p>
+          <div class="proxy-actions" id="proxy-actions" hidden></div>
         </div>
       </section>
     </main>
 
     <script>
-      const HOPVAC_PROXY_PATH = "/lion-hopvac-proxy/";
-      const HOPVAC_REMOTE_ORIGIN = "https://www.facilities-engineering.com";
-      const HOPVAC_ALLOWED_REMOTE_ORIGINS = new Set([
+      const LION_BMS_PROXY_PATH = "/lion-hopvac-proxy/";
+      const LION_BMS_REMOTE_ORIGIN = "https://www.facilities-engineering.com";
+      const LION_BMS_ALLOWED_REMOTE_ORIGINS = new Set([
         "https://www.facilities-engineering.com",
         "https://facilities-engineering.com"
       ]);
       const frame = document.querySelector("#controller-frame");
       const placeholder = document.querySelector("#controller-placeholder");
+      const placeholderTitle = document.querySelector("#placeholder-title");
+      const proxyStatus = document.querySelector("#proxy-status");
+      const proxyActions = document.querySelector("#proxy-actions");
       const workbarLinks = document.querySelector("#workbar-links");
+      let proxyLoadTimer = null;
 
       function widgetHref(widget) {
         if (widget.url.startsWith("#")) {
@@ -254,12 +297,16 @@
           host === "::1";
       }
 
-      function getHopVACProxyUrl() {
+      function shouldLoadRemoteProxyInPreview() {
+        return new URLSearchParams(window.location.search).get("loadProxy") === "1";
+      }
+
+      function getLionBmsProxyUrl() {
         if (shouldUseRemoteProxy()) {
-          return `${HOPVAC_REMOTE_ORIGIN}${HOPVAC_PROXY_PATH}`;
+          return `${LION_BMS_REMOTE_ORIGIN}${LION_BMS_PROXY_PATH}`;
         }
 
-        return HOPVAC_PROXY_PATH;
+        return LION_BMS_PROXY_PATH;
       }
 
       function isApprovedProxyUrl(value) {
@@ -268,39 +315,94 @@
         }
 
         if (value.startsWith("/") && !value.startsWith("//")) {
-          return value.startsWith(HOPVAC_PROXY_PATH);
+          return value.startsWith(LION_BMS_PROXY_PATH);
         }
 
         try {
           const url = new URL(value);
           return url.protocol === "https:" &&
-            HOPVAC_ALLOWED_REMOTE_ORIGINS.has(url.origin) &&
-            url.pathname.startsWith(HOPVAC_PROXY_PATH);
+            LION_BMS_ALLOWED_REMOTE_ORIGINS.has(url.origin) &&
+            url.pathname.startsWith(LION_BMS_PROXY_PATH);
         } catch {
           return false;
         }
       }
 
-      function loadController() {
-        const hopVACProxyUrl = getHopVACProxyUrl();
+      function setProxyActions(hopVACProxyUrl) {
+        proxyActions.hidden = false;
+        proxyActions.innerHTML = `
+          <a href="../dashboard/">Return to Dashboard</a>
+          <a href="${hopVACProxyUrl}" target="_blank" rel="noopener noreferrer">
+            Open Proxy Route
+          </a>
+        `;
+      }
 
-        if (!hopVACProxyUrl) {
-          return;
+      function showProxyStatus(title, message, hopVACProxyUrl) {
+        placeholderTitle.textContent = title;
+        proxyStatus.textContent = message;
+        setProxyActions(hopVACProxyUrl);
+        placeholder.hidden = false;
+        frame.hidden = true;
+      }
+
+      function markProxyLoaded() {
+        if (proxyLoadTimer) {
+          window.clearTimeout(proxyLoadTimer);
+          proxyLoadTimer = null;
         }
-
-        if (!isApprovedProxyUrl(hopVACProxyUrl)) {
-          placeholder.querySelector("p").textContent =
-            "Lion-HopVAC requires an approved Facilities Engineering proxy route. Direct server URLs, IP addresses, and private hostnames are not allowed in this page.";
-          return;
-        }
-
-        frame.src = hopVACProxyUrl;
-        frame.hidden = false;
         placeholder.hidden = true;
+        frame.hidden = false;
+      }
+
+      function loadController() {
+        const lionBmsProxyUrl = getLionBmsProxyUrl();
+
+        if (!lionBmsProxyUrl) {
+          return;
+        }
+
+        if (!isApprovedProxyUrl(lionBmsProxyUrl)) {
+          showProxyStatus(
+            "Proxy route not approved",
+            "Lion-BMS requires an approved Facilities Engineering proxy route. Direct server URLs, IP addresses, and private hostnames are not allowed in this page.",
+            "../dashboard/"
+          );
+          return;
+        }
+
+        if (shouldUseRemoteProxy() && !shouldLoadRemoteProxyInPreview()) {
+          showProxyStatus(
+            "Production proxy required",
+            "This local preview can show the Lion-BMS shell, but the controller must load through the approved production proxy route. That domain is currently blocked by company policy on this network. Request an allowlist exemption for www.facilities-engineering.com, then open the production page.",
+            lionBmsProxyUrl
+          );
+          return;
+        }
+
+        proxyStatus.textContent = `Loading ${lionBmsProxyUrl}`;
+        setProxyActions(lionBmsProxyUrl);
+        frame.addEventListener("load", markProxyLoaded, { once: true });
+        frame.addEventListener("error", () => {
+          showProxyStatus(
+            "Lion-BMS proxy unavailable",
+            "The approved Lion-BMS proxy route could not be reached from this browser. If you are on a managed network, request an allowlist exemption for www.facilities-engineering.com.",
+            lionBmsProxyUrl
+          );
+        }, { once: true });
+        frame.src = lionBmsProxyUrl;
+        proxyLoadTimer = window.setTimeout(() => {
+          showProxyStatus(
+            "Lion-BMS proxy unavailable",
+            "The approved Lion-BMS proxy route did not finish loading. This is usually caused by network filtering, an unavailable tunnel, or a missing proxy deployment.",
+            lionBmsProxyUrl
+          );
+        }, 8000);
       }
 
       renderWidgetLinks();
       loadController();
     </script>
+    <script src="../scripts/local-preview.js?v=preview-1"></script>
   </body>
 </html>

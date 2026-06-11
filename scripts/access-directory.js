@@ -5,14 +5,14 @@
   const profilePagesKey = "facilitiesEngineeringProfilePages";
   const profileWidgetsVersionKey = "facilitiesEngineeringProfileWidgetsVersion";
   const profilePagesVersionKey = "facilitiesEngineeringProfilePagesVersion";
-  const currentProfileWidgetsVersion = "lion-hopvac-4";
-  const currentProfilePagesVersion = "lion-hopvac-4";
+  const currentProfileWidgetsVersion = "facilities-engineering-1";
+  const currentProfilePagesVersion = "facilities-engineering-1";
 
   const pages = [
     { id: "home", label: "Home", path: "../home/", description: "Public Facilities Engineering home page" },
-    { id: "dashboard", label: "Team Dashboard", path: "../dashboard/", description: "Team dashboard and operating resources" },
-    { id: "hvac-login", label: "Lion-HopVAC", path: "../lion-HopVAC/", description: "HopVAC FUXA workspace for the ABM Lion BMS" },
-    { id: "settings", label: "Settings", path: "../settings/", description: "Login, profile, page, and widget access management" }
+    { id: "dashboard", label: "Facilities Engineering", path: "../dashboard/", description: "Facilities Engineering mission-control dashboard" },
+    { id: "hvac-login", label: "Systems", path: "../lion-HopVAC/", description: "Systems workspace for building controls" },
+    { id: "settings", label: "Administration", path: "../settings/", description: "Users, profiles, page access, and widget access" }
   ];
   const pageIds = new Set(pages.map((page) => page.id));
 
@@ -26,75 +26,63 @@
 
   const widgets = [
     {
-      id: "team-projects",
-      label: "Team Projects",
-      description: "Open the project tracker for active facility work.",
-      url: "#team-projects"
+      id: "dashboard",
+      label: "Dashboard",
+      description: "Open the site-first Facilities Engineering landing page.",
+      url: "#dashboard"
     },
     {
-      id: "work-orders",
-      label: "Work Orders",
-      description: "Open the external work-order system.",
-      url: "https://example.com/work-orders"
+      id: "assets",
+      label: "Assets",
+      description: "Open asset records, asset health, and maintenance identity.",
+      url: "http://192.168.0.6:3010"
     },
     {
-      id: "asset-inventory",
-      label: "Asset Inventory",
-      description: "Open the asset inventory and equipment records system.",
-      url: "https://example.com/asset-inventory"
+      id: "systems",
+      label: "Systems",
+      description: "Open live systems graphics and pressure-gauge views.",
+      url: "http://192.168.0.6:1881"
     },
     {
-      id: "preventive-maintenance",
-      label: "Preventive Maintenance",
-      description: "Open preventive maintenance schedules and task plans.",
-      url: "https://example.com/preventive-maintenance"
+      id: "projects",
+      label: "Projects",
+      description: "Open projects, work orders, PM tasks, and delivery tracking.",
+      url: "http://192.168.0.6:8081"
     },
     {
-      id: "hvac",
-      label: "HopVAC",
-      description: "Open the HopVAC controller workspace.",
-      url: "../lion-HopVAC/"
+      id: "analytics",
+      label: "Analytics",
+      description: "Open trends, reporting, energy, and KPI dashboards.",
+      url: "http://192.168.0.6:3001"
     },
     {
-      id: "vendor-tracker",
-      label: "Vendor Tracker",
-      description: "Open vendor deliverables, contacts, and follow-ups.",
-      url: "#vendor-tracker"
+      id: "alarms",
+      label: "Alarms",
+      description: "Open active alarms, alarm routing, and notification queue status.",
+      url: "#alarms"
     },
     {
-      id: "events-calendar",
-      label: "Events Calendar",
-      description: "Open upcoming reviews, planning events, and milestones.",
-      url: "#events-calendar"
+      id: "wireless",
+      label: "Wireless",
+      description: "Open wireless gateways, LoRaWAN devices, and sensor connectivity.",
+      url: "http://192.168.0.6:8083"
     },
     {
-      id: "pto-calendar",
-      label: "PTO Calendar",
-      description: "Open PTO and coverage planning.",
-      url: "#pto-calendar"
+      id: "mail",
+      label: "Mail",
+      description: "Open inbox, alerts, templates, and Mail Settings.",
+      url: "#mail"
     },
     {
-      id: "reports",
-      label: "Reports",
-      description: "Open dashboard reports and leadership summaries.",
-      url: "https://example.com/reports"
+      id: "johny",
+      label: "Johny",
+      description: "Open the AI assistant for site, systems, reports, and mail.",
+      url: "http://192.168.0.6:3000"
     },
     {
-      id: "fms-resources",
-      label: "FMS Resources",
-      description: "Open facility systems and operating resources.",
-      url: "https://example.com/fms-resources"
-    },
-    {
-      id: "qr-inspector",
-      label: "QR Inspector",
-      description: "Open the QR inspection tool.",
-      url: "qr-reader.html"
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      description: "Open profile, login, page, and widget settings.",
+      id: "administration",
+      label: "Administration",
+      description: "Open users, integrations, system health, and notification settings.",
       url: "../settings/"
     }
   ];
@@ -102,33 +90,32 @@
 
   const defaultProfileWidgets = {
     engineer: [
-      "team-projects",
-      "work-orders",
-      "preventive-maintenance",
-      "hvac",
-      "vendor-tracker",
-      "events-calendar",
-      "qr-inspector"
+      "dashboard",
+      "assets",
+      "systems",
+      "projects",
+      "alarms",
+      "mail",
+      "johny"
     ],
     manager: [
-      "team-projects",
-      "work-orders",
-      "hvac",
-      "vendor-tracker",
-      "events-calendar",
-      "pto-calendar",
-      "reports"
+      "dashboard",
+      "projects",
+      "analytics",
+      "alarms",
+      "mail",
+      "johny",
+      "administration"
     ],
     administrator: widgets.map((widget) => widget.id),
     "asset-manager": [
-      "asset-inventory",
-      "work-orders",
-      "preventive-maintenance",
-      "hvac",
-      "vendor-tracker",
-      "fms-resources",
-      "qr-inspector",
-      "reports"
+      "dashboard",
+      "assets",
+      "systems",
+      "projects",
+      "analytics",
+      "alarms",
+      "mail"
     ]
   };
 
@@ -184,7 +171,24 @@
 
   function normalizeWidgetIds(widgetList) {
     const migrated = (Array.isArray(widgetList) ? widgetList : [])
-      .map((widgetId) => widgetId === "credential-settings" ? "settings" : widgetId);
+      .map((widgetId) => {
+        const aliases = {
+          "team-projects": "dashboard",
+          "work-orders": "projects",
+          "asset-inventory": "assets",
+          "preventive-maintenance": "projects",
+          hvac: "systems",
+          "vendor-tracker": "projects",
+          "events-calendar": "dashboard",
+          "pto-calendar": "dashboard",
+          reports: "analytics",
+          "fms-resources": "systems",
+          "qr-inspector": "assets",
+          settings: "administration",
+          "credential-settings": "administration",
+        };
+        return aliases[widgetId] || widgetId;
+      });
 
     return Array.from(new Set(migrated)).filter((widgetId) => widgetIds.has(widgetId));
   }
@@ -268,12 +272,12 @@
         const shouldAddNewDefaults = localStorage.getItem(profileWidgetsVersionKey) !== currentProfileWidgetsVersion;
         const merged = profiles.reduce((settings, profile) => {
           const widgetIds = normalizeWidgetIds(parsed[profile.id] || defaultProfileWidgets[profile.id]);
-          if (
-            shouldAddNewDefaults &&
-            defaultProfileWidgets[profile.id].includes("hvac") &&
-            !widgetIds.includes("hvac")
-          ) {
-            widgetIds.push("hvac");
+          if (shouldAddNewDefaults) {
+            defaultProfileWidgets[profile.id].forEach((widgetId) => {
+              if (!widgetIds.includes(widgetId)) {
+                widgetIds.push(widgetId);
+              }
+            });
           }
           settings[profile.id] = widgetIds;
           return settings;

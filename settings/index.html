@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="../assets/favicon.ico?v=frog-tab-1" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png?v=frog-tab-1">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png?v=frog-tab-1">
+    <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=frog-tab-1">
     <meta
       name="description"
       content="Facilities Engineering settings for adding users, passwords, profiles, and page permissions."
@@ -14,7 +18,7 @@
         display: none;
       }
     </style>
-    <script src="../scripts/access-directory.js?v=profiles-9"></script>
+    <script src="../scripts/access-directory.js?v=profiles-10"></script>
     <script>
       if (AccessDirectory.requirePageAccess("settings", "../login/?redirect=../settings/")) {
         document.documentElement.classList.remove("require-auth");
@@ -341,5 +345,6 @@
         }
       });
     </script>
+    <script src="../scripts/local-preview.js?v=preview-1"></script>
   </body>
 </html>

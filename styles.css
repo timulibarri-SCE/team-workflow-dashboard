@@ -1,17 +1,17 @@
 :root {
-  --bg: #f4f6f8;
-  --surface: #ffffff;
-  --surface-strong: #eef2f5;
-  --text: #111827;
-  --muted: #596575;
-  --border: #d6dde5;
-  --accent: #0f3f72;
-  --accent-dark: #0b2f55;
-  --accent-soft: #e8f0f7;
-  --gold: #b07a2a;
+  --bg: #06110f;
+  --surface: rgba(16, 36, 32, 0.72);
+  --surface-strong: rgba(255, 255, 255, 0.08);
+  --text: #ffffff;
+  --muted: #c9d6cf;
+  --border: rgba(174, 213, 129, 0.28);
+  --accent: #7cb342;
+  --accent-dark: #558b2f;
+  --accent-soft: rgba(124, 179, 66, 0.16);
+  --gold: #aed581;
   --warning-bg: #fff7ed;
   --warning-border: #fed7aa;
-  --shadow: 0 18px 45px rgb(17 24 39 / 12%);
+  --shadow: 0 24px 80px rgb(0 0 0 / 34%);
 }
 
 * {
@@ -26,8 +26,10 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--text);
-  background: var(--bg);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at 16% 8%, rgb(124 179 66 / 18%), transparent 30%),
+    linear-gradient(135deg, #06110f 0%, #0c1b18 52%, #08110f 100%);
+  font-family: Inter, Arial, Helvetica, sans-serif;
   line-height: 1.5;
 }
 
@@ -39,7 +41,7 @@ a {
   position: sticky;
   z-index: 20;
   top: 0;
-  background: rgb(255 255 255 / 96%);
+  background: rgb(6 17 15 / 86%);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(12px);
 }
@@ -107,8 +109,8 @@ a {
 .home-hero {
   min-height: 680px;
   background:
-    linear-gradient(180deg, rgb(9 21 35 / 12%) 0%, rgb(9 21 35 / 50%) 44%, rgb(9 21 35 / 84%) 100%),
-    linear-gradient(90deg, rgb(9 21 35 / 48%) 0%, rgb(9 21 35 / 30%) 42%, rgb(9 21 35 / 6%) 100%),
+    linear-gradient(180deg, rgb(6 17 15 / 14%) 0%, rgb(6 17 15 / 54%) 44%, rgb(6 17 15 / 88%) 100%),
+    linear-gradient(90deg, rgb(6 17 15 / 62%) 0%, rgb(6 17 15 / 36%) 42%, rgb(6 17 15 / 8%) 100%),
     url("assets/facilities-engineering-hero.jpg") 28% center / cover no-repeat;
 }
 
@@ -154,7 +156,7 @@ a {
 }
 
 .hero-content .eyebrow {
-  color: #f3c574;
+  color: var(--light-lime, #aed581);
 }
 
 h1,
@@ -283,6 +285,132 @@ h3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.standards-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.standard-card {
+  position: relative;
+  min-height: 240px;
+  overflow: hidden;
+  padding: 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgb(124 179 66 / 12%), rgb(255 255 255 / 5%)),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.standard-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--standard-state, var(--accent));
+  box-shadow: 0 0 20px var(--standard-state, var(--accent));
+  content: "";
+}
+
+.standard-card h3 {
+  margin-top: 1.2rem;
+}
+
+.standard-card p {
+  color: var(--muted);
+}
+
+.standard-card.is-running {
+  --standard-state: var(--accent);
+}
+
+.standard-card.is-alarm {
+  --standard-state: #ff4f46;
+}
+
+.standard-card.is-maintenance {
+  --standard-state: #ffc928;
+}
+
+.standard-card.is-assets {
+  --standard-state: var(--gold);
+}
+
+.standard-icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgb(174 213 129 / 34%);
+  border-radius: 8px;
+  background: rgb(24 35 31 / 92%);
+}
+
+.mini-fan::before {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  background:
+    conic-gradient(from 0deg, transparent 0 14%, var(--accent) 15% 27%, transparent 28% 48%, var(--gold) 49% 61%, transparent 62% 82%, var(--accent) 83% 94%, transparent 95%);
+  content: "";
+  animation: siteFanSpin 1.7s linear infinite;
+}
+
+.alarm-dot::before {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #ff4f46;
+  border-radius: 50%;
+  background: rgb(255 79 70 / 16%);
+  box-shadow: 0 0 0 8px rgb(255 79 70 / 10%), 0 0 24px rgb(255 79 70 / 42%);
+  content: "";
+  animation: siteAlarmPulse 1.7s ease-in-out infinite;
+}
+
+.valve-mark::before,
+.valve-mark::after {
+  position: absolute;
+  content: "";
+}
+
+.valve-mark::before {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #ffc928;
+  background: rgb(255 201 40 / 12%);
+  transform: rotate(45deg);
+}
+
+.valve-mark::after {
+  width: 42px;
+  height: 3px;
+  border-radius: 999px;
+  background: #ffc928;
+  animation: siteValveSweep 2.2s ease-in-out infinite;
+}
+
+.asset-ring {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgb(6 17 15 / 98%) 0 54%, transparent 56%),
+    conic-gradient(var(--accent) 78%, rgb(255 255 255 / 10%) 0);
+  box-shadow: 0 0 24px rgb(124 179 66 / 24%);
+}
+
+.asset-ring strong {
+  color: var(--text);
+  font-size: 20px;
+}
+
 .info-card,
 .process-step,
 .system-card,
@@ -359,6 +487,34 @@ h3 {
   width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
   font-size: 0.9rem;
+}
+
+@keyframes siteFanSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes siteAlarmPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 5px rgb(255 79 70 / 10%), 0 0 14px rgb(255 79 70 / 42%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgb(255 79 70 / 18%), 0 0 28px rgb(255 79 70 / 6%);
+  }
+}
+
+@keyframes siteValveSweep {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(72deg);
+  }
 }
 
 .link-grid {
@@ -772,6 +928,7 @@ h3 {
 
   .two-column,
   .capability-grid,
+  .standards-grid,
   .process-list,
   .resources-panel,
   .sso-layout,

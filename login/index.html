@@ -3,12 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="../assets/favicon.ico?v=frog-tab-1" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png?v=frog-tab-1">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png?v=frog-tab-1">
+    <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=frog-tab-1">
     <meta
       name="description"
       content="Facilities Engineering login page for authorized staff access."
     >
     <title>Login | Facilities Engineering</title>
-    <link rel="stylesheet" href="../styles.css?v=profiles-4">
+    <link rel="stylesheet" href="../styles.css?v=facilities-os-1">
   </head>
   <body class="login-page">
     <header class="site-header">
@@ -29,7 +33,7 @@
         <img
           class="login-graphic"
           src="../assets/frogo-fe2.png"
-          alt="Facility Engineer mascot graphic"
+          alt="Facilities Engineering access graphic"
           width="1254"
           height="1254"
         >
@@ -73,7 +77,7 @@
       </section>
     </main>
 
-    <script src="../scripts/access-directory.js?v=profiles-9"></script>
+    <script src="../scripts/access-directory.js?v=profiles-10"></script>
     <script>
       const form = document.querySelector("#login-form");
       const message = document.querySelector("#login-message");
@@ -146,5 +150,6 @@
         renderAccess(user);
       });
     </script>
+    <script src="../scripts/local-preview.js?v=preview-1"></script>
   </body>
 </html>
