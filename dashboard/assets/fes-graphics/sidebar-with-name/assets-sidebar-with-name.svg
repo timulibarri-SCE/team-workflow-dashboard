@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" viewBox="0 0 360 96" role="img" aria-labelledby="title desc">
+  <title id="title">Assets sidebar graphic with name</title>
+  <desc id="desc">Facilities ES sidebar navigation graphic with the Assets name.</desc>
+  
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="rgb(16 36 32)" stop-opacity="0.72" />
+      <stop offset="0.54" stop-color="#0C1B18" stop-opacity="0.84" />
+      <stop offset="1" stop-color="#06110F" stop-opacity="0.96" />
+    </linearGradient>
+    <linearGradient id="tile" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#22342E" stop-opacity="0.98" />
+      <stop offset="1" stop-color="#18231F" stop-opacity="0.94" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#AED581" />
+      <stop offset="1" stop-color="#7CB342" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="52%">
+      <stop offset="0" stop-color="#7CB342" stop-opacity="0.34" />
+      <stop offset="0.58" stop-color="#7CB342" stop-opacity="0.12" />
+      <stop offset="1" stop-color="#7CB342" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0V44" fill="none" stroke="#AED581" stroke-opacity="0.055" stroke-width="1" />
+    </pattern>
+    <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="28" flood-color="#000000" flood-opacity="0.34" />
+    </filter>
+    <filter id="lime-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#7CB342" flood-opacity="0.42" />
+    </filter>
+    <style>
+      .label { font-family: Inter, Arial, Helvetica, sans-serif; font-weight: 700; letter-spacing: 0; }
+      .caption { font-family: Inter, Arial, Helvetica, sans-serif; font-weight: 600; letter-spacing: 0; }
+      .hairline { stroke: #AED581; stroke-opacity: 0.34; stroke-width: 2; fill: none; }
+      .surface-light { fill: rgb(255 255 255); fill-opacity: 0.08; }
+      .border-glass { stroke: rgb(174 213 129); stroke-opacity: 0.28; }
+    </style>
+  </defs>
+  <rect x="1" y="1" width="358" height="94" rx="16" fill="url(#panel)" stroke="#AED581" stroke-opacity="0.28" stroke-width="2" />
+  <rect x="2" y="2" width="356" height="92" rx="15" fill="url(#grid)" opacity="0.48" />
+  <circle cx="48" cy="48" r="44" fill="url(#glow)" opacity="0.76" />
+  
+    <g>
+      <rect x="18" y="18" width="60" height="60" rx="11" fill="url(#tile)" fill-opacity="1" stroke="#AED581" stroke-opacity="0.28" stroke-width="1.4" />
+      <circle cx="63.6" cy="32.4" r="20.400000000000002" fill="url(#glow)" />
+      <g transform="translate(8.625 8.625) scale(0.7875)">
+        
+        <circle cx="50" cy="50" r="32" fill="none" stroke="#7CB342" stroke-width="6" />
+        <path d="M25 52h13l6-13 12 27 8-16h12" fill="none" stroke="#AED581" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M50 16v10M50 74v10M16 50h10M74 50h10" stroke="#7CB342" stroke-width="5" stroke-linecap="round" opacity="0.86" />
+      </g>
+    </g>
+  <text x="94" y="58" class="label" fill="#FFFFFF" font-size="28">Assets</text>
+</svg>

@@ -1,78 +1,130 @@
-const roleModes = {
-  Operator: ["Active alarms", "System overview", "Critical equipment", "Recent activity"],
-  Maintenance: ["Work orders", "Asset health", "PM tasks", "Critical assets"],
-  Manager: ["Energy", "Cost", "KPIs", "Compliance"],
-  Administrator: ["System health", "Users", "Integrations", "Mail settings", "Notification settings"],
-};
+const sites = [
+  {
+    id: "mb0",
+    name: "MB0",
+  },
+  {
+    id: "mbwest",
+    name: "MBwest",
+  },
+  {
+    id: "575-florida",
+    name: "575 Florida",
+  },
+  {
+    id: "350-ellis",
+    name: "350 Ellis",
+  },
+  {
+    id: "564-pacific",
+    name: "564 Pacific",
+  },
+  {
+    id: "harbour-way",
+    name: "Harbour Way",
+  },
+  {
+    id: "lion",
+    name: "Lion",
+  },
+];
 
-const siteNames = {
-  "DAL-B1": "Dallas Building 1",
-  "DAL-B2": "Dallas Building 2",
-  "AUS-C1": "Austin Campus",
-};
+const siteIconImage = "assets/fes-graphics/ui/site-icon.svg";
 
-const moduleSearch = document.querySelector("#moduleSearch");
-const moduleCards = Array.from(document.querySelectorAll(".module-card"));
-const roleTabs = Array.from(document.querySelectorAll(".role-tab"));
-const roleEyebrow = document.querySelector("#roleEyebrow");
-const roleTitle = document.querySelector("#roleTitle");
-const roleItems = document.querySelector("#roleItems");
-const siteSelector = document.querySelector("#siteSelector");
-const siteContext = document.querySelector("#siteContext");
-const lastSync = document.querySelector("#lastSync");
-const refreshButton = document.querySelector("#refreshButton");
+const modules = [
+  {
+    name: "Systems",
+    image: "assets/fes-graphics/sidebar-with-name/systems-sidebar-with-name.svg",
+    href: "http://192.168.0.6:1881",
+  },
+  {
+    name: "Assets",
+    image: "assets/fes-graphics/sidebar-with-name/assets-sidebar-with-name.svg",
+  },
+  {
+    name: "Lighting",
+    image: "assets/fes-graphics/sidebar-with-name/lighting-sidebar-with-name.svg",
+  },
+  {
+    name: "Projects",
+    image: "assets/fes-graphics/sidebar-with-name/projects-sidebar-with-name.svg",
+    href: "http://192.168.0.6:8081",
+  },
+  {
+    name: "Johnny",
+    image: "assets/fes-graphics/sidebar-with-name/johny-sidebar-with-name.svg",
+    href: "http://192.168.0.6:3000",
+  },
+  {
+    name: "Weather",
+    image: "assets/fes-graphics/sidebar-with-name/weather-sidebar-with-name.svg",
+  },
+];
 
-function setRole(role) {
-  const items = roleModes[role] || roleModes.Operator;
-  roleTabs.forEach((tab) => {
-    tab.classList.toggle("active", tab.dataset.role === role);
-  });
-  roleEyebrow.textContent = `${role} dashboard`;
-  roleTitle.textContent = items.join(", ");
-  roleItems.innerHTML = items.map((item) => `<span>${item}</span>`).join("");
+const siteDirectory = document.querySelector("#siteDirectory");
+const logoutButton = document.querySelector("#logoutButton");
+
+function createModuleButton(site, module) {
+  const element = module.href ? document.createElement("a") : document.createElement("button");
+  element.className = "module-button";
+  element.setAttribute("aria-label", `${module.name} for ${site.name}`);
+
+  if (module.href) {
+    element.href = module.href;
+    element.target = "_blank";
+    element.rel = "noopener noreferrer";
+  } else {
+    element.type = "button";
+  }
+
+  const image = document.createElement("img");
+  image.src = module.image;
+  image.alt = module.name;
+
+  element.append(image);
+  return element;
 }
 
-function updateSiteContext() {
-  const siteName = siteNames[siteSelector.value] || siteSelector.value;
-  siteContext.textContent = siteName;
-  document.querySelectorAll("[data-module]").forEach((item) => {
-    item.setAttribute("data-site", siteSelector.value);
-  });
+function createSiteSection(site) {
+  const section = document.createElement("section");
+  section.className = "site-section";
+  section.id = site.id;
+
+  const card = document.createElement("div");
+  card.className = "selected-site-card";
+
+  const siteLabel = document.createElement("div");
+  siteLabel.className = "site-label";
+
+  const siteIcon = document.createElement("span");
+  siteIcon.className = "site-icon-frame";
+
+  const siteIconArt = document.createElement("img");
+  siteIconArt.className = "site-icon-art";
+  siteIconArt.src = siteIconImage;
+  siteIconArt.alt = "";
+
+  const siteName = document.createElement("h2");
+  siteName.textContent = site.name;
+
+  const underline = document.createElement("span");
+  underline.className = "site-name-underline";
+
+  siteIcon.append(siteIconArt);
+  siteLabel.append(siteIcon, siteName, underline);
+
+  const grid = document.createElement("div");
+  grid.className = "module-grid";
+  grid.append(...modules.map((module) => createModuleButton(site, module)));
+
+  card.append(siteLabel);
+  section.append(card, grid);
+  return section;
 }
 
-function filterModules() {
-  const term = moduleSearch.value.trim().toLowerCase();
-  moduleCards.forEach((card) => {
-    const text = `${card.textContent} ${card.dataset.search || ""}`.toLowerCase();
-    card.classList.toggle("is-hidden", Boolean(term) && !text.includes(term));
-  });
-}
+siteDirectory.replaceChildren(...sites.map(createSiteSection));
 
-function refreshDashboard() {
-  const now = new Date();
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  lastSync.textContent = `Updated ${now.getHours()}:${minutes}`;
-
-  document.querySelectorAll(".metric-card").forEach((card, index) => {
-    card.animate(
-      [
-        { transform: "translateY(0)", filter: "brightness(1)" },
-        { transform: "translateY(-2px)", filter: "brightness(1.08)" },
-        { transform: "translateY(0)", filter: "brightness(1)" },
-      ],
-      { duration: 320 + index * 20, easing: "ease-out" }
-    );
-  });
-}
-
-roleTabs.forEach((tab) => {
-  tab.addEventListener("click", () => setRole(tab.dataset.role));
+logoutButton.addEventListener("click", () => {
+  AccessDirectory.clearSession();
+  window.location.href = "../login/";
 });
-
-siteSelector.addEventListener("change", updateSiteContext);
-moduleSearch.addEventListener("input", filterModules);
-refreshButton.addEventListener("click", refreshDashboard);
-
-setRole("Operator");
-updateSiteContext();
-refreshDashboard();

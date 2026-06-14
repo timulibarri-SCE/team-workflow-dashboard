@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" viewBox="0 0 360 96" role="img" aria-labelledby="title desc">
+  <title id="title">Weather sidebar graphic with name</title>
+  <desc id="desc">Facilities ES sidebar navigation graphic with the Weather name.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#102420" stop-opacity="0.72" />
+      <stop offset="0.54" stop-color="#0C1B18" stop-opacity="0.84" />
+      <stop offset="1" stop-color="#06110F" stop-opacity="0.96" />
+    </linearGradient>
+    <linearGradient id="tile" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#22342E" stop-opacity="0.98" />
+      <stop offset="1" stop-color="#18231F" stop-opacity="0.94" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#AED581" />
+      <stop offset="1" stop-color="#7CB342" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="52%">
+      <stop offset="0" stop-color="#7CB342" stop-opacity="0.34" />
+      <stop offset="0.58" stop-color="#7CB342" stop-opacity="0.12" />
+      <stop offset="1" stop-color="#7CB342" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0V44" fill="none" stroke="#AED581" stroke-opacity="0.055" stroke-width="1" />
+    </pattern>
+    <filter id="lime-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#7CB342" flood-opacity="0.42" />
+    </filter>
+    <style>
+      .label { font-family: Inter, Arial, Helvetica, sans-serif; font-weight: 700; letter-spacing: 0; }
+      .hairline { stroke: #AED581; stroke-opacity: 0.34; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <rect x="1" y="1" width="358" height="94" rx="16" fill="url(#panel)" stroke="#AED581" stroke-opacity="0.28" stroke-width="2" />
+  <rect x="2" y="2" width="356" height="92" rx="15" fill="url(#grid)" opacity="0.48" />
+  <circle cx="48" cy="48" r="44" fill="url(#glow)" opacity="0.76" />
+  <g>
+    <rect x="18" y="18" width="60" height="60" rx="11" fill="url(#tile)" stroke="#AED581" stroke-opacity="0.28" stroke-width="1.4" />
+    <circle cx="64" cy="32" r="20" fill="url(#glow)" />
+    <g filter="url(#lime-glow)">
+      <circle cx="43" cy="39" r="12" fill="url(#accent)" opacity="0.96" />
+      <path class="hairline" d="M43 21v7M43 50v7M25 39h7M54 39h7M30 26l5 5M51 47l5 5M56 26l-5 5M35 47l-5 5" />
+      <path d="M35 62h26c6.5 0 11-4.2 11-10.1 0-5.3-3.9-9.3-9.1-9.8C61 36.9 56 33 50 33c-7 0-12.7 4.9-14 11.5-5.8.5-10 4.2-10 9.1C26 58.6 29.8 62 35 62Z" fill="#18231F" stroke="#AED581" stroke-width="3" />
+    </g>
+  </g>
+  <text x="94" y="58" class="label" fill="#FFFFFF" font-size="28">Weather</text>
+</svg>
