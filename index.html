@@ -1,123 +1,18 @@
 <!doctype html>
-<html lang="en" class="require-auth">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.ico?v=frog-tab-1" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?v=frog-tab-1">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png?v=frog-tab-1">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=frog-tab-1">
-    <title>Facilities ES | Dashboard</title>
-    <link rel="stylesheet" href="styles.css?v=facilities-es-dashboard-11" />
-    <style>
-      .require-auth body {
-        display: none;
-      }
-    </style>
-    <script src="../scripts/access-directory.js?v=facilities-os-3"></script>
-    <script>
-      const dashboardUser = AccessDirectory.requirePageAccess("dashboard", "../login/?redirect=../dashboard/");
-      if (dashboardUser) {
-        window.dashboardUser = dashboardUser;
-        document.documentElement.classList.remove("require-auth");
-      }
-    </script>
+    <meta http-equiv="refresh" content="0; url=/home/">
+    <link rel="canonical" href="/home/">
+    <title>Facilities Engineering</title>
   </head>
   <body>
-    <div class="dashboard-shell" id="dashboard">
-      <aside class="sidebar" aria-label="Facilities ES modules">
-        <button class="brand-lockup" id="facilitiesMenuClose" type="button" aria-label="Close Facilities menu">
-          <img class="brand-mark" src="assets/facility-engineer-transparent.png?v=facility-brand-3" alt="" />
-          <span>
-            <strong>Facilities</strong>
-          </span>
-        </button>
-
-        <nav class="site-menu" id="siteMenu" aria-label="Sites and modules"></nav>
-      </aside>
-
-      <main class="workspace" aria-label="Dashboard workspace">
-        <header class="topbar" aria-label="Dashboard controls">
-          <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-
-          <div class="topbar-actions">
-            <button class="user-menu" id="userMenu" type="button" aria-label="User menu">
-              <span id="userInitials">FE</span>
-            </button>
-            <button class="logout-button" id="logoutButton" type="button">Log out</button>
-          </div>
-        </header>
-
-        <section class="hero-panel" aria-labelledby="dashboardTitle">
-          <div>
-            <p class="eyebrow" id="siteScope">Selected site</p>
-            <h1 id="dashboardTitle">Dashboard</h1>
-            <p class="hero-copy" id="dashboardSummary">
-              Role-aware operating view for vendor scheduling, PTO, open Jira work, and open projects.
-            </p>
-          </div>
-          <div class="hero-status">
-            <span class="state-dot running" aria-hidden="true"></span>
-            <span id="siteStatusLabel">Online</span>
-          </div>
-        </section>
-
-        <section class="kpi-grid" id="kpiGrid" aria-label="Role dashboard cards"></section>
-
-        <section class="content-grid schedule-grid">
-          <article class="glass-panel vendor-panel" aria-labelledby="vendorCalendarTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">Vendor calendar</p>
-                <h2 id="vendorCalendarTitle">Two-Week Look-Ahead</h2>
-              </div>
-              <span class="caption-chip" id="vendorCalendarSiteLabel">Selected site</span>
-            </div>
-            <div class="calendar-list" id="vendorCalendarList"></div>
-          </article>
-
-          <article class="glass-panel pto-panel" aria-labelledby="ptoCalendarTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">PTO calendar</p>
-                <h2 id="ptoCalendarTitle">PTO List</h2>
-              </div>
-              <span class="caption-chip" id="ptoCalendarSiteLabel">Selected site</span>
-            </div>
-            <div class="calendar-list" id="ptoCalendarList"></div>
-          </article>
-        </section>
-
-        <section class="content-grid lower-grid">
-          <article class="glass-panel activity-panel" aria-labelledby="activityTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">Calendar updates</p>
-                <h2 id="activityTitle">Site Work</h2>
-              </div>
-              <span id="activitySiteLabel" class="caption-chip">All systems</span>
-            </div>
-            <div class="activity-list" id="activityList"></div>
-          </article>
-
-          <article class="glass-panel open-work-panel" aria-labelledby="openWorkTitle">
-            <div class="panel-header">
-              <div>
-                <p class="eyebrow">Open work</p>
-                <h2 id="openWorkTitle">Jira and Projects</h2>
-              </div>
-              <span class="caption-chip" id="profileLabel">Profile</span>
-            </div>
-            <div class="open-module-grid" id="openModuleGrid"></div>
-          </article>
-        </section>
-      </main>
-    </div>
-
-    <script src="app.js?v=facilities-es-dashboard-8"></script>
+    <p><a href="/home/">Open Facilities Engineering Home</a></p>
+    <script src="scripts/local-preview.js?v=preview-1"></script>
   </body>
 </html>
