@@ -15,19 +15,6 @@
     <link rel="stylesheet" href="../styles.css?v=facilities-os-2">
   </head>
   <body>
-    <header class="site-header">
-      <nav class="nav" aria-label="Main navigation">
-        <a class="brand" href="./">Facilities Engineering</a>
-        <div class="nav-links">
-          <a class="active" href="./" aria-current="page">Home</a>
-          <a href="#capabilities">Capabilities</a>
-          <a href="#approach">Approach</a>
-          <a href="../dashboard/">Dashboard</a>
-        </div>
-        <a class="login-button" href="../login/">Login</a>
-      </nav>
-    </header>
-
     <main>
       <section class="home-hero">
         <div class="hero-overlay">
@@ -40,7 +27,6 @@
             </p>
             <div class="hero-actions" aria-label="Primary actions">
               <a class="primary-action" href="../login/">Open Facilities Engineering</a>
-              <a class="secondary-action" href="#capabilities">Review Modules</a>
             </div>
           </div>
         </div>
@@ -59,161 +45,7 @@
           </p>
         </div>
       </section>
-
-      <section class="page-shell" aria-labelledby="visual-standards-title">
-        <div class="section-heading">
-          <p class="eyebrow">Visual standards</p>
-          <h2 id="visual-standards-title">Dark glass, lime state, clear equipment motion.</h2>
-        </div>
-
-        <div class="standards-grid">
-          <article class="standard-card is-running">
-            <span class="standard-icon mini-fan" aria-hidden="true"></span>
-            <h3>Running</h3>
-            <p>Green glow, subtle fan rotation, and directional air-flow movement.</p>
-          </article>
-          <article class="standard-card is-alarm">
-            <span class="standard-icon alarm-dot" aria-hidden="true"></span>
-            <h3>Alarm</h3>
-            <p>Red pulse for high-priority conditions that require action.</p>
-          </article>
-          <article class="standard-card is-maintenance">
-            <span class="standard-icon valve-mark" aria-hidden="true"></span>
-            <h3>Maintenance</h3>
-            <p>Amber treatment for PM, inspection, and watch-list equipment.</p>
-          </article>
-          <article class="standard-card is-assets">
-            <span class="asset-ring" aria-hidden="true"><strong>78</strong></span>
-            <h3>Asset Health</h3>
-            <p>Ring and summary chips show health, critical assets, and overdue PMs.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="page-shell" id="capabilities" aria-labelledby="capabilities-title">
-        <div class="section-heading">
-          <p class="eyebrow">Modules</p>
-          <h2 id="capabilities-title">Facilities Engineering module coverage</h2>
-        </div>
-
-        <div class="capability-grid">
-          <article class="info-card">
-            <span class="card-kicker">01</span>
-            <h3>Assets</h3>
-            <p>
-              Asset records, asset health, equipment identity, and maintenance
-              context under one Facilities Engineering label.
-            </p>
-          </article>
-
-          <article class="info-card">
-            <span class="card-kicker">02</span>
-            <h3>Systems</h3>
-            <p>
-              Live process graphics, pressure-gauge views, and operational
-              state styling for equipment and building systems.
-            </p>
-          </article>
-
-          <article class="info-card">
-            <span class="card-kicker">03</span>
-            <h3>Projects</h3>
-            <p>
-              Project delivery, work orders, preventive maintenance, and
-              coordination queues for site teams.
-            </p>
-          </article>
-
-          <article class="info-card">
-            <span class="card-kicker">04</span>
-            <h3>Analytics</h3>
-            <p>
-              Reports, trends, energy, cost, KPIs, and compliance views for
-              managers and administrators.
-            </p>
-          </article>
-
-          <article class="info-card">
-            <span class="card-kicker">05</span>
-            <h3>Alarms and Wireless</h3>
-            <p>
-              Alarm routing, notification queues, wireless gateways, LoRaWAN
-              devices, and sensor connectivity.
-            </p>
-          </article>
-
-          <article class="info-card">
-            <span class="card-kicker">06</span>
-            <h3>Mail and Johny</h3>
-            <p>
-              Mail templates, alert mailboxes, notification settings, and the
-              Johny assistant for site-aware support.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-band muted-band" id="approach" aria-labelledby="approach-title">
-        <div class="page-shell tight">
-          <div class="section-heading">
-            <p class="eyebrow">Approach</p>
-            <h2 id="approach-title">Site-first, role-aware, and operations focused</h2>
-          </div>
-
-          <div class="process-list">
-            <article class="process-step">
-              <span>Site</span>
-              <h3>Scope every screen</h3>
-              <p>
-                Keep navigation and dashboard context anchored to the selected
-                facility site wherever possible.
-              </p>
-            </article>
-            <article class="process-step">
-              <span>Name</span>
-              <h3>Use hybrid naming</h3>
-              <p>
-                Show operator-friendly display names and preserve system IDs
-                for integrations, reports, mail templates, and Johny.
-              </p>
-            </article>
-            <article class="process-step">
-              <span>Operate</span>
-              <h3>Signal meaningful state</h3>
-              <p>
-                Use clear state styles for running, stopped, alarm, maintenance,
-                offline, and manual override conditions.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="page-shell" id="resources" aria-labelledby="resources-title">
-        <div class="resources-panel">
-          <div>
-              <p class="eyebrow">Internal platform</p>
-              <h2 id="resources-title">Centralized access for authorized users</h2>
-            <p>
-              The Facilities Engineering dashboard includes links to site modules,
-              operational systems, mail administration, and account settings.
-              Access should stay limited to approved team members.
-            </p>
-          </div>
-          <div class="resource-actions">
-            <a class="secondary-action dark" href="../login/">Open Facilities Engineering</a>
-            <a class="primary-action" href="../login/">Login</a>
-          </div>
-        </div>
-      </section>
     </main>
-
-    <footer class="site-footer">
-      <div class="footer-inner">
-        <span>Facilities Engineering</span>
-        <span>Unified site-first operations, modules, mail, and Johny access.</span>
-      </div>
-    </footer>
     <script src="../scripts/local-preview.js?v=preview-1"></script>
   </body>
 </html>
