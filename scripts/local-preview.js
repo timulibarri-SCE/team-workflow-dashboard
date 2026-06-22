@@ -1,5 +1,5 @@
 (function () {
-  const productionOrigin = "https://www.facilities-engineering.com";
+  const productionOrigin = "https://home.facilities-engineering.com";
   const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
 
   function isLocalPreview() {
@@ -132,7 +132,7 @@
         <strong>Local preview</strong>
         <span>
           Viewing ${escapeHtml(locationLabel)}. Production uses
-          www.facilities-engineering.com and may need a company policy exemption.
+          home.facilities-engineering.com and may need a company policy exemption.
         </span>
       </div>
       <a href="${escapeHtml(productionUrl)}" target="_blank" rel="noopener noreferrer">
