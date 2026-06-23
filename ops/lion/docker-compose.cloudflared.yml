@@ -1,0 +1,12 @@
+services:
+  md2service-cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: md2service-cloudflared
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - cloudflared.env
+    command:
+      - tunnel
+      - --no-autoupdate
+      - run

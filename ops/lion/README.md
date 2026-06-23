@@ -26,6 +26,18 @@ Use Cloudflare Tunnel on the Lion server as the preferred public path. Apply
 `md2service-cloudflared-tunnel.example.yml` as `/etc/cloudflared/config.yml`
 after replacing the tunnel ID and credentials path with the real values.
 
+If `cloudflared` is not installed as a system service, run the Docker-based
+tunnel from this folder instead:
+
+```sh
+cp cloudflared.env.example cloudflared.env
+$EDITOR cloudflared.env
+./start-md2service-cloudflared.sh
+```
+
+The Cloudflare Zero Trust tunnel token must stay in `cloudflared.env` on the
+Lion server only.
+
 Required Cloudflare DNS state:
 
 ```text
