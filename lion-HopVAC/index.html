@@ -9,12 +9,23 @@
     <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=frog-tab-1">
     <meta
       name="description"
-      content="Facilities Engineering Lion-BMS FUXA workspace for the ABM Lion BMS."
+      content="Facilities Engineering Lion Systems workspace for the ABM Lion BMS."
     >
-    <title>Lion-BMS | Facilities Engineering</title>
+    <title>Lion Systems | Facilities Engineering</title>
     <style>
       :root {
-        color-scheme: light;
+        --fe-primary-lime: #7cb342;
+        --fe-dark-lime: #558b2f;
+        --fe-light-lime: #aed581;
+        --fe-background-dark: #06110f;
+        --fe-surface-glass: rgba(16, 36, 32, 0.72);
+        --fe-surface-glass-strong: rgba(6, 17, 15, 0.9);
+        --fe-surface-glass-light: rgba(255, 255, 255, 0.08);
+        --fe-border-glass: rgba(174, 213, 129, 0.28);
+        --fe-text-primary: #ffffff;
+        --fe-text-secondary: #c9d6cf;
+        --fe-text-muted: #8fa39a;
+        color-scheme: dark;
         font-family:
           Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
           "Segoe UI", sans-serif;
@@ -35,8 +46,10 @@
 
       body {
         margin: 0;
-        background: #101814;
-        color: #f7fbf8;
+        background:
+          radial-gradient(circle at 12% 18%, rgb(124 179 66 / 18%), transparent 30%),
+          linear-gradient(135deg, var(--fe-background-dark), #0b1c18 54%, #07110f);
+        color: var(--fe-text-primary);
         overflow: hidden;
       }
 
@@ -56,11 +69,13 @@
         gap: 1rem;
         min-height: 60px;
         padding: 0.72rem 1rem;
-        border-bottom: 1px solid rgb(255 255 255 / 16%);
-        background: rgb(32 48 42 / 96%);
+        border-bottom: 1px solid var(--fe-border-glass);
+        background: var(--fe-surface-glass-strong);
         box-shadow: 0 14px 32px rgb(0 0 0 / 18%);
         transform: translateY(calc(-100% + 12px));
         transition: transform 180ms ease;
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
       }
 
       .controller-workbar:hover,
@@ -75,7 +90,7 @@
         left: 0;
         height: 12px;
         content: "";
-        background: rgb(32 48 42 / 80%);
+        background: rgb(6 17 15 / 80%);
       }
 
       .workbar-title {
@@ -89,7 +104,7 @@
       }
 
       .workbar-title span {
-        color: rgb(247 251 248 / 68%);
+        color: var(--fe-text-secondary);
         font-size: 0.78rem;
       }
 
@@ -103,9 +118,9 @@
 
       .workbar-links a {
         flex: 0 0 auto;
-        border: 1px solid rgb(255 255 255 / 18%);
+        border: 1px solid var(--fe-border-glass);
         border-radius: 6px;
-        color: #f7fbf8;
+        color: var(--fe-text-primary);
         font-size: 0.84rem;
         font-weight: 800;
         padding: 0.52rem 0.72rem;
@@ -114,8 +129,89 @@
 
       .workbar-links a:hover,
       .workbar-links a:focus {
-        background: rgb(255 255 255 / 12%);
+        background: rgb(124 179 66 / 18%);
         outline: none;
+      }
+
+      .floorplan-nav {
+        position: fixed;
+        top: 50%;
+        left: 1rem;
+        z-index: 18;
+        display: grid;
+        gap: 0.62rem;
+        width: min(220px, calc(100vw - 2rem));
+        padding: 0.72rem;
+        border: 1px solid var(--fe-border-glass);
+        border-radius: 8px;
+        background: var(--fe-surface-glass);
+        box-shadow: 0 24px 80px rgb(0 0 0 / 34%);
+        transform: translateY(-50%);
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
+      }
+
+      .floorplan-nav strong {
+        color: var(--fe-light-lime);
+        font-size: 0.76rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .floorplan-list {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .floorplan-button {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        align-items: center;
+        gap: 0.64rem;
+        width: 100%;
+        min-height: 48px;
+        padding: 0.42rem 0.54rem;
+        border: 1px solid rgb(174 213 129 / 18%);
+        border-radius: 8px;
+        background: var(--fe-surface-glass-light);
+        color: var(--fe-text-secondary);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.86rem;
+        font-weight: 850;
+        text-align: left;
+      }
+
+      .floorplan-button img {
+        width: 34px;
+        height: 34px;
+      }
+
+      .floorplan-button span {
+        display: grid;
+        gap: 0.08rem;
+      }
+
+      .floorplan-button small {
+        color: var(--fe-text-muted);
+        font-size: 0.7rem;
+        font-weight: 800;
+      }
+
+      .floorplan-button:hover,
+      .floorplan-button:focus {
+        border-color: var(--fe-light-lime);
+        background: rgb(124 179 66 / 16%);
+        color: var(--fe-text-primary);
+        outline: none;
+      }
+
+      .floorplan-button.active {
+        border-color: var(--fe-primary-lime);
+        background: linear-gradient(135deg, rgb(124 179 66 / 24%), rgb(85 139 47 / 14%));
+        color: var(--fe-text-primary);
+        box-shadow: 0 0 24px rgb(124 179 66 / 20%);
       }
 
       .controller-stage,
@@ -142,15 +238,17 @@
 
       .placeholder-card {
         width: min(640px, 100%);
-        border: 1px solid rgb(255 255 255 / 16%);
+        border: 1px solid var(--fe-border-glass);
         border-radius: 8px;
-        background: rgb(255 255 255 / 8%);
+        background: var(--fe-surface-glass-light);
         box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
         padding: 1.5rem;
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
       }
 
       .placeholder-card p {
-        color: rgb(247 251 248 / 74%);
+        color: var(--fe-text-secondary);
         line-height: 1.55;
       }
 
@@ -166,9 +264,9 @@
       }
 
       .proxy-actions a {
-        border: 1px solid rgb(255 255 255 / 22%);
+        border: 1px solid var(--fe-border-glass);
         border-radius: 6px;
-        color: #ffffff;
+        color: var(--fe-text-primary);
         font-size: 0.86rem;
         font-weight: 800;
         padding: 0.58rem 0.78rem;
@@ -177,7 +275,7 @@
 
       .proxy-actions a:hover,
       .proxy-actions a:focus {
-        background: rgb(255 255 255 / 12%);
+        background: rgb(124 179 66 / 16%);
         outline: none;
       }
 
@@ -197,9 +295,44 @@
         .workbar-links {
           justify-content: flex-start;
         }
+
+        .floorplan-nav {
+          top: auto;
+          right: 1rem;
+          bottom: 1rem;
+          left: 1rem;
+          width: auto;
+          transform: none;
+        }
+
+        .floorplan-list {
+          display: flex;
+          overflow-x: auto;
+          padding-bottom: 0.1rem;
+        }
+
+        .floorplan-button {
+          grid-template-columns: 30px 1fr;
+          min-width: 138px;
+        }
+
+        .floorplan-button img {
+          width: 30px;
+          height: 30px;
+        }
+
+        body:has(.local-preview-banner) .floorplan-nav {
+          bottom: 8.7rem;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body:has(.local-preview-banner) .floorplan-nav {
+          bottom: 10.4rem;
+        }
       }
     </style>
-    <script src="../scripts/access-directory.js?v=profiles-10"></script>
+    <script src="../scripts/access-directory.js?v=profiles-11"></script>
     <script>
       if (AccessDirectory.requirePageAccess("hvac-login", "../login/?redirect=../lion-HopVAC/")) {
         document.documentElement.classList.remove("require-auth");
@@ -207,39 +340,42 @@
     </script>
   </head>
   <body>
-    <header class="controller-workbar" aria-label="Lion-BMS navigation">
+    <header class="controller-workbar" aria-label="Lion Systems navigation">
       <div class="workbar-title">
-        <strong>Lion-BMS</strong>
-        <span>FUXA / ABM Lion BMS</span>
+        <strong>Lion Systems</strong>
+        <span>ABM Lion BMS</span>
       </div>
       <nav class="workbar-links" id="workbar-links" aria-label="Widget navigation">
         <a href="../dashboard/">Dashboard</a>
       </nav>
     </header>
 
+    <aside class="floorplan-nav" id="floorplan-nav" aria-label="Lion floorplan navigation"></aside>
+
     <main class="controller-stage">
       <iframe
         class="controller-frame"
         id="controller-frame"
-        title="Lion-BMS FUXA controller workspace"
+        title="Lion Systems controller workspace"
         referrerpolicy="no-referrer"
         hidden
       ></iframe>
 
       <section class="controller-placeholder" id="controller-placeholder" aria-labelledby="placeholder-title">
         <div class="placeholder-card">
-          <h1 id="placeholder-title">Lion-BMS</h1>
+          <h1 id="placeholder-title">Lion Systems</h1>
           <p>
-            The Lion-BMS FUXA software target must be reached through a frontend proxy
-            path on this site. Do not place the ABM Lion BMS server IP address
-            or private hostname in this page.
+            The Lion Systems target must be reached through an approved
+            Facilities Engineering hostname. Do not place the ABM Lion BMS
+            server IP address or private hostname in this page.
           </p>
           <p>
-            The workbar hides during use. Move the mouse to the top edge of the
-            page to bring back Dashboard and widget navigation.
+            The floorplan navigator opens named Systems views for the selected
+            site. The workbar hides during use; move the mouse to the top edge
+            to bring back Dashboard and module navigation.
           </p>
           <p class="proxy-status" id="proxy-status">
-            Loading the approved Lion-BMS proxy route.
+            Loading the approved Lion Systems route.
           </p>
           <div class="proxy-actions" id="proxy-actions" hidden></div>
         </div>
@@ -248,18 +384,49 @@
 
     <script>
       const LION_BMS_PROXY_PATH = "/lion-hopvac-proxy/";
-      const LION_BMS_REMOTE_ORIGIN = "https://www.facilities-engineering.com";
-      const LION_BMS_ALLOWED_REMOTE_ORIGINS = new Set([
+      const LION_BMS_PUBLIC_URL = "https://md2service.facilities-engineering.com/";
+      const LION_BMS_STATIC_SHELL_ORIGINS = new Set([
         "https://www.facilities-engineering.com",
         "https://facilities-engineering.com"
       ]);
+      const LION_BMS_ALLOWED_REMOTE_ROUTES = new Map([
+        ["https://md2service.facilities-engineering.com", "/"],
+        ["https://www.facilities-engineering.com", LION_BMS_PROXY_PATH],
+        ["https://facilities-engineering.com", LION_BMS_PROXY_PATH]
+      ]);
+      const LION_SYSTEMS_FLOORPLANS = [
+        {
+          id: "floor-1",
+          label: "1",
+          displayName: "Floor 1",
+          viewName: "Floor 1",
+          icon: "../assets/facilities-es/modules/floor-icons/1.svg"
+        },
+        {
+          id: "floor-2",
+          label: "2",
+          displayName: "Floor 2",
+          viewName: "Floor 2",
+          icon: "../assets/facilities-es/modules/floor-icons/2.svg"
+        },
+        {
+          id: "mechanical",
+          label: "M",
+          displayName: "Mechanical",
+          viewName: "Mechanical",
+          icon: "../assets/facilities-es/modules/floor-icons/m.svg"
+        }
+      ];
       const frame = document.querySelector("#controller-frame");
       const placeholder = document.querySelector("#controller-placeholder");
       const placeholderTitle = document.querySelector("#placeholder-title");
       const proxyStatus = document.querySelector("#proxy-status");
       const proxyActions = document.querySelector("#proxy-actions");
       const workbarLinks = document.querySelector("#workbar-links");
+      const floorplanNav = document.querySelector("#floorplan-nav");
       let proxyLoadTimer = null;
+      let proxyLoadToken = 0;
+      let activeFloorplanId = null;
 
       function widgetHref(widget) {
         if (widget.url.startsWith("#")) {
@@ -276,7 +443,7 @@
       function renderWidgetLinks() {
         const user = AccessDirectory.getCurrentUser();
         const widgets = AccessDirectory.getWidgetsForUser(user)
-          .filter((widget) => widget.id !== "hvac");
+          .filter((widget) => !["hvac", "systems"].includes(widget.id));
 
         workbarLinks.insertAdjacentHTML("beforeend", widgets.map((widget) => {
           const href = widgetHref(widget);
@@ -289,24 +456,36 @@
         }).join(""));
       }
 
-      function shouldUseRemoteProxy() {
-        const host = window.location.hostname;
-        return window.location.protocol === "file:" ||
-          host === "localhost" ||
-          host === "127.0.0.1" ||
-          host === "::1";
+      function isLocalFilePreview() {
+        return window.location.protocol === "file:";
       }
 
-      function shouldLoadRemoteProxyInPreview() {
-        return new URLSearchParams(window.location.search).get("loadProxy") === "1";
+      function shouldUsePublicSystemsHost() {
+        return isLocalFilePreview() ||
+          LION_BMS_STATIC_SHELL_ORIGINS.has(window.location.origin);
       }
 
       function getLionBmsProxyUrl() {
-        if (shouldUseRemoteProxy()) {
-          return `${LION_BMS_REMOTE_ORIGIN}${LION_BMS_PROXY_PATH}`;
+        if (shouldUsePublicSystemsHost()) {
+          return LION_BMS_PUBLIC_URL;
         }
 
         return LION_BMS_PROXY_PATH;
+      }
+
+      function proxyUrlForFloorplan(floorplan) {
+        const proxyUrl = getLionBmsProxyUrl();
+        const url = new URL(proxyUrl, window.location.origin);
+
+        if (floorplan?.viewName) {
+          url.searchParams.set("viewName", floorplan.viewName);
+        }
+
+        if (proxyUrl.startsWith("/") && url.origin === window.location.origin) {
+          return `${url.pathname}${url.search}${url.hash}`;
+        }
+
+        return url.href;
       }
 
       function isApprovedProxyUrl(value) {
@@ -320,28 +499,29 @@
 
         try {
           const url = new URL(value);
+          const allowedPath = LION_BMS_ALLOWED_REMOTE_ROUTES.get(url.origin);
           return url.protocol === "https:" &&
-            LION_BMS_ALLOWED_REMOTE_ORIGINS.has(url.origin) &&
-            url.pathname.startsWith(LION_BMS_PROXY_PATH);
+            Boolean(allowedPath) &&
+            url.pathname.startsWith(allowedPath);
         } catch {
           return false;
         }
       }
 
-      function setProxyActions(hopVACProxyUrl) {
+      function setProxyActions(systemsProxyUrl, floorplan) {
         proxyActions.hidden = false;
         proxyActions.innerHTML = `
           <a href="../dashboard/">Return to Dashboard</a>
-          <a href="${hopVACProxyUrl}" target="_blank" rel="noopener noreferrer">
-            Open Proxy Route
+          <a href="${systemsProxyUrl}" target="_blank" rel="noopener noreferrer">
+            ${floorplan ? `Open ${floorplan.displayName}` : "Open Systems Route"}
           </a>
         `;
       }
 
-      function showProxyStatus(title, message, hopVACProxyUrl) {
+      function showProxyStatus(title, message, systemsProxyUrl, floorplan) {
         placeholderTitle.textContent = title;
         proxyStatus.textContent = message;
-        setProxyActions(hopVACProxyUrl);
+        setProxyActions(systemsProxyUrl, floorplan);
         placeholder.hidden = false;
         frame.hidden = true;
       }
@@ -355,8 +535,114 @@
         frame.hidden = false;
       }
 
-      function loadController() {
-        const lionBmsProxyUrl = getLionBmsProxyUrl();
+      function normalizeFloorplanId(value) {
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/^floor-?/, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+
+      function findFloorplan(value) {
+        const normalized = normalizeFloorplanId(value);
+        if (!normalized) {
+          return null;
+        }
+
+        return LION_SYSTEMS_FLOORPLANS.find((floorplan) => {
+          const candidates = [
+            floorplan.id,
+            floorplan.label,
+            floorplan.displayName,
+            floorplan.viewName
+          ].map(normalizeFloorplanId);
+
+          return candidates.includes(normalized);
+        }) || null;
+      }
+
+      function getInitialFloorplan() {
+        const params = new URLSearchParams(window.location.search);
+        return findFloorplan(params.get("floor") || params.get("viewName"));
+      }
+
+      function updateFloorplanUrlState(floorplan) {
+        const params = new URLSearchParams(window.location.search);
+        if (floorplan) {
+          params.set("floor", floorplan.label);
+        } else {
+          params.delete("floor");
+        }
+
+        const query = params.toString();
+        const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+        window.history.replaceState(null, "", nextUrl);
+      }
+
+      function setActiveFloorplan(floorplan) {
+        activeFloorplanId = floorplan?.id || null;
+        floorplanNav.querySelectorAll(".floorplan-button").forEach((button) => {
+          const isActive = button.dataset.floorplanId === activeFloorplanId;
+          button.classList.toggle("active", isActive);
+          button.setAttribute("aria-current", isActive ? "page" : "false");
+        });
+      }
+
+      async function isSameOriginProxyAvailable(systemsProxyUrl) {
+        if (!systemsProxyUrl.startsWith("/") || systemsProxyUrl.startsWith("//")) {
+          return true;
+        }
+
+        try {
+          const response = await window.fetch(systemsProxyUrl, {
+            cache: "no-store",
+            credentials: "include"
+          });
+
+          return response.ok || response.status === 401 || response.status === 403;
+        } catch {
+          return false;
+        }
+      }
+
+      function renderFloorplanNav() {
+        floorplanNav.innerHTML = `
+          <strong>Floorplans</strong>
+          <div class="floorplan-list">
+            ${LION_SYSTEMS_FLOORPLANS.map((floorplan) => `
+              <button class="floorplan-button" type="button" data-floorplan-id="${floorplan.id}">
+                <img src="${floorplan.icon}" alt="" aria-hidden="true">
+                <span>
+                  ${floorplan.displayName}
+                  <small>View ${floorplan.label}</small>
+                </span>
+              </button>
+            `).join("")}
+          </div>
+        `;
+
+        floorplanNav.addEventListener("click", (event) => {
+          const button = event.target.closest(".floorplan-button");
+          if (!button) {
+            return;
+          }
+
+          const floorplan = LION_SYSTEMS_FLOORPLANS.find((item) => item.id === button.dataset.floorplanId);
+          if (!floorplan) {
+            return;
+          }
+
+          setActiveFloorplan(floorplan);
+          updateFloorplanUrlState(floorplan);
+          loadController(floorplan);
+        });
+      }
+
+      async function loadController(floorplan = null) {
+        const lionBmsProxyUrl = proxyUrlForFloorplan(floorplan);
+        const loadToken = proxyLoadToken + 1;
+        proxyLoadToken = loadToken;
 
         if (!lionBmsProxyUrl) {
           return;
@@ -365,43 +651,82 @@
         if (!isApprovedProxyUrl(lionBmsProxyUrl)) {
           showProxyStatus(
             "Proxy route not approved",
-            "Lion-BMS requires an approved Facilities Engineering proxy route. Direct server URLs, IP addresses, and private hostnames are not allowed in this page.",
-            "../dashboard/"
+            "Lion Systems requires an approved Facilities Engineering proxy route. Direct server URLs, IP addresses, and private hostnames are not allowed in this page.",
+            "../dashboard/",
+            floorplan
           );
           return;
         }
 
-        if (shouldUseRemoteProxy() && !shouldLoadRemoteProxyInPreview()) {
+        if (isLocalFilePreview()) {
           showProxyStatus(
             "Production proxy required",
-            "This local preview can show the Lion-BMS shell, but the controller must load through the approved production proxy route. That domain is currently blocked by company policy on this network. Request an allowlist exemption for www.facilities-engineering.com, then open the production page.",
-            lionBmsProxyUrl
+            "This local file preview can show the Lion Systems shell, but the controller must load through the approved production hostname. Open the hosted Facilities Engineering page or the MD2Service Systems route.",
+            lionBmsProxyUrl,
+            floorplan
+          );
+          return;
+        }
+
+        proxyStatus.textContent = `Checking ${lionBmsProxyUrl}`;
+        setProxyActions(lionBmsProxyUrl, floorplan);
+
+        const isProxyAvailable = await isSameOriginProxyAvailable(lionBmsProxyUrl);
+        if (loadToken !== proxyLoadToken) {
+          return;
+        }
+
+        if (!isProxyAvailable) {
+          showProxyStatus(
+            "Systems proxy route required",
+            "The Lion Systems shell loaded, but this host is not serving the approved Systems route. Configure md2service.facilities-engineering.com or the local proxy path to forward to the local Systems service, then reload this page.",
+            lionBmsProxyUrl,
+            floorplan
           );
           return;
         }
 
         proxyStatus.textContent = `Loading ${lionBmsProxyUrl}`;
-        setProxyActions(lionBmsProxyUrl);
-        frame.addEventListener("load", markProxyLoaded, { once: true });
-        frame.addEventListener("error", () => {
+        setProxyActions(lionBmsProxyUrl, floorplan);
+        frame.onload = () => {
+          if (loadToken === proxyLoadToken) {
+            markProxyLoaded();
+          }
+        };
+        frame.onerror = () => {
+          if (loadToken !== proxyLoadToken) {
+            return;
+          }
           showProxyStatus(
-            "Lion-BMS proxy unavailable",
-            "The approved Lion-BMS proxy route could not be reached from this browser. If you are on a managed network, request an allowlist exemption for www.facilities-engineering.com.",
-            lionBmsProxyUrl
+            "Lion Systems unavailable",
+            "The approved Lion Systems route could not be reached from this browser. If you are on a managed network, request an allowlist exemption for md2service.facilities-engineering.com.",
+            lionBmsProxyUrl,
+            floorplan
           );
-        }, { once: true });
+        };
         frame.src = lionBmsProxyUrl;
+
+        if (proxyLoadTimer) {
+          window.clearTimeout(proxyLoadTimer);
+        }
         proxyLoadTimer = window.setTimeout(() => {
+          if (loadToken !== proxyLoadToken) {
+            return;
+          }
           showProxyStatus(
-            "Lion-BMS proxy unavailable",
-            "The approved Lion-BMS proxy route did not finish loading. This is usually caused by network filtering, an unavailable tunnel, or a missing proxy deployment.",
-            lionBmsProxyUrl
+            "Lion Systems unavailable",
+            "The approved Lion Systems route did not finish loading. This is usually caused by network filtering, an unavailable tunnel, or a missing proxy deployment.",
+            lionBmsProxyUrl,
+            floorplan
           );
         }, 8000);
       }
 
+      const initialFloorplan = getInitialFloorplan();
       renderWidgetLinks();
-      loadController();
+      renderFloorplanNav();
+      setActiveFloorplan(initialFloorplan);
+      loadController(initialFloorplan);
     </script>
     <script src="../scripts/local-preview.js?v=preview-1"></script>
   </body>

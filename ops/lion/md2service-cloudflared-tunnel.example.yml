@@ -1,0 +1,13 @@
+# Cloudflare Tunnel config for the Lion Systems MD2Service hostname.
+#
+# Install this on the Lion server as /etc/cloudflared/config.yml after replacing
+# the tunnel ID and credentials file path with the real values. Keep the real
+# credentials JSON out of this repository.
+
+tunnel: CHANGE_ME_MD2SERVICE_TUNNEL_ID
+credentials-file: /etc/cloudflared/CHANGE_ME_MD2SERVICE_TUNNEL_ID.json
+
+ingress:
+  - hostname: md2service.facilities-engineering.com
+    service: http://127.0.0.1:1881
+  - service: http_status:404

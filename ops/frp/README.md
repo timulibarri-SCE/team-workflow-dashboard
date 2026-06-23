@@ -109,10 +109,12 @@ Replace `site1.example.com` and certificate paths before enabling the Nginx
 site. If Authentik is already available, merge the optional forward-auth
 snippet before exposing any real control UI.
 
-For the `https://www.facilities-engineering.com/lion-HopVAC/` page, use
-`cloud/nginx-facilities-path.example.conf` instead of a standalone subdomain.
-In that case set `FRP_PUBLIC_HOST=www.facilities-engineering.com` on the site
-gateway so FRP routes by the same Host header that Nginx sends to `frps`.
+Do not route `www.facilities-engineering.com` through FRP. GitHub Pages is the
+final owner of `www`, so the path-based example in
+`cloud/nginx-facilities-path.example.conf` is historical only. Use a dedicated
+non-`www` Systems proxy hostname, such as
+`md2service.facilities-engineering.com`, and set `FRP_PUBLIC_HOST` to that
+hostname.
 
 ## Site Gateway Setup
 
@@ -135,9 +137,10 @@ sudo install -m 0600 -o frp -g frp site1.token /etc/frp/tokens/site1.token
 Edit `/etc/frp/frpc-site1.env`:
 
 - `FRP_SERVER_ADDR`: public DNS name of the cloud server.
-- `FRP_PUBLIC_HOST`: public route, for example `site1.example.com`.
+- `FRP_PUBLIC_HOST`: public route, for example
+  `md2service.facilities-engineering.com`.
 - `FRP_LOCAL_SERVICE_HOST`: usually `127.0.0.1`.
-- `FRP_LOCAL_SERVICE_PORT`: demo is `8080`; FUXA might be `1881`.
+- `FRP_LOCAL_SERVICE_PORT`: demo is `8080`; Systems might be `1881`.
 
 Validate and start. The systemd unit runs `frpc verify` with the configured
 `EnvironmentFile` before starting the service.
@@ -192,7 +195,7 @@ check-frpc-health site1 gateway-dashboard 127.0.0.1 8080
 
 The systemd units log start/stop events with site ID, exposed local service,
 and public route. FRP logs registration and disconnect events for the named
-proxy `site1-gateway-dashboard`.
+proxy, for example `lion-md2service-systems`.
 
 ## Acceptance Test
 

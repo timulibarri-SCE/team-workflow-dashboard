@@ -1,0 +1,23 @@
+# Example Cloudflare Tunnel config for the Facilities Engineering public model.
+#
+# Run cloudflared on the central reverse-proxy host for self-hosted app
+# subdomains. GitHub Pages owns www.facilities-engineering.com; do not add it
+# to this Lillypad tunnel.
+#
+# Lion Systems uses a separate Lion-hosted tunnel for
+# md2service.facilities-engineering.com. See ops/lion/.
+#
+# Do not use Cloudflare HTTP proxying for Mail protocols. Mail DNS is handled
+# separately as DNS-only records.
+
+tunnel: CHANGE_ME_TUNNEL_ID
+credentials-file: /etc/cloudflared/CHANGE_ME_TUNNEL_ID.json
+
+ingress:
+  - hostname: equipmentissues.facilities-engineering.com
+    service: http://127.0.0.1:80
+  - hostname: assets.facilities-engineering.com
+    service: http://127.0.0.1:80
+  - hostname: projects.facilities-engineering.com
+    service: http://127.0.0.1:80
+  - service: http_status:404

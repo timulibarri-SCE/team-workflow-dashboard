@@ -5,7 +5,7 @@
   const profilePagesKey = "facilitiesEngineeringProfilePages";
   const profileWidgetsVersionKey = "facilitiesEngineeringProfileWidgetsVersion";
   const profilePagesVersionKey = "facilitiesEngineeringProfilePagesVersion";
-  const currentProfileWidgetsVersion = "facilities-engineering-1";
+  const currentProfileWidgetsVersion = "facilities-engineering-3";
   const currentProfilePagesVersion = "facilities-engineering-1";
 
   const pages = [
@@ -35,25 +35,37 @@
       id: "assets",
       label: "Assets",
       description: "Open asset records, asset health, and maintenance identity.",
-      url: "http://192.168.0.6:3010"
+      url: "https://assets.facilities-engineering.com/"
     },
     {
       id: "systems",
       label: "Systems",
       description: "Open live systems graphics and pressure-gauge views.",
-      url: "http://192.168.0.6:1881"
+      url: "../lion-HopVAC/"
+    },
+    {
+      id: "lighting",
+      label: "Lighting",
+      description: "Open lighting zones, schedules, and controls.",
+      url: "#lighting"
     },
     {
       id: "projects",
       label: "Projects",
       description: "Open projects, work orders, PM tasks, and delivery tracking.",
-      url: "http://192.168.0.6:8081"
+      url: "https://projects.facilities-engineering.com/"
+    },
+    {
+      id: "work-orders",
+      label: "Work Orders",
+      description: "Open work orders, PM tasks, and maintenance tracking.",
+      url: "#work-orders"
     },
     {
       id: "analytics",
       label: "Analytics",
       description: "Open trends, reporting, energy, and KPI dashboards.",
-      url: "http://192.168.0.6:3001"
+      url: "#analytics"
     },
     {
       id: "alarms",
@@ -65,7 +77,7 @@
       id: "wireless",
       label: "Wireless",
       description: "Open wireless gateways, LoRaWAN devices, and sensor connectivity.",
-      url: "http://192.168.0.6:8083"
+      url: "#wireless"
     },
     {
       id: "mail",
@@ -77,7 +89,7 @@
       id: "johny",
       label: "Johny",
       description: "Open the AI assistant for site, systems, reports, and mail.",
-      url: "http://192.168.0.6:3000"
+      url: "#johny"
     },
     {
       id: "administration",
@@ -93,14 +105,18 @@
       "dashboard",
       "assets",
       "systems",
+      "lighting",
       "projects",
+      "work-orders",
       "alarms",
       "mail",
       "johny"
     ],
     manager: [
       "dashboard",
+      "lighting",
       "projects",
+      "work-orders",
       "analytics",
       "alarms",
       "mail",
@@ -112,7 +128,9 @@
       "dashboard",
       "assets",
       "systems",
+      "lighting",
       "projects",
+      "work-orders",
       "analytics",
       "alarms",
       "mail"
@@ -174,7 +192,6 @@
       .map((widgetId) => {
         const aliases = {
           "team-projects": "dashboard",
-          "work-orders": "projects",
           "asset-inventory": "assets",
           "preventive-maintenance": "projects",
           hvac: "systems",
@@ -182,6 +199,7 @@
           "events-calendar": "dashboard",
           "pto-calendar": "dashboard",
           reports: "analytics",
+          recorder: "work-orders",
           "fms-resources": "systems",
           "qr-inspector": "assets",
           settings: "administration",
