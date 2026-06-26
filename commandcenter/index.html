@@ -333,6 +333,13 @@ button {
   font-weight: 800;
 }
 
+.sync-detail {
+  margin-top: 8px;
+  color: rgba(217, 255, 240, 0.68);
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
 .sync-meter {
   height: 6px;
   margin-top: 12px;
@@ -343,10 +350,51 @@ button {
 
 .sync-meter span {
   display: block;
-  width: 68%;
+  width: 22%;
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--green), #7dd3fc);
+  transition:
+    width 180ms ease,
+    background 180ms ease;
+}
+
+.sync-panel[data-sync-mode="local"] .sync-state {
+  color: #fde68a;
+}
+
+.sync-panel[data-sync-mode="queued"] .sync-state,
+.sync-panel[data-sync-mode="saving"] .sync-state,
+.sync-panel[data-sync-mode="syncing"] .sync-state {
+  color: #7dd3fc;
+}
+
+.sync-panel[data-sync-mode="offline"] .sync-state {
+  color: #fca5a5;
+}
+
+.sync-panel[data-sync-mode="saved"] .sync-state {
+  color: #86efac;
+}
+
+.sync-panel[data-sync-mode="local"] .sync-meter span {
+  width: 22%;
+  background: linear-gradient(90deg, #f59e0b, #fde68a);
+}
+
+.sync-panel[data-sync-mode="queued"] .sync-meter span,
+.sync-panel[data-sync-mode="saving"] .sync-meter span,
+.sync-panel[data-sync-mode="syncing"] .sync-meter span {
+  width: 58%;
+}
+
+.sync-panel[data-sync-mode="saved"] .sync-meter span {
+  width: 100%;
+}
+
+.sync-panel[data-sync-mode="offline"] .sync-meter span {
+  width: 38%;
+  background: linear-gradient(90deg, #ef4444, #fca5a5);
 }
 
 .workspace {
@@ -907,7 +955,7 @@ button {
   }
 }
 
-</style>
+    </style>
   </head>
   <body>
     <div class="app-shell">
@@ -994,14 +1042,20 @@ button {
           </button>
         </section>
 
-        <div class="sync-panel">
+        <div
+          class="sync-panel"
+          id="syncPanel"
+          data-sync-mode="local"
+          title="Double-click to set the Google sync endpoint"
+        >
           <div class="sync-row">
-            <span>Google backend</span>
-            <span class="sync-state">Ready</span>
+            <span>Shared storage</span>
+            <span class="sync-state" id="syncState">Local</span>
           </div>
           <div class="sync-meter" aria-hidden="true">
-            <span></span>
+            <span id="syncMeterBar"></span>
           </div>
+          <div class="sync-detail" id="syncDetail">Waiting for Google link</div>
         </div>
       </aside>
 
@@ -1089,8 +1143,19 @@ button {
     </template>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="sync-config.js"></script>
     <script>
 const STORAGE_KEY = "fes-command-center-tasks-v1";
+const SYNC_META_KEY = "fes-command-center-sync-meta-v1";
+const SYNC_CLIENT_KEY = "fes-command-center-client-id-v1";
+const SYNC_ENDPOINT_STORAGE_KEY = "fes-command-center-sync-endpoint-v1";
+
+const syncConfig = {
+  endpoint: "",
+  namespace: "commandcenter",
+  pollMs: 15000,
+  ...(window.COMMAND_CENTER_SYNC_CONFIG || {}),
+};
 
 const defaultTasks = [
   {
@@ -1282,6 +1347,22 @@ const defaultTasks = [
 const DRIVE_REPOSITORY_URL =
   "https://drive.google.com/drive/folders/1ww8rUXsbrb3v_FrbdthnUSENBdDS_Ct4?usp=drive_link";
 
+const syncMeta = loadSyncMeta();
+const sync = {
+  clientId: getClientId(),
+  endpoint: getConfiguredSyncEndpoint(),
+  namespace: syncConfig.namespace || "commandcenter",
+  pollMs: Number(syncConfig.pollMs) || 15000,
+  version: Number(syncMeta.version) || 0,
+  dirty: false,
+  pushInFlight: false,
+  saveTimer: null,
+  pollTimer: null,
+  lastLocalAt: syncMeta.updatedAt || null,
+};
+
+sync.enabled = Boolean(sync.endpoint);
+
 let tasks = loadTasks();
 
 const state = {
@@ -1293,22 +1374,309 @@ const state = {
 const body = document.querySelector("#taskTableBody");
 const emptyTemplate = document.querySelector("#emptyStateTemplate");
 const searchInput = document.querySelector("#searchInput");
+const syncPanel = document.querySelector("#syncPanel");
+const syncStateLabel = document.querySelector("#syncState");
+const syncDetail = document.querySelector("#syncDetail");
 
 function cloneDefaultTasks() {
   return JSON.parse(JSON.stringify(defaultTasks));
 }
 
+function getClientId() {
+  const stored = localStorage.getItem(SYNC_CLIENT_KEY);
+  if (stored) return stored;
+
+  const generated =
+    window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : `client-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(SYNC_CLIENT_KEY, generated);
+  return generated;
+}
+
+function loadSyncMeta() {
+  try {
+    return JSON.parse(localStorage.getItem(SYNC_META_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveSyncMeta(meta = {}) {
+  localStorage.setItem(
+    SYNC_META_KEY,
+    JSON.stringify({
+      version: sync.version,
+      updatedAt: sync.lastLocalAt,
+      ...meta,
+    }),
+  );
+}
+
+function normalizeSyncEndpoint(value) {
+  const endpoint = (value || "").trim();
+  if (!endpoint) return "";
+
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === "https:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+function getConfiguredSyncEndpoint() {
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get("syncEndpoint") || params.get("sync");
+
+  if (fromUrl === "clear") {
+    localStorage.removeItem(SYNC_ENDPOINT_STORAGE_KEY);
+    return normalizeSyncEndpoint(syncConfig.endpoint);
+  }
+
+  const urlEndpoint = normalizeSyncEndpoint(fromUrl);
+  if (urlEndpoint) {
+    localStorage.setItem(SYNC_ENDPOINT_STORAGE_KEY, urlEndpoint);
+    return urlEndpoint;
+  }
+
+  return (
+    normalizeSyncEndpoint(syncConfig.endpoint) ||
+    normalizeSyncEndpoint(localStorage.getItem(SYNC_ENDPOINT_STORAGE_KEY))
+  );
+}
+
 function loadTasks() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : cloneDefaultTasks();
+    return normalizeTaskList(stored ? JSON.parse(stored) : cloneDefaultTasks());
   } catch {
     return cloneDefaultTasks();
   }
 }
 
-function saveTasks() {
+function normalizeTaskList(nextTasks) {
+  return (Array.isArray(nextTasks) ? nextTasks : cloneDefaultTasks()).map((task) => ({
+    ...task,
+    subtasks: Array.isArray(task.subtasks) ? task.subtasks : [],
+  }));
+}
+
+function saveTasks(options = {}) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  if (options.sync !== false) {
+    queueRemoteSave();
+  }
+}
+
+function setSyncStatus(mode, label, detail) {
+  if (!syncPanel || !syncStateLabel || !syncDetail) return;
+
+  syncPanel.dataset.syncMode = mode;
+  syncStateLabel.textContent = label;
+  syncDetail.textContent = detail;
+}
+
+function buildSyncUrl(action, params = {}) {
+  const url = new URL(sync.endpoint);
+  url.searchParams.set("action", action);
+  url.searchParams.set("namespace", sync.namespace);
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.set(key, value);
+    }
+  });
+
+  return url.toString();
+}
+
+function requestJsonp(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `__commandCenterSync${Date.now()}${Math.random()
+      .toString(16)
+      .slice(2)}`;
+    const script = document.createElement("script");
+    const timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Google sync timed out"));
+    }, 12000);
+
+    function cleanup() {
+      window.clearTimeout(timeout);
+      delete window[callbackName];
+      script.remove();
+    }
+
+    window[callbackName] = (payload) => {
+      cleanup();
+      resolve(payload);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("Google sync failed"));
+    };
+
+    script.src = buildSyncUrl(action, {
+      ...params,
+      callback: callbackName,
+      t: Date.now(),
+    });
+    document.head.append(script);
+  });
+}
+
+function hasActiveEditable() {
+  return Boolean(document.activeElement && document.activeElement.closest("[data-edit-field]"));
+}
+
+function queueRemoteSave() {
+  sync.lastLocalAt = new Date().toISOString();
+  saveSyncMeta({ updatedAt: sync.lastLocalAt });
+
+  if (!sync.enabled) {
+    setSyncStatus("local", "Local", "Waiting for Google link");
+    return;
+  }
+
+  sync.dirty = true;
+  setSyncStatus("queued", "Queued", "Saving to shared storage");
+  window.clearTimeout(sync.saveTimer);
+  sync.saveTimer = window.setTimeout(pushRemoteSave, 900);
+}
+
+function createSyncPayload() {
+  return {
+    namespace: sync.namespace,
+    baseVersion: sync.version,
+    clientId: sync.clientId,
+    updatedAt: new Date().toISOString(),
+    tasks,
+  };
+}
+
+async function pushRemoteSave() {
+  if (!sync.enabled || !sync.dirty || sync.pushInFlight) return;
+
+  sync.pushInFlight = true;
+  setSyncStatus("saving", "Saving", "Writing to Google Drive");
+
+  try {
+    const body = JSON.stringify(createSyncPayload());
+    await fetch(buildSyncUrl("write"), {
+      method: "POST",
+      mode: "no-cors",
+      body,
+    });
+
+    sync.dirty = false;
+    setSyncStatus("syncing", "Syncing", "Confirming shared copy");
+    window.setTimeout(() => fetchRemoteState({ quiet: true }), 1800);
+  } catch {
+    sync.dirty = true;
+    setSyncStatus("offline", "Offline", "Will retry Google sync");
+    window.clearTimeout(sync.saveTimer);
+    sync.saveTimer = window.setTimeout(pushRemoteSave, 6000);
+  } finally {
+    sync.pushInFlight = false;
+  }
+}
+
+function applyRemoteState(remote) {
+  if (!remote || !Array.isArray(remote.tasks)) return false;
+
+  tasks = normalizeTaskList(remote.tasks);
+  sync.version = Number(remote.version) || sync.version;
+  sync.lastLocalAt = remote.updatedAt || sync.lastLocalAt;
+  saveTasks({ sync: false });
+  saveSyncMeta({
+    version: sync.version,
+    updatedAt: sync.lastLocalAt,
+    updatedBy: remote.updatedBy || "",
+  });
+  renderTable();
+  return true;
+}
+
+async function fetchRemoteState(options = {}) {
+  if (!sync.enabled || sync.pushInFlight) return;
+
+  if (!options.quiet && !sync.dirty) {
+    setSyncStatus("syncing", "Syncing", "Checking shared storage");
+  }
+
+  try {
+    const remote = await requestJsonp("read", {
+      clientId: sync.clientId,
+      version: sync.version,
+    });
+
+    if (!remote || remote.ok === false) {
+      throw new Error(remote && remote.error ? remote.error : "Google sync returned an error");
+    }
+
+    if (remote.empty && !sync.version) {
+      sync.dirty = true;
+      await pushRemoteSave();
+      return;
+    }
+
+    const remoteVersion = Number(remote.version) || 0;
+    if (remoteVersion > sync.version && !sync.dirty && !hasActiveEditable()) {
+      applyRemoteState(remote);
+    } else if (remoteVersion > sync.version && (sync.dirty || hasActiveEditable())) {
+      setSyncStatus("queued", "Queued", "Shared changes waiting");
+      return;
+    }
+
+    setSyncStatus("saved", "Saved", "Shared storage current");
+  } catch {
+    setSyncStatus("offline", "Offline", "Using local copy");
+  }
+}
+
+function configureSyncEndpoint() {
+  const nextEndpoint = window.prompt("Google Apps Script Web App URL", sync.endpoint || "");
+  if (nextEndpoint === null) return;
+
+  const normalized = normalizeSyncEndpoint(nextEndpoint);
+  if (!normalized) {
+    localStorage.removeItem(SYNC_ENDPOINT_STORAGE_KEY);
+    sync.endpoint = "";
+    sync.enabled = false;
+    window.clearInterval(sync.pollTimer);
+    setSyncStatus("local", "Local", "Waiting for Google link");
+    return;
+  }
+
+  localStorage.setItem(SYNC_ENDPOINT_STORAGE_KEY, normalized);
+  sync.endpoint = normalized;
+  sync.enabled = true;
+  sync.version = 0;
+  saveSyncMeta({ version: 0 });
+  startSync();
+}
+
+function flushRemoteSave() {
+  if (!sync.enabled || !sync.dirty || !navigator.sendBeacon) return;
+
+  const body = JSON.stringify(createSyncPayload());
+  const blob = new Blob([body], { type: "text/plain" });
+  navigator.sendBeacon(buildSyncUrl("write"), blob);
+}
+
+function startSync() {
+  window.clearInterval(sync.pollTimer);
+
+  if (!sync.enabled) {
+    setSyncStatus("local", "Local", "Waiting for Google link");
+    return;
+  }
+
+  setSyncStatus("syncing", "Syncing", "Loading shared storage");
+  fetchRemoteState();
+  sync.pollTimer = window.setInterval(() => fetchRemoteState({ quiet: true }), sync.pollMs);
 }
 
 function findTask(taskId) {
@@ -1637,6 +2005,12 @@ searchInput.addEventListener("input", (event) => {
   renderTable();
 });
 
+if (syncPanel) {
+  syncPanel.addEventListener("dblclick", configureSyncEndpoint);
+}
+
+window.addEventListener("beforeunload", flushRemoteSave);
+
 document.querySelector("#addTaskButton").addEventListener("click", () => {
   tasks.unshift({
     id: `T-NEW-${Date.now()}`,
@@ -1677,8 +2051,9 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
 });
 
 renderTable();
+startSync();
 
-</script>
+    </script>
   </body>
 </html>
 
