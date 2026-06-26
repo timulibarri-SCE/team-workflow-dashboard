@@ -1,0 +1,1684 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FES Command Center</title>
+    <style>
+:root {
+  --ink: #101614;
+  --sidebar: #07100d;
+  --sidebar-2: #0c1915;
+  --sidebar-3: #10221c;
+  --green: #14b878;
+  --green-2: #0f8f62;
+  --green-soft: #e9f7f0;
+  --teal: #0e7490;
+  --blue: #2663eb;
+  --amber: #b7791f;
+  --red: #c24135;
+  --gray-25: #fbfcfd;
+  --gray-50: #f5f7f8;
+  --gray-100: #e8edf0;
+  --gray-200: #d5dee3;
+  --gray-400: #71818b;
+  --gray-600: #3f4d56;
+  --white: #ffffff;
+  --shadow: 0 22px 70px rgba(15, 23, 42, 0.13);
+  --sidebar-shadow: 18px 0 45px rgba(0, 0, 0, 0.28);
+  color-scheme: light;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 1120px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    linear-gradient(90deg, #08110f 0, #08110f 260px, transparent 260px),
+    var(--gray-50);
+  color: var(--ink);
+  overflow-x: auto;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 268px minmax(852px, 1fr);
+  min-height: 100vh;
+}
+
+.command-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 24px 18px 18px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(20, 184, 120, 0.22), transparent 28%),
+    linear-gradient(145deg, var(--sidebar), var(--sidebar-2) 58%, #06110e);
+  box-shadow: var(--sidebar-shadow);
+  color: #edfdf6;
+  overflow: hidden;
+}
+
+.command-sidebar::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 34%);
+}
+
+.brand-block,
+.primary-nav,
+.team-menu,
+.sync-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgba(82, 232, 160, 0.5);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 34% 22%, rgba(255, 255, 255, 0.2), transparent 26%),
+    linear-gradient(145deg, #16a66c, #07533c 72%);
+  box-shadow: 0 12px 24px rgba(5, 48, 34, 0.7);
+  color: #86efac;
+  font-weight: 800;
+  overflow: hidden;
+}
+
+.brand-mark svg {
+  width: 40px;
+  height: 40px;
+}
+
+.ai-knot {
+  opacity: 0.72;
+  transform-origin: 32px 32px;
+}
+
+.ai-knot path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.64);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.7;
+}
+
+.ai-knot path:nth-child(2) {
+  transform: rotate(60deg);
+  transform-origin: 32px 32px;
+}
+
+.ai-knot path:nth-child(3) {
+  transform: rotate(120deg);
+  transform-origin: 32px 32px;
+}
+
+.ai-knot path:nth-child(4) {
+  transform: rotate(180deg);
+  transform-origin: 32px 32px;
+}
+
+.ai-knot path:nth-child(5) {
+  transform: rotate(240deg);
+  transform-origin: 32px 32px;
+}
+
+.ai-knot path:nth-child(6) {
+  transform: rotate(300deg);
+  transform-origin: 32px 32px;
+}
+
+.building-core,
+.building-wing {
+  fill: rgba(255, 255, 255, 0.96);
+}
+
+.building-wing {
+  fill: rgba(255, 255, 255, 0.88);
+}
+
+.building-base,
+.building-roof,
+.building-windows,
+.building-door {
+  fill: none;
+  stroke: #07533c;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.building-base,
+.building-roof {
+  stroke-width: 2.35;
+}
+
+.building-windows,
+.building-door {
+  stroke-width: 2.05;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--green);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.brand-block h1,
+.topbar h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.brand-block h1 {
+  font-family: Bahnschrift, "DIN Alternate", "Arial Narrow", "Segoe UI", sans-serif;
+  font-size: 1.06rem;
+  font-stretch: condensed;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.primary-nav {
+  display: grid;
+  gap: 6px;
+}
+
+.nav-item,
+.team-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  border-radius: 8px;
+  background: transparent;
+  color: #b6c8c0;
+  text-align: left;
+}
+
+.nav-item {
+  gap: 10px;
+  padding: 0 12px;
+}
+
+.nav-item svg,
+.toolbar svg,
+.table-actions svg,
+.attachment-count svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 2;
+}
+
+.nav-item:hover,
+.team-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--white);
+}
+
+.nav-item.is-active {
+  background: linear-gradient(90deg, rgba(20, 184, 120, 0.28), rgba(20, 184, 120, 0.08));
+  box-shadow: inset 3px 0 0 var(--green);
+  color: var(--white);
+}
+
+.team-menu {
+  margin-top: 30px;
+}
+
+.section-label {
+  margin: 0 10px 8px;
+  color: #6ee7b7;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.team-item {
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.team-item span:nth-child(2) {
+  flex: 1;
+}
+
+.team-item strong {
+  color: #d7f7e9;
+  font-size: 0.78rem;
+}
+
+.team-item.is-selected {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+}
+
+.team-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(20, 184, 120, 0.13);
+}
+
+.team-dot.controls {
+  background: var(--teal);
+}
+
+.team-dot.electrical {
+  background: var(--blue);
+}
+
+.team-dot.mechanical {
+  background: var(--amber);
+}
+
+.team-dot.service {
+  background: #22c55e;
+}
+
+.sync-panel {
+  margin-top: auto;
+  padding: 14px;
+  border: 1px solid rgba(110, 231, 183, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sync-row {
+  display: flex;
+  justify-content: space-between;
+  color: #d9fff0;
+  font-size: 0.8rem;
+}
+
+.sync-state {
+  color: #86efac;
+  font-weight: 800;
+}
+
+.sync-meter {
+  height: 6px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.sync-meter span {
+  display: block;
+  width: 68%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), #7dd3fc);
+}
+
+.workspace {
+  padding: 22px 26px 32px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.topbar h2 {
+  font-size: 1.85rem;
+  line-height: 1.1;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 300px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04);
+  color: var(--gray-400);
+}
+
+.search-box input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+}
+
+.icon-button,
+.primary-button,
+.segmented-control button,
+.row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-600);
+  text-decoration: none;
+}
+
+.icon-button:hover,
+.row-action:hover {
+  border-color: rgba(20, 184, 120, 0.45);
+  color: var(--green-2);
+}
+
+.primary-button {
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  background: linear-gradient(135deg, var(--green), var(--green-2));
+  box-shadow: 0 12px 24px rgba(20, 184, 120, 0.24);
+  color: var(--white);
+  font-weight: 800;
+}
+
+.segmented-control {
+  display: flex;
+  height: 40px;
+  padding: 3px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.segmented-control button {
+  min-width: 58px;
+  padding: 0 10px;
+  background: transparent;
+  color: var(--gray-600);
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.segmented-control button.is-active {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.metric {
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.metric span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--gray-400);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.metric strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.metric small {
+  display: none;
+  margin-top: 0;
+  color: var(--gray-400);
+}
+
+.metric.urgent {
+  border-color: rgba(194, 65, 53, 0.22);
+}
+
+.metric.urgent strong {
+  color: var(--red);
+}
+
+.metric.complete strong {
+  color: var(--green-2);
+}
+
+.task-surface {
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.task-table-wrap {
+  overflow: auto;
+}
+
+.task-table {
+  width: 100%;
+  min-width: 1080px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.task-table th,
+.task-table td {
+  border-bottom: 1px solid var(--gray-100);
+  border-right: 1px solid var(--gray-100);
+  vertical-align: middle;
+}
+
+.task-table th:last-child,
+.task-table td:last-child {
+  border-right: 0;
+}
+
+.task-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 42px;
+  padding: 0 10px;
+  background: #f9fbfb;
+  color: #5d6b74;
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.task-table td {
+  height: 58px;
+  padding: 9px 10px;
+  background: var(--white);
+  font-size: 0.86rem;
+}
+
+.task-table .task-col {
+  width: 220px;
+}
+
+.description-col {
+  width: 226px;
+}
+
+.notes-col {
+  width: 230px;
+}
+
+.task-table th:nth-child(4),
+.task-table td:nth-child(4) {
+  width: 118px;
+}
+
+.task-table th:nth-child(5),
+.task-table td:nth-child(5) {
+  width: 112px;
+}
+
+.task-table th:nth-child(6),
+.task-table td:nth-child(6) {
+  width: 84px;
+}
+
+.task-table th:nth-child(7),
+.task-table td:nth-child(7) {
+  width: 84px;
+}
+
+.completion-col {
+  width: 62px;
+  text-align: center;
+}
+
+.attachment-col {
+  width: 54px;
+  text-align: center;
+}
+
+.task-table tr.parent-row td {
+  background: #ffffff;
+}
+
+.task-table tr.subtask-row td {
+  height: 84px;
+  background: var(--green-soft);
+}
+
+.task-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.task-title {
+  min-width: 0;
+  overflow: hidden;
+  color: #13201b;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtask-row .task-title {
+  font-weight: 760;
+}
+
+.indent-guide {
+  width: 20px;
+  height: 32px;
+  margin-left: 18px;
+  border-bottom: 2px solid rgba(20, 184, 120, 0.38);
+  border-left: 2px solid rgba(20, 184, 120, 0.38);
+  border-radius: 0 0 0 6px;
+  flex: 0 0 auto;
+}
+
+.chevron-button,
+.row-action {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-600);
+  flex: 0 0 auto;
+}
+
+.chevron-button svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 160ms ease;
+}
+
+.chevron-button.is-collapsed svg {
+  transform: rotate(-90deg);
+}
+
+.editable,
+.note-box,
+.editable-title {
+  min-height: 34px;
+  outline: 0;
+}
+
+.editable {
+  display: block;
+  width: 100%;
+  padding: 7px 8px;
+  border-radius: 6px;
+  color: #26343c;
+  line-height: 1.28;
+}
+
+.editable:focus,
+.note-box:focus,
+.editable-title:focus {
+  box-shadow: 0 0 0 2px rgba(20, 184, 120, 0.22);
+  background: var(--white);
+}
+
+.editable-title {
+  cursor: text;
+  border-radius: 6px;
+  padding: 4px 5px;
+}
+
+.parent-note {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  color: var(--gray-400);
+  font-size: 0.8rem;
+}
+
+.note-box {
+  display: block;
+  width: 100%;
+  max-height: 64px;
+  padding: 8px 9px;
+  border: 1px solid rgba(20, 184, 120, 0.24);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #1d3028;
+  line-height: 1.3;
+  overflow: hidden;
+}
+
+.assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--gray-600);
+  font-weight: 700;
+}
+
+.assignee span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.avatar.green {
+  background: #dcfce7;
+  color: #047857;
+}
+
+.avatar.amber {
+  background: #fef3c7;
+  color: #a16207;
+}
+
+.avatar.red {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.pill,
+.due-label,
+.priority {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.pill {
+  padding: 0 10px;
+}
+
+.pill.in-progress {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.pill.waiting {
+  background: #fef3c7;
+  color: #9a5d00;
+}
+
+.pill.blocked {
+  background: #fee2e2;
+  color: #b42318;
+}
+
+.pill.complete {
+  background: #dcfce7;
+  color: #047857;
+}
+
+.priority {
+  padding: 0 9px;
+  background: #eef2f5;
+  color: var(--gray-600);
+}
+
+.priority.high,
+.priority.urgent {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.due-label {
+  padding: 0 9px;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.due-label.soon {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+.due-label.overdue {
+  background: #fff1f2;
+  color: var(--red);
+}
+
+.completion-ring {
+  --p: 0;
+  --ring-color: var(--green);
+  position: relative;
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(var(--ring-color) calc(var(--p) * 1%), #dce5e9 0);
+}
+
+.completion-ring::after {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--white);
+  content: "";
+}
+
+.subtask-row .completion-ring::after {
+  background: var(--green-soft);
+}
+
+.completion-ring.low {
+  --ring-color: var(--amber);
+}
+
+.completion-ring.blocked {
+  --ring-color: var(--red);
+}
+
+.completion-ring.done {
+  --ring-color: var(--green-2);
+}
+
+.attachment-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 38px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--gray-600);
+  font-weight: 850;
+}
+
+.attachment-count:hover {
+  background: rgba(20, 184, 120, 0.12);
+  color: var(--green-2);
+}
+
+.empty-row td {
+  height: 210px;
+  background: var(--gray-25);
+}
+
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: var(--gray-400);
+}
+
+.empty-state svg {
+  width: 30px;
+  height: 30px;
+}
+
+.empty-state strong {
+  color: var(--gray-600);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1180px) {
+  .workspace {
+    padding: 20px;
+  }
+
+  .metric-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="command-sidebar" aria-label="Project navigation">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" role="img">
+              <g class="ai-knot">
+                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
+                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
+                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
+                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
+                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
+                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
+              </g>
+              <g class="building-mark">
+                <path class="building-base" d="M11 58h42" />
+                <path class="building-wing left" d="M14 57V39l10-5v23H14Z" />
+                <path class="building-wing right" d="M40 57V34l10 5v18H40Z" />
+                <path class="building-core" d="M23 57V26.5L32 21l9 5.5V57H23Z" />
+                <path class="building-roof" d="M21 28 32 21l11 7" />
+                <path
+                  class="building-windows"
+                  d="M28 32h3M34 32h3M28 38h3M34 38h3M28 44h3M34 44h3M17.5 43h3M17.5 49h3M43.5 43h3M43.5 49h3"
+                />
+                <path class="building-door" d="M30 57v-7h4v7" />
+              </g>
+            </svg>
+          </div>
+          <div>
+            <h1>Command Center</h1>
+          </div>
+        </div>
+
+        <nav class="primary-nav" aria-label="Main menu">
+          <button class="nav-item is-active" type="button">
+            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+            <span>Overview</span>
+          </button>
+          <button class="nav-item" type="button">
+            <i data-lucide="users" aria-hidden="true"></i>
+            <span>Workstreams</span>
+          </button>
+          <button class="nav-item" type="button">
+            <i data-lucide="calendar-days" aria-hidden="true"></i>
+            <span>Calendar</span>
+          </button>
+          <button class="nav-item" type="button">
+            <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+            <span>Reports</span>
+          </button>
+          <button class="nav-item" type="button">
+            <i data-lucide="settings" aria-hidden="true"></i>
+            <span>Settings</span>
+          </button>
+        </nav>
+
+        <section class="team-menu" aria-label="Workstream filters">
+          <div class="section-label">Workstreams</div>
+          <button class="team-item is-selected" type="button" data-team-filter="All">
+            <span class="team-dot"></span>
+            <span>All Workstreams</span>
+            <strong>42</strong>
+          </button>
+          <button class="team-item" type="button" data-team-filter="Controls">
+            <span class="team-dot controls"></span>
+            <span>Controls</span>
+            <strong>16</strong>
+          </button>
+          <button class="team-item" type="button" data-team-filter="Electrical">
+            <span class="team-dot electrical"></span>
+            <span>Electrical</span>
+            <strong>9</strong>
+          </button>
+          <button class="team-item" type="button" data-team-filter="Mechanical">
+            <span class="team-dot mechanical"></span>
+            <span>Mechanical</span>
+            <strong>11</strong>
+          </button>
+          <button class="team-item" type="button" data-team-filter="Service">
+            <span class="team-dot service"></span>
+            <span>Service</span>
+            <strong>6</strong>
+          </button>
+        </section>
+
+        <div class="sync-panel">
+          <div class="sync-row">
+            <span>Google backend</span>
+            <span class="sync-state">Ready</span>
+          </div>
+          <div class="sync-meter" aria-hidden="true">
+            <span></span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div class="toolbar">
+            <label class="search-box">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <input id="searchInput" type="search" placeholder="Search tasks, notes, assignees" />
+            </label>
+            <button class="icon-button" id="filterButton" type="button" title="Filter table">
+              <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+            </button>
+            <div class="segmented-control" aria-label="View mode">
+              <button class="is-active" type="button" data-view-filter="Active">Active</button>
+              <button type="button" data-view-filter="Due">Due</button>
+              <button type="button" data-view-filter="All">All</button>
+            </div>
+            <button class="primary-button" id="addTaskButton" type="button">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              <span>Add Task</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="metric-strip" aria-label="Project summary">
+          <article class="metric">
+            <span>Open Tasks</span>
+            <strong>42</strong>
+            <small>Across 7 projects</small>
+          </article>
+          <article class="metric">
+            <span>Due This Week</span>
+            <strong>12</strong>
+            <small>4 need owners</small>
+          </article>
+          <article class="metric urgent">
+            <span>Blocked</span>
+            <strong>5</strong>
+            <small>Procurement and access</small>
+          </article>
+          <article class="metric complete">
+            <span>Completed</span>
+            <strong>31</strong>
+            <small>Past 14 days</small>
+          </article>
+        </section>
+
+        <section class="task-surface" aria-label="Project task table">
+          <div class="task-table-wrap">
+            <table class="task-table">
+              <thead>
+                <tr>
+                  <th class="task-col">Task</th>
+                  <th class="description-col">Description</th>
+                  <th class="notes-col">Notes</th>
+                  <th>Assignee</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Due</th>
+                  <th class="completion-col">Done</th>
+                  <th class="attachment-col">
+                    <span class="sr-only">Attachments</span>
+                    <i data-lucide="paperclip" aria-hidden="true"></i>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="taskTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="emptyStateTemplate">
+      <tr class="empty-row">
+        <td colspan="9">
+          <div class="empty-state">
+            <i data-lucide="search-x" aria-hidden="true"></i>
+            <strong>No matching work found</strong>
+            <span>Adjust the workstream, view, or search filter.</span>
+          </div>
+        </td>
+      </tr>
+    </template>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+const STORAGE_KEY = "fes-command-center-tasks-v1";
+
+const defaultTasks = [
+  {
+    id: "T-1001",
+    team: "Controls",
+    title: "Install control panel",
+    description: "Mount panel, land control wiring, and prep for checkout.",
+    assignee: "Mike R.",
+    initials: "MR",
+    avatar: "green",
+    status: "In Progress",
+    priority: "High",
+    due: "Jul 10",
+    dueState: "soon",
+    completion: 68,
+    attachments: 4,
+    expanded: true,
+    subtasks: [
+      {
+        id: "ST-1001-A",
+        team: "Controls",
+        title: "Order VFD enclosure",
+        description: "Confirm dimensions and order enclosure before shutdown window.",
+        notes: "Vendor confirmed stock. Waiting on updated quote with freight.",
+        assignee: "Sarah K.",
+        initials: "SK",
+        avatar: "amber",
+        status: "Waiting",
+        priority: "High",
+        due: "Jul 02",
+        dueState: "overdue",
+        completion: 35,
+        attachments: 2,
+      },
+      {
+        id: "ST-1001-B",
+        team: "Controls",
+        title: "Verify wiring schedule",
+        description: "Match field tags to panel drawings and point list.",
+        notes: "Need two point names clarified before final checkout.",
+        assignee: "Tim U.",
+        initials: "TU",
+        avatar: "",
+        status: "In Progress",
+        priority: "Normal",
+        due: "Jul 08",
+        dueState: "soon",
+        completion: 76,
+        attachments: 3,
+      },
+    ],
+  },
+  {
+    id: "T-1002",
+    team: "Mechanical",
+    title: "Commission AHU sequence",
+    description: "Validate occupied mode, safeties, alarms, and trend setup.",
+    assignee: "Jordan L.",
+    initials: "JL",
+    avatar: "",
+    status: "Blocked",
+    priority: "Urgent",
+    due: "Jul 12",
+    dueState: "",
+    completion: 22,
+    attachments: 6,
+    expanded: true,
+    subtasks: [
+      {
+        id: "ST-1002-A",
+        team: "Mechanical",
+        title: "Schedule shutdown window",
+        description: "Coordinate access with operations and night crew.",
+        notes: "Ops can support Tuesday evening only. Confirm electrician coverage.",
+        assignee: "Dana P.",
+        initials: "DP",
+        avatar: "red",
+        status: "Blocked",
+        priority: "Urgent",
+        due: "Jul 05",
+        dueState: "overdue",
+        completion: 12,
+        attachments: 1,
+      },
+      {
+        id: "ST-1002-B",
+        team: "Mechanical",
+        title: "Trend supply air reset",
+        description: "Capture 48 hours of trend data after sequence load.",
+        notes: "Create trend once AHU network point is exposed.",
+        assignee: "Mike R.",
+        initials: "MR",
+        avatar: "green",
+        status: "Waiting",
+        priority: "Normal",
+        due: "Jul 15",
+        dueState: "",
+        completion: 0,
+        attachments: 0,
+      },
+    ],
+  },
+  {
+    id: "T-1003",
+    team: "Electrical",
+    title: "Update as-built drawings",
+    description: "Capture redlines and upload final marked set to Drive.",
+    assignee: "Alex M.",
+    initials: "AM",
+    avatar: "",
+    status: "In Progress",
+    priority: "Normal",
+    due: "Jul 18",
+    dueState: "",
+    completion: 84,
+    attachments: 5,
+    expanded: true,
+    subtasks: [
+      {
+        id: "ST-1003-A",
+        team: "Electrical",
+        title: "Upload site photos",
+        description: "Add panel, conduit, device, and final label photos.",
+        notes: "Photos from east riser are missing. Ask field team for closeups.",
+        assignee: "Nia C.",
+        initials: "NC",
+        avatar: "amber",
+        status: "In Progress",
+        priority: "Normal",
+        due: "Jul 11",
+        dueState: "soon",
+        completion: 58,
+        attachments: 8,
+      },
+      {
+        id: "ST-1003-B",
+        team: "Electrical",
+        title: "Review submittal package",
+        description: "Compare installed components against approved submittals.",
+        notes: "Breaker schedule matches. Need final label sheet attached.",
+        assignee: "Alex M.",
+        initials: "AM",
+        avatar: "",
+        status: "Complete",
+        priority: "Low",
+        due: "Jul 09",
+        dueState: "",
+        completion: 100,
+        attachments: 2,
+      },
+    ],
+  },
+  {
+    id: "T-1004",
+    team: "Service",
+    title: "Confirm material lead time",
+    description: "Validate long-lead parts before issuing customer schedule.",
+    assignee: "Chris V.",
+    initials: "CV",
+    avatar: "green",
+    status: "Waiting",
+    priority: "High",
+    due: "Jul 16",
+    dueState: "",
+    completion: 44,
+    attachments: 3,
+    expanded: false,
+    subtasks: [
+      {
+        id: "ST-1004-A",
+        team: "Service",
+        title: "Check actuator availability",
+        description: "Confirm count, voltage, and replacement model.",
+        notes: "Supplier says partial shipment is possible if approved today.",
+        assignee: "Chris V.",
+        initials: "CV",
+        avatar: "green",
+        status: "Waiting",
+        priority: "High",
+        due: "Jul 13",
+        dueState: "soon",
+        completion: 50,
+        attachments: 1,
+      },
+    ],
+  },
+];
+
+const DRIVE_REPOSITORY_URL =
+  "https://drive.google.com/drive/folders/1ww8rUXsbrb3v_FrbdthnUSENBdDS_Ct4?usp=drive_link";
+
+let tasks = loadTasks();
+
+const state = {
+  team: "All",
+  view: "Active",
+  search: "",
+};
+
+const body = document.querySelector("#taskTableBody");
+const emptyTemplate = document.querySelector("#emptyStateTemplate");
+const searchInput = document.querySelector("#searchInput");
+
+function cloneDefaultTasks() {
+  return JSON.parse(JSON.stringify(defaultTasks));
+}
+
+function loadTasks() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : cloneDefaultTasks();
+  } catch {
+    return cloneDefaultTasks();
+  }
+}
+
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function findTask(taskId) {
+  for (const task of tasks) {
+    if (task.id === taskId) return task;
+    const subtask = task.subtasks.find((item) => item.id === taskId);
+    if (subtask) return subtask;
+  }
+  return null;
+}
+
+function statusClass(status) {
+  return status.toLowerCase().replace(/\s+/g, "-");
+}
+
+function priorityClass(priority) {
+  return priority.toLowerCase();
+}
+
+function completionClass(value, status) {
+  if (status === "Blocked") return "blocked";
+  if (value >= 100) return "done";
+  if (value < 45) return "low";
+  return "";
+}
+
+function matchesSearch(task) {
+  if (!state.search) return true;
+  const haystack = [
+    task.title,
+    task.description,
+    task.notes,
+    task.assignee,
+    task.status,
+    task.priority,
+    task.team,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(state.search);
+}
+
+function matchesView(task) {
+  if (state.view === "All") return true;
+  if (state.view === "Due") return task.dueState === "soon" || task.dueState === "overdue";
+  return task.status !== "Complete";
+}
+
+function matchesTeam(task) {
+  return state.team === "All" || task.team === state.team;
+}
+
+function createIcon(name) {
+  const icon = document.createElement("i");
+  icon.setAttribute("data-lucide", name);
+  icon.setAttribute("aria-hidden", "true");
+  return icon;
+}
+
+function createEditable(text, className = "editable", taskId, field) {
+  const editable = document.createElement("span");
+  editable.className = className;
+  editable.contentEditable = "true";
+  editable.dataset.taskId = taskId;
+  editable.dataset.editField = field;
+  editable.spellcheck = true;
+  editable.textContent = text;
+  return editable;
+}
+
+function renderAssignee(task) {
+  const wrap = document.createElement("span");
+  wrap.className = "assignee";
+
+  const avatar = document.createElement("span");
+  avatar.className = `avatar ${task.avatar || ""}`.trim();
+  avatar.textContent = task.initials;
+
+  const name = document.createElement("span");
+  name.textContent = task.assignee;
+
+  wrap.append(avatar, name);
+  return wrap;
+}
+
+function renderCompletion(task) {
+  const ring = document.createElement("span");
+  ring.className = `completion-ring ${completionClass(task.completion, task.status)}`.trim();
+  ring.style.setProperty("--p", task.completion);
+  ring.setAttribute("role", "img");
+  ring.setAttribute("aria-label", `${task.completion} percent complete`);
+  ring.title = "Completion";
+  return ring;
+}
+
+function renderAttachment(task) {
+  const button = document.createElement("button");
+  button.className = "attachment-count";
+  button.type = "button";
+  button.title = `${task.attachments} attachments`;
+  button.dataset.openDriveRepository = "true";
+  button.append(createIcon("paperclip"), document.createTextNode(String(task.attachments)));
+  return button;
+}
+
+function renderTaskCell(task, isSubtask) {
+  const wrap = document.createElement("div");
+  wrap.className = "task-cell";
+
+  if (isSubtask) {
+    const guide = document.createElement("span");
+    guide.className = "indent-guide";
+    guide.setAttribute("aria-hidden", "true");
+    wrap.append(guide);
+  } else {
+    const chevron = document.createElement("button");
+    chevron.className = `chevron-button ${task.expanded ? "" : "is-collapsed"}`.trim();
+    chevron.type = "button";
+    chevron.title = task.expanded ? "Collapse subtasks" : "Expand subtasks";
+    chevron.dataset.taskId = task.id;
+    chevron.append(createIcon("chevron-down"));
+    wrap.append(chevron);
+  }
+
+  const title = document.createElement("span");
+  title.className = "task-title editable-title";
+  title.contentEditable = "true";
+  title.spellcheck = true;
+  title.dataset.taskId = task.id;
+  title.dataset.editField = "title";
+  title.textContent = task.title;
+  wrap.append(title);
+
+  if (!isSubtask) {
+    const addSubtask = document.createElement("button");
+    addSubtask.className = "row-action";
+    addSubtask.type = "button";
+    addSubtask.title = "Add subtask";
+    addSubtask.dataset.addSubtaskFor = task.id;
+    addSubtask.append(createIcon("list-plus"));
+    wrap.append(addSubtask);
+  }
+
+  return wrap;
+}
+
+function appendCells(row, task, isSubtask = false) {
+  const taskCell = document.createElement("td");
+  taskCell.append(renderTaskCell(task, isSubtask));
+
+  const descriptionCell = document.createElement("td");
+  descriptionCell.append(createEditable(task.description, "editable", task.id, "description"));
+
+  const notesCell = document.createElement("td");
+  if (isSubtask) {
+    notesCell.append(createEditable(task.notes, "note-box", task.id, "notes"));
+  } else {
+    const parentNote = document.createElement("span");
+    parentNote.className = "parent-note";
+    parentNote.textContent = "Subtask notes roll up below";
+    notesCell.append(parentNote);
+  }
+
+  const assigneeCell = document.createElement("td");
+  assigneeCell.append(renderAssignee(task));
+
+  const statusCell = document.createElement("td");
+  const status = document.createElement("span");
+  status.className = `pill ${statusClass(task.status)}`;
+  status.textContent = task.status;
+  statusCell.append(status);
+
+  const priorityCell = document.createElement("td");
+  const priority = document.createElement("span");
+  priority.className = `priority ${priorityClass(task.priority)}`;
+  priority.textContent = task.priority;
+  priorityCell.append(priority);
+
+  const dueCell = document.createElement("td");
+  const due = document.createElement("span");
+  due.className = `due-label ${task.dueState || ""}`.trim();
+  due.textContent = task.due;
+  dueCell.append(due);
+
+  const completionCell = document.createElement("td");
+  completionCell.className = "completion-col";
+  completionCell.append(renderCompletion(task));
+
+  const attachmentCell = document.createElement("td");
+  attachmentCell.className = "attachment-col";
+  attachmentCell.append(renderAttachment(task));
+
+  row.append(
+    taskCell,
+    descriptionCell,
+    notesCell,
+    assigneeCell,
+    statusCell,
+    priorityCell,
+    dueCell,
+    completionCell,
+    attachmentCell,
+  );
+}
+
+function parentShouldRender(task) {
+  const parentMatches = matchesTeam(task) && matchesView(task) && matchesSearch(task);
+  const childMatches = task.subtasks.some(
+    (subtask) => matchesTeam(subtask) && matchesView(subtask) && matchesSearch(subtask),
+  );
+  return parentMatches || childMatches;
+}
+
+function renderTable() {
+  body.innerHTML = "";
+  let rowCount = 0;
+
+  tasks.filter(parentShouldRender).forEach((task) => {
+    const parentRow = document.createElement("tr");
+    parentRow.className = "parent-row";
+    parentRow.dataset.taskId = task.id;
+    appendCells(parentRow, task);
+    body.append(parentRow);
+    rowCount += 1;
+
+    if (task.expanded) {
+      task.subtasks
+        .filter((subtask) => matchesTeam(subtask) && matchesView(subtask) && matchesSearch(subtask))
+        .forEach((subtask) => {
+          const subtaskRow = document.createElement("tr");
+          subtaskRow.className = "subtask-row";
+          subtaskRow.dataset.parentId = task.id;
+          appendCells(subtaskRow, subtask, true);
+          body.append(subtaskRow);
+          rowCount += 1;
+        });
+    }
+  });
+
+  if (rowCount === 0) {
+    body.append(emptyTemplate.content.cloneNode(true));
+  }
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+body.addEventListener("click", (event) => {
+  const attachment = event.target.closest("[data-open-drive-repository]");
+  if (attachment) {
+    window.open(DRIVE_REPOSITORY_URL, "_blank", "noopener");
+    return;
+  }
+
+  const toggle = event.target.closest("[data-task-id]");
+  if (toggle) {
+    const task = tasks.find((item) => item.id === toggle.dataset.taskId);
+    if (task) {
+      task.expanded = !task.expanded;
+      saveTasks();
+      renderTable();
+    }
+    return;
+  }
+
+  const addSubtask = event.target.closest("[data-add-subtask-for]");
+  if (addSubtask) {
+    const task = tasks.find((item) => item.id === addSubtask.dataset.addSubtaskFor);
+    if (task) {
+      task.expanded = true;
+      task.subtasks.push({
+        id: `${task.id}-NEW-${Date.now()}`,
+        team: task.team,
+        title: "New field follow-up",
+        description: "Add scope detail directly in the grid.",
+        notes: "Capture current blocker, field note, or customer update here.",
+        assignee: "Unassigned",
+        initials: "--",
+        avatar: "",
+        status: "In Progress",
+        priority: "Normal",
+        due: "Set date",
+        dueState: "",
+        completion: 0,
+        attachments: 0,
+      });
+      saveTasks();
+      renderTable();
+    }
+  }
+});
+
+body.addEventListener("input", (event) => {
+  const editable = event.target.closest("[data-edit-field]");
+  if (!editable) return;
+
+  const task = findTask(editable.dataset.taskId);
+  if (!task) return;
+
+  task[editable.dataset.editField] = editable.textContent.trim();
+  saveTasks();
+});
+
+document.querySelectorAll("[data-team-filter]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-team-filter]").forEach((item) => item.classList.remove("is-selected"));
+    button.classList.add("is-selected");
+    state.team = button.dataset.teamFilter;
+    renderTable();
+  });
+});
+
+document.querySelectorAll("[data-view-filter]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-view-filter]").forEach((item) => item.classList.remove("is-active"));
+    button.classList.add("is-active");
+    state.view = button.dataset.viewFilter;
+    renderTable();
+  });
+});
+
+searchInput.addEventListener("input", (event) => {
+  state.search = event.target.value.trim().toLowerCase();
+  renderTable();
+});
+
+document.querySelector("#addTaskButton").addEventListener("click", () => {
+  tasks.unshift({
+    id: `T-NEW-${Date.now()}`,
+    team: state.team === "All" ? "Controls" : state.team,
+    title: "New project task",
+    description: "Define the main task scope in this row.",
+    assignee: "Unassigned",
+    initials: "--",
+    avatar: "",
+    status: "In Progress",
+    priority: "Normal",
+    due: "Set date",
+    dueState: "",
+    completion: 0,
+    attachments: 0,
+    expanded: true,
+    subtasks: [
+      {
+        id: `ST-NEW-${Date.now()}`,
+        team: state.team === "All" ? "Controls" : state.team,
+        title: "New subtask",
+        description: "Add the field or workflow step.",
+        notes: "Keep notes visible here so the work record stays in the table.",
+        assignee: "Unassigned",
+        initials: "--",
+        avatar: "",
+        status: "In Progress",
+        priority: "Normal",
+        due: "Set date",
+        dueState: "",
+        completion: 0,
+        attachments: 0,
+      },
+    ],
+  });
+  saveTasks();
+  renderTable();
+});
+
+renderTable();
+
+</script>
+  </body>
+</html>
+
