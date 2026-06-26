@@ -12,6 +12,10 @@ function doGet(e) {
       return respond_({ ok: true, service: "command-center-sync" }, getParameter_(e, "callback"));
     }
 
+    if (action === "syncCalendar") {
+      return respond_(syncCalendar_(), getParameter_(e, "callback"));
+    }
+
     return respond_(readState_(), getParameter_(e, "callback"));
   } catch (error) {
     return respond_(toError_(error), getParameter_(e, "callback"));
@@ -36,6 +40,14 @@ function setupCommandCenterStore() {
   };
 }
 
+function authorizeCalendarAccess() {
+  const calendar = CalendarApp.getDefaultCalendar();
+  return {
+    ok: true,
+    calendarName: calendar.getName(),
+  };
+}
+
 function readState_() {
   const file = getDataFile_(false);
   if (!file) {
@@ -46,6 +58,7 @@ function readState_() {
       version: 0,
       updatedAt: "",
       updatedBy: "",
+      calendar: {},
       tasks: [],
     };
   }
@@ -60,6 +73,7 @@ function readState_() {
     version: Number(state.version) || 0,
     updatedAt: state.updatedAt || "",
     updatedBy: state.updatedBy || "",
+    calendar: state.calendar || {},
     tasks: Array.isArray(state.tasks) ? state.tasks : [],
   };
 }
@@ -84,6 +98,7 @@ function writeState_(payload) {
       version: (Number(current.version) || 0) + 1,
       updatedAt: payload.updatedAt || new Date().toISOString(),
       updatedBy: payload.clientId || "unknown-client",
+      calendar: current.calendar || {},
       tasks: payload.tasks,
     };
 
@@ -114,10 +129,126 @@ function getDataFile_(createIfMissing) {
       version: 0,
       updatedAt: "",
       updatedBy: "",
+      calendar: {},
       tasks: [],
     }, null, 2),
     MimeType.PLAIN_TEXT
   );
+}
+
+function syncCalendar_() {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    const state = readState_();
+    if (!Array.isArray(state.tasks) || state.tasks.length === 0) {
+      return {
+        ok: true,
+        created: 0,
+        updated: 0,
+        skipped: 0,
+        tasks: [],
+        calendar: state.calendar || {},
+        version: Number(state.version) || 0,
+      };
+    }
+
+    const calendar = CalendarApp.getDefaultCalendar();
+    const summary = {
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      syncedAt: new Date().toISOString(),
+      calendarName: calendar.getName(),
+    };
+
+    walkTasks_(state.tasks, function(task, parent) {
+      if (task.status === "Complete") {
+        summary.skipped += 1;
+        return;
+      }
+
+      const dueDate = parseDueDate_(task.due);
+      if (!dueDate) {
+        summary.skipped += 1;
+        return;
+      }
+
+      const eventTitle = `[${task.team || "Work"}] ${task.title || "Untitled task"}`;
+      const description = buildCalendarDescription_(task, parent);
+      let event = task.calendarEventId ? calendar.getEventById(task.calendarEventId) : null;
+
+      if (event) {
+        event.setTitle(eventTitle);
+        event.setDescription(description);
+        event.setAllDayDate(dueDate);
+        summary.updated += 1;
+      } else {
+        event = calendar.createAllDayEvent(eventTitle, dueDate, {
+          description: description,
+        });
+        task.calendarEventId = event.getId();
+        summary.created += 1;
+      }
+
+      task.calendarSyncedAt = summary.syncedAt;
+    });
+
+    const nextState = {
+      ok: true,
+      namespace: COMMAND_CENTER_CONFIG.namespace,
+      version: (Number(state.version) || 0) + 1,
+      updatedAt: summary.syncedAt,
+      updatedBy: "calendar-sync",
+      calendar: summary,
+      tasks: state.tasks,
+    };
+
+    const file = getDataFile_(true);
+    file.setContent(JSON.stringify(nextState, null, 2));
+    return nextState;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function walkTasks_(tasks, callback) {
+  tasks.forEach(function(task) {
+    callback(task, null);
+    (Array.isArray(task.subtasks) ? task.subtasks : []).forEach(function(subtask) {
+      callback(subtask, task);
+    });
+  });
+}
+
+function parseDueDate_(value) {
+  const match = String(value || "").trim().match(/^([A-Za-z]{3,9})\s+(\d{1,2})$/);
+  if (!match) {
+    return null;
+  }
+
+  const date = new Date(`${match[1]} ${match[2]}, ${new Date().getFullYear()}`);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function buildCalendarDescription_(task, parent) {
+  const lines = [
+    task.description || "",
+    task.notes ? `Notes: ${task.notes}` : "",
+    parent ? `Parent task: ${parent.title}` : "",
+    task.assignee ? `Assignee: ${task.assignee}` : "",
+    task.status ? `Status: ${task.status}` : "",
+    task.priority ? `Priority: ${task.priority}` : "",
+    `Command Center ID: ${task.id}`,
+  ];
+
+  return lines.filter(Boolean).join("\n");
 }
 
 function parsePayload_(e) {
