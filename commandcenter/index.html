@@ -2639,9 +2639,21 @@ function getSubstationById(parentId, childId) {
   return child ? { parent, child } : null;
 }
 
+function getUniqueName(baseName, existingNames) {
+  const base = String(baseName || "New Item").trim();
+  const used = new Set(existingNames.map((name) => String(name || "").trim().toLowerCase()));
+  if (!used.has(base.toLowerCase())) return base;
+
+  let index = 2;
+  while (used.has(`${base} ${index}`.toLowerCase())) {
+    index += 1;
+  }
+  return `${base} ${index}`;
+}
+
 function createWorkstation(name) {
-  const clean = String(name || "").trim();
-  if (!clean) return null;
+  const clean =
+    String(name || "").trim() || getUniqueName("New Workstation", workstreams.map((workstation) => workstation.name));
 
   const existing = workstreams.find((workstation) => workstation.name.toLowerCase() === clean.toLowerCase());
   if (existing) return existing;
@@ -2733,10 +2745,11 @@ function deleteWorkstation(id) {
 
 function addSubstation(parentId, name) {
   const parent = getWorkstationById(parentId);
-  const clean = String(name || "").trim();
-  if (!parent || !clean) return null;
+  if (!parent) return null;
 
   parent.children = Array.isArray(parent.children) ? parent.children : [];
+  const clean =
+    String(name || "").trim() || getUniqueName("New Section", parent.children.map((child) => child.name));
   const existing = parent.children.find((child) => child.name.toLowerCase() === clean.toLowerCase());
   if (existing) return existing;
 
@@ -2869,10 +2882,10 @@ function renderSettingsWorkstations() {
 
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "Add sub-workstation";
-    input.setAttribute("aria-label", `Add sub-workstation to ${workstation.name}`);
+    input.placeholder = "Add section";
+    input.setAttribute("aria-label", `Add section to ${workstation.name}`);
 
-    const addButton = createSettingsIconButton("plus", "Add sub-workstation", {});
+    const addButton = createSettingsIconButton("plus", "Add section", { addSubstationButton: workstation.id });
     addButton.type = "submit";
     addForm.append(input, addButton);
     card.append(addForm);
@@ -3303,34 +3316,46 @@ if (workstreamForm && workstreamNameInput) {
   });
 }
 
-if (settingsWorkstationForm && settingsWorkstationNameInput) {
-  settingsWorkstationForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const workstation = createWorkstation(settingsWorkstationNameInput.value);
-    if (!workstation) return;
+function addSettingsWorkstationFromInput(event) {
+  event?.preventDefault();
+  if (!settingsWorkstationNameInput) return;
 
-    state.team = workstation.name;
-    settingsWorkstationNameInput.value = "";
-    saveWorkstreams();
-    renderTable();
-  });
+  const workstation = createWorkstation(settingsWorkstationNameInput.value);
+  if (!workstation) return;
+
+  state.team = workstation.name;
+  settingsWorkstationNameInput.value = "";
+  saveWorkstreams();
+  renderTable();
+}
+
+function addSettingsSubstationFromForm(form, event) {
+  event?.preventDefault();
+  if (!form) return;
+
+  const input = form.querySelector("input");
+  const child = addSubstation(form.dataset.addSubstationFor, input ? input.value : "");
+  const parent = getWorkstationById(form.dataset.addSubstationFor);
+  if (!child || !parent) return;
+
+  state.team = getSubstationFullName(parent, child);
+  if (input) input.value = "";
+  saveWorkstreams();
+  renderTable();
+}
+
+if (settingsWorkstationForm && settingsWorkstationNameInput) {
+  settingsWorkstationForm.addEventListener("submit", addSettingsWorkstationFromInput);
+  settingsWorkstationForm
+    .querySelector("button[type='submit']")
+    ?.addEventListener("click", addSettingsWorkstationFromInput);
 }
 
 if (settingsWorkstationList) {
   settingsWorkstationList.addEventListener("submit", (event) => {
     const form = event.target.closest("[data-add-substation-for]");
     if (!form) return;
-    event.preventDefault();
-
-    const input = form.querySelector("input");
-    const child = addSubstation(form.dataset.addSubstationFor, input.value);
-    const parent = getWorkstationById(form.dataset.addSubstationFor);
-    if (!child || !parent) return;
-
-    state.team = getSubstationFullName(parent, child);
-    input.value = "";
-    saveWorkstreams();
-    renderTable();
+    addSettingsSubstationFromForm(form, event);
   });
 
   settingsWorkstationList.addEventListener("change", (event) => {
@@ -3351,6 +3376,12 @@ if (settingsWorkstationList) {
   });
 
   settingsWorkstationList.addEventListener("click", (event) => {
+    const addSubstationButton = event.target.closest("[data-add-substation-button]");
+    if (addSubstationButton) {
+      addSettingsSubstationFromForm(addSubstationButton.closest("[data-add-substation-for]"), event);
+      return;
+    }
+
     const deleteWorkstationButton = event.target.closest("[data-delete-workstation]");
     if (deleteWorkstationButton) {
       const workstation = getWorkstationById(deleteWorkstationButton.dataset.deleteWorkstation);
