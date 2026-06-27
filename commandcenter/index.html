@@ -1061,7 +1061,7 @@ button {
 
 .task-table {
   width: 100%;
-  min-width: 1280px;
+  min-width: 1500px;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -1102,7 +1102,7 @@ button {
 
 .task-table th:nth-child(1),
 .task-table td:nth-child(1) {
-  width: 126px;
+  width: 104px;
 }
 
 .task-table th:nth-child(2),
@@ -1110,35 +1110,40 @@ button {
   width: 104px;
 }
 
+.task-table th:nth-child(3),
+.task-table td:nth-child(3) {
+  width: 112px;
+}
+
 .task-table .topic-col {
-  width: 238px;
+  width: 270px;
 }
 
 .description-col {
-  width: 246px;
+  width: 315px;
 }
 
 .notes-col {
-  width: 250px;
-}
-
-.task-table th:nth-child(6),
-.task-table td:nth-child(6) {
-  width: 142px;
+  width: 330px;
 }
 
 .task-table th:nth-child(7),
 .task-table td:nth-child(7) {
-  width: 126px;
+  width: 116px;
 }
 
 .task-table th:nth-child(8),
 .task-table td:nth-child(8) {
-  width: 98px;
+  width: 92px;
 }
 
 .task-table th:nth-child(9),
 .task-table td:nth-child(9) {
+  width: 86px;
+}
+
+.task-table th:nth-child(10),
+.task-table td:nth-child(10) {
   width: 92px;
 }
 
@@ -1147,7 +1152,7 @@ button {
 }
 
 .task-table tr.subtask-row td {
-  height: 74px;
+  height: 116px;
   background: var(--green-soft);
 }
 
@@ -1173,6 +1178,11 @@ button {
 
 .subtask-row .task-title {
   font-weight: 760;
+  display: block;
+  max-height: 96px;
+  overflow: auto;
+  white-space: normal;
+  -webkit-line-clamp: unset;
 }
 
 .indent-guide {
@@ -1267,6 +1277,14 @@ button {
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.subtask-row .editable,
+.subtask-row .note-box {
+  display: block;
+  max-height: 96px;
+  overflow: auto;
+  -webkit-line-clamp: unset;
 }
 
 .creator-editor {
@@ -1906,11 +1924,11 @@ button {
               <input id="jiraFilter" type="search" placeholder="Key or link" />
             </label>
             <label>
-              <span>Date from</span>
+              <span>Created from</span>
               <input id="dateFromFilter" type="date" />
             </label>
             <label>
-              <span>Date to</span>
+              <span>Created to</span>
               <input id="dateToFilter" type="date" />
             </label>
             <label>
@@ -2071,7 +2089,8 @@ button {
               <thead>
                 <tr>
                   <th>Status</th>
-                  <th>Date</th>
+                  <th>Created</th>
+                  <th>Completed</th>
                   <th class="topic-col">Topic</th>
                   <th class="description-col">Description</th>
                   <th class="notes-col">Notes</th>
@@ -2090,7 +2109,7 @@ button {
 
     <template id="emptyStateTemplate">
       <tr class="empty-row">
-        <td colspan="9">
+        <td colspan="10">
           <div class="empty-state">
             <i data-lucide="search-x" aria-hidden="true"></i>
             <strong>No matching work found</strong>
@@ -2118,7 +2137,7 @@ const SYNC_ENDPOINT_STORAGE_KEY = "fes-command-center-sync-endpoint-v1";
 const JIRA_BASE_STORAGE_KEY = "fes-command-center-jira-base-url-v1";
 const FONT_FAMILY_STORAGE_KEY = "fes-command-center-font-family-v1";
 const FONT_SIZE_STORAGE_KEY = "fes-command-center-font-size-v1";
-const DATA_VERSION = 4;
+const DATA_VERSION = 5;
 
 const statusOptions = ["Not Started", "In Progress", "Waiting", "Blocked", "Complete", "Archived"];
 const priorityOptions = ["Low", "Normal", "High", "Urgent"];
@@ -2599,6 +2618,14 @@ function toDateInputValue(value) {
   return `${year}-${month}-${day}`;
 }
 
+function todayInputValue() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function formatDateLabel(value) {
   const parsed = parseDateValue(value);
   if (!parsed) return String(value || "Set date");
@@ -2629,13 +2656,17 @@ function normalizeTask(task, parentTeam = "") {
   const creator = task.creator || task.assignee || "Unassigned";
   const status = statusOptions.includes(task.status) ? task.status : "In Progress";
   const archivedAt = task.archivedAt || (status === "Archived" ? new Date().toISOString() : "");
+  const createdDate = toDateInputValue(task.createdDate || task.createdAt || task.date) || todayInputValue();
+  const completedDate = toDateInputValue(task.completedDate || task.completedAt);
 
   return {
     ...task,
     id: task.id || `T-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     team: task.team || parentTeam || defaultWorkstreams[0].name,
     title: task.title || "New project task",
-    date: task.date || task.createdDate || "Set date",
+    date: createdDate,
+    createdDate,
+    completedDate,
     description: task.description || "",
     notes: task.notes || "",
     creator,
@@ -3188,16 +3219,21 @@ function updateTaskField(task, field, value) {
     if (value === "Complete") {
       task.completion = 100;
       task.archivedAt = "";
+      task.completedDate = task.completedDate || todayInputValue();
     } else if (value === "Archived") {
       task.archivedAt = task.archivedAt || new Date().toISOString();
     } else {
       task.archivedAt = "";
+      task.completedDate = "";
       if (task.completion >= 100) task.completion = 75;
     }
   } else if (field === "priority") {
     task.priority = value;
-  } else if (field === "date") {
-    task.date = toDateInputValue(value) || "Set date";
+  } else if (field === "date" || field === "createdDate") {
+    task.createdDate = toDateInputValue(value) || todayInputValue();
+    task.date = task.createdDate;
+  } else if (field === "completedDate") {
+    task.completedDate = toDateInputValue(value);
   } else if (field === "jira") {
     const clean = value.trim();
     task.jira = /^[A-Z][A-Z0-9]+-\d+$/i.test(clean) ? clean.toUpperCase() : clean;
@@ -3217,8 +3253,10 @@ function updateTaskField(task, field, value) {
     if (task.completion >= 100) {
       task.status = "Complete";
       task.archivedAt = "";
+      task.completedDate = task.completedDate || todayInputValue();
     } else if (task.status === "Complete") {
       task.status = "In Progress";
+      task.completedDate = "";
     }
   }
 
@@ -3458,6 +3496,10 @@ function renderReports() {
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
+  const completedThisMonth = complete.filter((task) => {
+    const completedAt = parseDateValue(task.completedDate);
+    return completedAt && completedAt >= monthStart;
+  });
   const archivedThisMonth = archived.filter((task) => {
     const archivedAt = new Date(task.archivedAt || "");
     return !Number.isNaN(archivedAt.getTime()) && archivedAt >= monthStart;
@@ -3470,6 +3512,7 @@ function renderReports() {
     createReportCard("Blocked", blocked.length, "Rows needing action"),
     createReportCard("Urgent", urgent.length, "Urgent priority"),
     createReportCard("Complete", complete.length, "Closed rows"),
+    createReportCard("Completed This Month", completedThisMonth.length, "Completion date"),
     createReportCard("Archived", archived.length, "Stored out of active view"),
     createReportCard("Archived This Month", archivedThisMonth.length, "Monthly report set"),
     createReportCard("Workstations", flattenWorkstations().length, `${workstreams.length} top level`),
@@ -4012,7 +4055,8 @@ function matchesSearch(task) {
   if (!state.search) return true;
   const haystack = [
     task.title,
-    task.date,
+    task.createdDate,
+    task.completedDate,
     task.description,
     task.notes,
     task.creator,
@@ -4078,7 +4122,7 @@ function matchesAdvancedFilters(task) {
   if (filters.priority && task.priority !== filters.priority) return false;
   if (filters.creator && !normalizeFilterText(task.creator).includes(filters.creator)) return false;
   if (filters.jira && !normalizeFilterText(task.jira).includes(filters.jira)) return false;
-  if (!dateInRange(task.date, filters.dateFrom, filters.dateTo)) return false;
+  if (!dateInRange(task.createdDate, filters.dateFrom, filters.dateTo)) return false;
   if (!dateInRange(task.due, filters.dueFrom, filters.dueTo)) return false;
 
   return true;
@@ -4164,8 +4208,11 @@ function appendCells(row, task, isSubtask = false) {
   const statusCell = document.createElement("td");
   statusCell.append(createSelectControl(task, "status", statusOptions, `status-select ${statusClass(task.status)}`));
 
-  const dateCell = document.createElement("td");
-  dateCell.append(createDateControl(task, "date", "date-control"));
+  const createdCell = document.createElement("td");
+  createdCell.append(createDateControl(task, "createdDate", "date-control created-date-control"));
+
+  const completedCell = document.createElement("td");
+  completedCell.append(createDateControl(task, "completedDate", "date-control completed-date-control"));
 
   const taskCell = document.createElement("td");
   taskCell.append(renderTaskCell(task, isSubtask));
@@ -4197,7 +4244,8 @@ function appendCells(row, task, isSubtask = false) {
 
   row.append(
     statusCell,
-    dateCell,
+    createdCell,
+    completedCell,
     taskCell,
     descriptionCell,
     notesCell,
@@ -4420,7 +4468,9 @@ body.addEventListener("click", (event) => {
         id: `${task.id}-NEW-${Date.now()}`,
         team: task.team,
         title: "New field follow-up",
-        date: "Set date",
+        date: todayInputValue(),
+        createdDate: todayInputValue(),
+        completedDate: "",
         description: "Add scope detail directly in the grid.",
         notes: "Capture current blocker, field note, or customer update here.",
         creator: "Unassigned",
@@ -4810,7 +4860,9 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
     id: `T-NEW-${Date.now()}`,
     team: selectedTeam,
     title: "New project task",
-    date: "Set date",
+    date: todayInputValue(),
+    createdDate: todayInputValue(),
+    completedDate: "",
     description: "Define the main task scope in this row.",
     notes: "",
     creator: "Unassigned",
@@ -4831,7 +4883,9 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
         id: `ST-NEW-${Date.now()}`,
         team: selectedTeam,
         title: "New subtask",
-        date: "Set date",
+        date: todayInputValue(),
+        createdDate: todayInputValue(),
+        completedDate: "",
         description: "Add the field or workflow step.",
         notes: "Keep notes visible here so the work record stays in the table.",
         creator: "Unassigned",
