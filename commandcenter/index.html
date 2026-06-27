@@ -4,6 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FES Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (() => {
+        try {
+          const fontFamily = localStorage.getItem("fes-command-center-font-family-v1") || "atkinson";
+          const fontSize = localStorage.getItem("fes-command-center-font-size-v1") || "default";
+          document.documentElement.dataset.fontFamily = fontFamily;
+          document.documentElement.dataset.fontSize = fontSize;
+        } catch {}
+      })();
+    </script>
     <style>
 :root {
   --ink: #101614;
@@ -26,10 +42,34 @@
   --white: #ffffff;
   --shadow: 0 22px 70px rgba(15, 23, 42, 0.13);
   --sidebar-shadow: 18px 0 45px rgba(0, 0, 0, 0.28);
-  color-scheme: light;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  --app-font: "Atkinson Hyperlegible", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+  color-scheme: light;
+  font-family: var(--app-font);
+}
+
+html {
+  font-size: 15px;
+}
+
+html[data-font-size="compact"] {
+  font-size: 14px;
+}
+
+html[data-font-size="large"] {
+  font-size: 16px;
+}
+
+html[data-font-size="xlarge"] {
+  font-size: 17px;
+}
+
+html[data-font-family="inter"] {
+  --app-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html[data-font-family="system"] {
+  --app-font: Aptos, "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * {
@@ -44,6 +84,7 @@ body {
     linear-gradient(90deg, #08110f 0, #08110f 260px, transparent 260px),
     var(--gray-50);
   color: var(--ink);
+  font-family: var(--app-font);
   overflow-x: auto;
 }
 
@@ -604,6 +645,7 @@ button {
 .settings-name-input,
 .settings-substation-form input,
 .settings-box input,
+.settings-box select,
 .filter-panel input,
 .filter-panel select {
   width: 100%;
@@ -621,6 +663,7 @@ button {
 .settings-name-input:focus,
 .settings-substation-form input:focus,
 .settings-box input:focus,
+.settings-box select:focus,
 .filter-panel input:focus,
 .filter-panel select:focus {
   border-color: rgba(20, 184, 120, 0.5);
@@ -1828,6 +1871,29 @@ button {
             <div class="settings-grid">
               <section class="settings-box">
                 <div class="settings-box-header">
+                  <span>Appearance</span>
+                  <strong>Reading comfort</strong>
+                </div>
+                <label>
+                  <span>Font</span>
+                  <select id="fontFamilySelect">
+                    <option value="atkinson">Atkinson Hyperlegible</option>
+                    <option value="inter">Inter</option>
+                    <option value="system">System UI</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Font size</span>
+                  <select id="fontSizeSelect">
+                    <option value="compact">Compact</option>
+                    <option value="default">Default</option>
+                    <option value="large">Large</option>
+                    <option value="xlarge">Extra large</option>
+                  </select>
+                </label>
+              </section>
+              <section class="settings-box">
+                <div class="settings-box-header">
                   <span>Jira</span>
                   <strong>Link base</strong>
                 </div>
@@ -1905,6 +1971,8 @@ const SYNC_META_KEY = "fes-command-center-sync-meta-v1";
 const SYNC_CLIENT_KEY = "fes-command-center-client-id-v1";
 const SYNC_ENDPOINT_STORAGE_KEY = "fes-command-center-sync-endpoint-v1";
 const JIRA_BASE_STORAGE_KEY = "fes-command-center-jira-base-url-v1";
+const FONT_FAMILY_STORAGE_KEY = "fes-command-center-font-family-v1";
+const FONT_SIZE_STORAGE_KEY = "fes-command-center-font-size-v1";
 const DATA_VERSION = 4;
 
 const statusOptions = ["Not Started", "In Progress", "Waiting", "Blocked", "Complete", "Archived"];
@@ -2271,6 +2339,8 @@ const settingsCloseButton = document.querySelector("#settingsCloseButton");
 const settingsWorkstationForm = document.querySelector("#settingsWorkstationForm");
 const settingsWorkstationNameInput = document.querySelector("#settingsWorkstationNameInput");
 const settingsWorkstationList = document.querySelector("#settingsWorkstationList");
+const fontFamilySelect = document.querySelector("#fontFamilySelect");
+const fontSizeSelect = document.querySelector("#fontSizeSelect");
 const jiraBaseUrlInput = document.querySelector("#jiraBaseUrlInput");
 const refreshBackupsButton = document.querySelector("#refreshBackupsButton");
 const backupList = document.querySelector("#backupList");
@@ -2330,6 +2400,22 @@ function getAvatarClass(name) {
   const classes = ["green", "amber", "red", ""];
   const total = [...clean].reduce((sum, char) => sum + char.charCodeAt(0), 0);
   return classes[total % classes.length];
+}
+
+function getStoredPreference(key, fallback, allowed) {
+  const value = localStorage.getItem(key) || fallback;
+  return allowed.includes(value) ? value : fallback;
+}
+
+function applyAppearancePreferences() {
+  const fontFamily = getStoredPreference(FONT_FAMILY_STORAGE_KEY, "atkinson", ["atkinson", "inter", "system"]);
+  const fontSize = getStoredPreference(FONT_SIZE_STORAGE_KEY, "default", ["compact", "default", "large", "xlarge"]);
+
+  document.documentElement.dataset.fontFamily = fontFamily;
+  document.documentElement.dataset.fontSize = fontSize;
+
+  if (fontFamilySelect) fontFamilySelect.value = fontFamily;
+  if (fontSizeSelect) fontSizeSelect.value = fontSize;
 }
 
 function parseDateValue(value) {
@@ -4262,6 +4348,26 @@ if (backupList) {
   });
 }
 
+if (fontFamilySelect) {
+  fontFamilySelect.addEventListener("change", (event) => {
+    const value = event.target.value;
+    if (["atkinson", "inter", "system"].includes(value)) {
+      localStorage.setItem(FONT_FAMILY_STORAGE_KEY, value);
+      applyAppearancePreferences();
+    }
+  });
+}
+
+if (fontSizeSelect) {
+  fontSizeSelect.addEventListener("change", (event) => {
+    const value = event.target.value;
+    if (["compact", "default", "large", "xlarge"].includes(value)) {
+      localStorage.setItem(FONT_SIZE_STORAGE_KEY, value);
+      applyAppearancePreferences();
+    }
+  });
+}
+
 if (jiraBaseUrlInput) {
   jiraBaseUrlInput.value = getJiraBaseUrl();
   jiraBaseUrlInput.addEventListener("change", (event) => {
@@ -4456,6 +4562,7 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
   renderTable();
 });
 
+applyAppearancePreferences();
 renderWorkstreams();
 renderSettingsWorkstations();
 renderMetrics();
