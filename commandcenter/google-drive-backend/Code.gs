@@ -1,6 +1,8 @@
 const COMMAND_CENTER_CONFIG = {
   folderId: "1ww8rUXsbrb3v_FrbdthnUSENBdDS_Ct4",
   fileName: "command-center-data.json",
+  backupFolderName: "command-center-backups",
+  maxBackups: 40,
   namespace: "commandcenter",
 };
 
@@ -14,6 +16,10 @@ function doGet(e) {
 
     if (action === "syncCalendar") {
       return respond_(syncCalendar_(), getParameter_(e, "callback"));
+    }
+
+    if (action === "backups") {
+      return respond_({ ok: true, backups: listBackups_(10) }, getParameter_(e, "callback"));
     }
 
     return respond_(readState_(), getParameter_(e, "callback"));
@@ -55,10 +61,13 @@ function readState_() {
       ok: true,
       empty: true,
       namespace: COMMAND_CENTER_CONFIG.namespace,
+      schemaVersion: 2,
       version: 0,
       updatedAt: "",
       updatedBy: "",
       calendar: {},
+      workstreams: [],
+      backups: [],
       tasks: [],
     };
   }
@@ -70,10 +79,13 @@ function readState_() {
     ok: true,
     empty: !Array.isArray(state.tasks) || state.tasks.length === 0,
     namespace: state.namespace || COMMAND_CENTER_CONFIG.namespace,
+    schemaVersion: Number(state.schemaVersion) || 1,
     version: Number(state.version) || 0,
     updatedAt: state.updatedAt || "",
     updatedBy: state.updatedBy || "",
     calendar: state.calendar || {},
+    workstreams: Array.isArray(state.workstreams) ? state.workstreams : [],
+    backups: listBackups_(5),
     tasks: Array.isArray(state.tasks) ? state.tasks : [],
   };
 }
@@ -92,17 +104,21 @@ function writeState_(payload) {
 
   try {
     const current = readState_();
+    const file = getDataFile_(true);
+    const backup = createBackup_(file, current);
     const nextState = {
       ok: true,
       namespace: COMMAND_CENTER_CONFIG.namespace,
+      schemaVersion: Number(payload.schemaVersion) || 2,
       version: (Number(current.version) || 0) + 1,
       updatedAt: payload.updatedAt || new Date().toISOString(),
       updatedBy: payload.clientId || "unknown-client",
       calendar: current.calendar || {},
+      workstreams: Array.isArray(payload.workstreams) ? payload.workstreams : current.workstreams || [],
+      backup,
       tasks: payload.tasks,
     };
 
-    const file = getDataFile_(true);
     file.setContent(JSON.stringify(nextState, null, 2));
     return nextState;
   } finally {
@@ -126,14 +142,89 @@ function getDataFile_(createIfMissing) {
     COMMAND_CENTER_CONFIG.fileName,
     JSON.stringify({
       namespace: COMMAND_CENTER_CONFIG.namespace,
+      schemaVersion: 2,
       version: 0,
       updatedAt: "",
       updatedBy: "",
       calendar: {},
+      workstreams: [],
       tasks: [],
     }, null, 2),
     MimeType.PLAIN_TEXT
   );
+}
+
+function getBackupFolder_() {
+  const folder = DriveApp.getFolderById(COMMAND_CENTER_CONFIG.folderId);
+  const backups = folder.getFoldersByName(COMMAND_CENTER_CONFIG.backupFolderName);
+  return backups.hasNext() ? backups.next() : folder.createFolder(COMMAND_CENTER_CONFIG.backupFolderName);
+}
+
+function createBackup_(file, currentState) {
+  if (!file) {
+    return null;
+  }
+
+  const raw = file.getBlob().getDataAsString();
+  if (!raw) {
+    return null;
+  }
+
+  const folder = getBackupFolder_();
+  const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd-HHmmss");
+  const version = Number(currentState && currentState.version) || 0;
+  const backupFile = folder.createFile(
+    `command-center-data-v${version}-${stamp}.json`,
+    raw,
+    MimeType.PLAIN_TEXT,
+  );
+  pruneBackups_(folder);
+
+  return {
+    name: backupFile.getName(),
+    url: backupFile.getUrl(),
+    version,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function listBackups_(limit) {
+  const folder = getBackupFolder_();
+  const files = folder.getFiles();
+  const backups = [];
+
+  while (files.hasNext()) {
+    const file = files.next();
+    backups.push({
+      name: file.getName(),
+      url: file.getUrl(),
+      createdAt: file.getDateCreated().toISOString(),
+      updatedAt: file.getLastUpdated().toISOString(),
+    });
+  }
+
+  backups.sort(function(a, b) {
+    return b.createdAt.localeCompare(a.createdAt);
+  });
+
+  return backups.slice(0, limit || 10);
+}
+
+function pruneBackups_(folder) {
+  const files = [];
+  const iterator = folder.getFiles();
+
+  while (iterator.hasNext()) {
+    files.push(iterator.next());
+  }
+
+  files.sort(function(a, b) {
+    return b.getDateCreated().getTime() - a.getDateCreated().getTime();
+  });
+
+  files.slice(COMMAND_CENTER_CONFIG.maxBackups).forEach(function(file) {
+    file.setTrashed(true);
+  });
 }
 
 function syncCalendar_() {
@@ -149,6 +240,7 @@ function syncCalendar_() {
         updated: 0,
         skipped: 0,
         tasks: [],
+        workstreams: state.workstreams || [],
         calendar: state.calendar || {},
         version: Number(state.version) || 0,
       };
@@ -198,14 +290,17 @@ function syncCalendar_() {
     const nextState = {
       ok: true,
       namespace: COMMAND_CENTER_CONFIG.namespace,
+      schemaVersion: Number(state.schemaVersion) || 2,
       version: (Number(state.version) || 0) + 1,
       updatedAt: summary.syncedAt,
       updatedBy: "calendar-sync",
       calendar: summary,
+      workstreams: state.workstreams || [],
       tasks: state.tasks,
     };
 
     const file = getDataFile_(true);
+    nextState.backup = createBackup_(file, state);
     file.setContent(JSON.stringify(nextState, null, 2));
     return nextState;
   } finally {

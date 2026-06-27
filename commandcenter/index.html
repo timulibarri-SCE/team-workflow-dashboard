@@ -48,7 +48,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -261,12 +262,80 @@ button {
   margin-top: 30px;
 }
 
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 4px 8px 10px;
+}
+
 .section-label {
   margin: 0 10px 8px;
   color: #6ee7b7;
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.section-heading .section-label {
+  margin: 0;
+}
+
+.sidebar-icon-button,
+.workstream-form button {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #b6f3d8;
+}
+
+.sidebar-icon-button svg,
+.workstream-form svg {
+  width: 15px;
+  height: 15px;
+}
+
+.sidebar-icon-button:hover,
+.workstream-form button:hover {
+  border-color: rgba(110, 231, 183, 0.45);
+  background: rgba(20, 184, 120, 0.18);
+  color: var(--white);
+}
+
+.workstream-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px 28px;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.workstream-form[hidden] {
+  display: none;
+}
+
+.workstream-form input {
+  min-width: 0;
+  height: 30px;
+  border: 1px solid rgba(110, 231, 183, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+  outline: 0;
+  padding: 0 9px;
+}
+
+.workstream-form input::placeholder {
+  color: rgba(217, 255, 240, 0.52);
+}
+
+.workstream-list {
+  display: grid;
+  gap: 2px;
 }
 
 .team-item {
@@ -293,7 +362,7 @@ button {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--green);
+  background: var(--dot-color, var(--green));
   box-shadow: 0 0 0 3px rgba(20, 184, 120, 0.13);
 }
 
@@ -532,9 +601,10 @@ button {
 }
 
 .metric small {
-  display: none;
+  display: block;
   margin-top: 0;
   color: var(--gray-400);
+  font-size: 0.68rem;
 }
 
 .metric.urgent {
@@ -563,7 +633,7 @@ button {
 
 .task-table {
   width: 100%;
-  min-width: 1080px;
+  min-width: 1210px;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -616,22 +686,22 @@ button {
 
 .task-table th:nth-child(4),
 .task-table td:nth-child(4) {
-  width: 118px;
+  width: 138px;
 }
 
 .task-table th:nth-child(5),
 .task-table td:nth-child(5) {
-  width: 112px;
+  width: 126px;
 }
 
 .task-table th:nth-child(6),
 .task-table td:nth-child(6) {
-  width: 84px;
+  width: 98px;
 }
 
 .task-table th:nth-child(7),
 .task-table td:nth-child(7) {
-  width: 84px;
+  width: 92px;
 }
 
 .completion-col {
@@ -640,7 +710,12 @@ button {
 }
 
 .attachment-col {
-  width: 54px;
+  width: 74px;
+  text-align: center;
+}
+
+.action-col {
+  width: 82px;
   text-align: center;
 }
 
@@ -753,19 +828,14 @@ button {
   overflow: hidden;
 }
 
-.assignee {
+.assignee-editor {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   min-width: 0;
+  width: 100%;
   color: var(--gray-600);
   font-weight: 700;
-}
-
-.assignee span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .avatar {
@@ -797,7 +867,10 @@ button {
 
 .pill,
 .due-label,
-.priority {
+.priority,
+.status-select,
+.priority-select,
+.due-control {
   display: inline-flex;
   align-items: center;
   min-height: 28px;
@@ -811,52 +884,101 @@ button {
   padding: 0 10px;
 }
 
-.pill.in-progress {
+.pill.not-started,
+.status-select.not-started {
+  background: #eef2f5;
+  color: var(--gray-600);
+}
+
+.pill.in-progress,
+.status-select.in-progress {
   background: #e0f2fe;
   color: #0369a1;
 }
 
-.pill.waiting {
+.pill.waiting,
+.status-select.waiting {
   background: #fef3c7;
   color: #9a5d00;
 }
 
-.pill.blocked {
+.pill.blocked,
+.status-select.blocked {
   background: #fee2e2;
   color: #b42318;
 }
 
-.pill.complete {
+.pill.complete,
+.status-select.complete {
   background: #dcfce7;
   color: #047857;
 }
 
-.priority {
+.pill.archived,
+.status-select.archived {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.priority,
+.priority-select {
   padding: 0 9px;
   background: #eef2f5;
   color: var(--gray-600);
 }
 
 .priority.high,
-.priority.urgent {
+.priority.urgent,
+.priority-select.high,
+.priority-select.urgent {
   background: #fff7ed;
   color: #c2410c;
 }
 
-.due-label {
+.due-label,
+.due-control {
   padding: 0 9px;
   background: #f1f5f9;
   color: #334155;
 }
 
-.due-label.soon {
+.due-label.soon,
+.due-control.soon {
   background: #ecfeff;
   color: #0e7490;
 }
 
-.due-label.overdue {
+.due-label.overdue,
+.due-control.overdue {
   background: #fff1f2;
   color: var(--red);
+}
+
+.field-control {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  border: 1px solid transparent;
+  outline: 0;
+}
+
+.field-control:focus {
+  border-color: rgba(20, 184, 120, 0.45);
+  box-shadow: 0 0 0 2px rgba(20, 184, 120, 0.16);
+}
+
+.assignee-input {
+  min-width: 0;
+  padding: 0 2px;
+  background: transparent;
+  color: var(--gray-600);
+  font-weight: 750;
+}
+
+.select-control {
+  appearance: none;
+  cursor: pointer;
+  text-align: center;
 }
 
 .completion-ring {
@@ -868,6 +990,7 @@ button {
   height: 30px;
   place-items: center;
   border-radius: 50%;
+  border: 0;
   background: conic-gradient(var(--ring-color) calc(var(--p) * 1%), #dce5e9 0);
 }
 
@@ -910,6 +1033,55 @@ button {
 .attachment-count:hover {
   background: rgba(20, 184, 120, 0.12);
   color: var(--green-2);
+}
+
+.attachment-editor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 30px;
+  min-width: 54px;
+  border-radius: 8px;
+  color: var(--gray-600);
+  font-weight: 850;
+}
+
+.attachment-editor svg {
+  width: 15px;
+  height: 15px;
+}
+
+.attachment-input {
+  width: 34px;
+  padding: 0;
+  background: transparent;
+  color: var(--gray-600);
+  font-weight: 850;
+  text-align: center;
+}
+
+.attachment-input::-webkit-outer-spin-button,
+.attachment-input::-webkit-inner-spin-button {
+  margin: 0;
+}
+
+.table-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.table-actions .row-action {
+  width: 28px;
+  height: 28px;
+}
+
+.row-action.danger:hover {
+  border-color: rgba(194, 65, 53, 0.35);
+  background: #fff1f2;
+  color: var(--red);
 }
 
 .empty-row td {
@@ -1014,32 +1186,22 @@ button {
         </nav>
 
         <section class="team-menu" aria-label="Workstream filters">
-          <div class="section-label">Workstreams</div>
-          <button class="team-item is-selected" type="button" data-team-filter="All">
-            <span class="team-dot"></span>
-            <span>All Workstreams</span>
-            <strong>42</strong>
-          </button>
-          <button class="team-item" type="button" data-team-filter="Controls">
-            <span class="team-dot controls"></span>
-            <span>Controls</span>
-            <strong>16</strong>
-          </button>
-          <button class="team-item" type="button" data-team-filter="Electrical">
-            <span class="team-dot electrical"></span>
-            <span>Electrical</span>
-            <strong>9</strong>
-          </button>
-          <button class="team-item" type="button" data-team-filter="Mechanical">
-            <span class="team-dot mechanical"></span>
-            <span>Mechanical</span>
-            <strong>11</strong>
-          </button>
-          <button class="team-item" type="button" data-team-filter="Service">
-            <span class="team-dot service"></span>
-            <span>Service</span>
-            <strong>6</strong>
-          </button>
+          <div class="section-heading">
+            <div class="section-label">Workstreams</div>
+            <button class="sidebar-icon-button" id="addWorkstreamButton" type="button" title="New workstream">
+              <i data-lucide="plus" aria-hidden="true"></i>
+            </button>
+          </div>
+          <form class="workstream-form" id="workstreamForm" hidden>
+            <input id="workstreamNameInput" type="text" placeholder="New workstream" />
+            <button type="submit" title="Add workstream">
+              <i data-lucide="check" aria-hidden="true"></i>
+            </button>
+            <button id="cancelWorkstreamButton" type="button" title="Cancel">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </form>
+          <div class="workstream-list" id="workstreamList"></div>
         </section>
 
         <div
@@ -1069,13 +1231,11 @@ button {
             <button class="icon-button" id="filterButton" type="button" title="Filter table">
               <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
             </button>
-            <button class="icon-button" id="calendarSyncButton" type="button" title="Sync due dates to Google Calendar">
-              <i data-lucide="calendar-check" aria-hidden="true"></i>
-            </button>
             <div class="segmented-control" aria-label="View mode">
               <button class="is-active" type="button" data-view-filter="Active">Active</button>
               <button type="button" data-view-filter="Due">Due</button>
               <button type="button" data-view-filter="All">All</button>
+              <button type="button" data-view-filter="Archived">Archived</button>
             </div>
             <button class="primary-button" id="addTaskButton" type="button">
               <i data-lucide="plus" aria-hidden="true"></i>
@@ -1087,23 +1247,23 @@ button {
         <section class="metric-strip" aria-label="Project summary">
           <article class="metric">
             <span>Open Tasks</span>
-            <strong>42</strong>
-            <small>Across 7 projects</small>
+            <strong id="openTasksMetric">0</strong>
+            <small id="openTasksDetail">Across workstreams</small>
           </article>
           <article class="metric">
             <span>Due This Week</span>
-            <strong>12</strong>
-            <small>4 need owners</small>
+            <strong id="dueTasksMetric">0</strong>
+            <small id="dueTasksDetail">0 overdue</small>
           </article>
           <article class="metric urgent">
             <span>Blocked</span>
-            <strong>5</strong>
-            <small>Procurement and access</small>
+            <strong id="blockedTasksMetric">0</strong>
+            <small id="blockedTasksDetail">0 need action</small>
           </article>
           <article class="metric complete">
             <span>Completed</span>
-            <strong>31</strong>
-            <small>Past 14 days</small>
+            <strong id="completedTasksMetric">0</strong>
+            <small id="completedTasksDetail">Current shared board</small>
           </article>
         </section>
 
@@ -1124,6 +1284,10 @@ button {
                     <span class="sr-only">Attachments</span>
                     <i data-lucide="paperclip" aria-hidden="true"></i>
                   </th>
+                  <th class="action-col">
+                    <span class="sr-only">Actions</span>
+                    <i data-lucide="more-horizontal" aria-hidden="true"></i>
+                  </th>
                 </tr>
               </thead>
               <tbody id="taskTableBody"></tbody>
@@ -1135,7 +1299,7 @@ button {
 
     <template id="emptyStateTemplate">
       <tr class="empty-row">
-        <td colspan="9">
+        <td colspan="10">
           <div class="empty-state">
             <i data-lucide="search-x" aria-hidden="true"></i>
             <strong>No matching work found</strong>
@@ -1149,9 +1313,16 @@ button {
     <script src="sync-config.js"></script>
     <script>
 const STORAGE_KEY = "fes-command-center-tasks-v1";
+const WORKSTREAM_STORAGE_KEY = "fes-command-center-workstreams-v1";
 const SYNC_META_KEY = "fes-command-center-sync-meta-v1";
 const SYNC_CLIENT_KEY = "fes-command-center-client-id-v1";
 const SYNC_ENDPOINT_STORAGE_KEY = "fes-command-center-sync-endpoint-v1";
+const DATA_VERSION = 2;
+
+const statusOptions = ["Not Started", "In Progress", "Waiting", "Blocked", "Complete", "Archived"];
+const priorityOptions = ["Low", "Normal", "High", "Urgent"];
+
+const workstreamPalette = ["#14b878", "#0e7490", "#2663eb", "#b7791f", "#7c3aed", "#c24135", "#0f766e"];
 
 const syncConfig = {
   endpoint: "",
@@ -1160,101 +1331,110 @@ const syncConfig = {
   ...(window.COMMAND_CENTER_SYNC_CONFIG || {}),
 };
 
+const defaultWorkstreams = [
+  { id: "controls-bas", name: "Controls / BAS", color: "#0e7490" },
+  { id: "mechanical-systems", name: "Mechanical Systems", color: "#b7791f" },
+  { id: "electrical-infrastructure", name: "Electrical Infrastructure", color: "#2663eb" },
+  { id: "plumbing-utilities", name: "Plumbing / Utilities", color: "#0f766e" },
+  { id: "safety-compliance", name: "Safety / Compliance", color: "#c24135" },
+  { id: "capital-projects", name: "Capital Projects", color: "#7c3aed" },
+];
+
 const defaultTasks = [
   {
-    id: "T-1001",
-    team: "Controls",
-    title: "Install control panel",
-    description: "Mount panel, land control wiring, and prep for checkout.",
-    assignee: "Mike R.",
-    initials: "MR",
-    avatar: "green",
+    id: "T-FE-001",
+    team: "Controls / BAS",
+    title: "Stabilize BAS alarm queue",
+    description: "Clean up nuisance alarms, assign owners, and confirm escalation paths.",
+    assignee: "Tim U.",
+    initials: "TU",
+    avatar: "",
     status: "In Progress",
     priority: "High",
-    due: "Jul 10",
-    dueState: "soon",
-    completion: 68,
-    attachments: 4,
+    due: "Jul 03",
+    dueState: "",
+    completion: 62,
+    attachments: 3,
     expanded: true,
     subtasks: [
       {
-        id: "ST-1001-A",
-        team: "Controls",
-        title: "Order VFD enclosure",
-        description: "Confirm dimensions and order enclosure before shutdown window.",
-        notes: "Vendor confirmed stock. Waiting on updated quote with freight.",
-        assignee: "Sarah K.",
-        initials: "SK",
+        id: "ST-FE-001-A",
+        team: "Controls / BAS",
+        title: "Group alarms by equipment owner",
+        description: "Separate critical, advisory, and nuisance alarms for review.",
+        notes: "Start with AHU and chilled water alarms that repeat daily.",
+        assignee: "Controls Team",
+        initials: "CT",
         avatar: "amber",
-        status: "Waiting",
+        status: "In Progress",
         priority: "High",
-        due: "Jul 02",
-        dueState: "overdue",
-        completion: 35,
-        attachments: 2,
+        due: "Jul 01",
+        dueState: "",
+        completion: 55,
+        attachments: 1,
       },
       {
-        id: "ST-1001-B",
-        team: "Controls",
-        title: "Verify wiring schedule",
-        description: "Match field tags to panel drawings and point list.",
-        notes: "Need two point names clarified before final checkout.",
+        id: "ST-FE-001-B",
+        team: "Controls / BAS",
+        title: "Confirm notification recipients",
+        description: "Validate alarm email groups and after-hours contact paths.",
+        notes: "Remove stale recipients before enabling summary reports.",
         assignee: "Tim U.",
         initials: "TU",
         avatar: "",
-        status: "In Progress",
+        status: "Waiting",
         priority: "Normal",
-        due: "Jul 08",
-        dueState: "soon",
-        completion: 76,
-        attachments: 3,
+        due: "Jul 05",
+        dueState: "",
+        completion: 30,
+        attachments: 2,
       },
     ],
   },
   {
-    id: "T-1002",
-    team: "Mechanical",
-    title: "Commission AHU sequence",
-    description: "Validate occupied mode, safeties, alarms, and trend setup.",
-    assignee: "Jordan L.",
-    initials: "JL",
+    id: "T-FE-002",
+    team: "Mechanical Systems",
+    title: "Commission AHU seasonal changeover",
+    description: "Verify economizer, freeze protection, safeties, and trend capture.",
+    assignee: "Mechanical Lead",
+    initials: "ML",
     avatar: "",
     status: "Blocked",
     priority: "Urgent",
-    due: "Jul 12",
+    due: "Jul 08",
     dueState: "",
-    completion: 22,
-    attachments: 6,
+    completion: 25,
+    attachments: 5,
     expanded: true,
     subtasks: [
       {
-        id: "ST-1002-A",
-        team: "Mechanical",
-        title: "Schedule shutdown window",
-        description: "Coordinate access with operations and night crew.",
-        notes: "Ops can support Tuesday evening only. Confirm electrician coverage.",
-        assignee: "Dana P.",
-        initials: "DP",
+        id: "ST-FE-002-A",
+        team: "Mechanical Systems",
+        title: "Lock access window with operations",
+        description: "Confirm unit access, safety review, and occupant impact.",
+        notes: "Operations can support a two-hour window after 6 PM.",
+        assignee: "Ops Coordinator",
+        initials: "OC",
         avatar: "red",
         status: "Blocked",
         priority: "Urgent",
-        due: "Jul 05",
-        dueState: "overdue",
-        completion: 12,
+        due: "Jun 24",
+        dueState: "",
+        completion: 10,
         attachments: 1,
       },
       {
-        id: "ST-1002-B",
-        team: "Mechanical",
-        title: "Trend supply air reset",
-        description: "Capture 48 hours of trend data after sequence load.",
-        notes: "Create trend once AHU network point is exposed.",
-        assignee: "Mike R.",
-        initials: "MR",
+        id: "ST-FE-002-B",
+        team: "Mechanical Systems",
+        title: "Capture post-changeover trends",
+        description: "Trend mixed air, supply air, valve position, and fan command.",
+        notes: "Keep 48 hours of trend data attached to closeout.",
+        assignee: "Mechanical Lead",
+        initials: "ML",
         avatar: "green",
-        status: "Waiting",
+        status: "Not Started",
         priority: "Normal",
-        due: "Jul 15",
+        due: "Jul 10",
         dueState: "",
         completion: 0,
         attachments: 0,
@@ -1262,85 +1442,153 @@ const defaultTasks = [
     ],
   },
   {
-    id: "T-1003",
-    team: "Electrical",
-    title: "Update as-built drawings",
-    description: "Capture redlines and upload final marked set to Drive.",
-    assignee: "Alex M.",
-    initials: "AM",
+    id: "T-FE-003",
+    team: "Electrical Infrastructure",
+    title: "Clean panel schedule backlog",
+    description: "Bring panel labels, schedules, photos, and one-line notes current.",
+    assignee: "Electrical Lead",
+    initials: "EL",
     avatar: "",
     status: "In Progress",
     priority: "Normal",
-    due: "Jul 18",
+    due: "Jul 12",
     dueState: "",
-    completion: 84,
-    attachments: 5,
+    completion: 74,
+    attachments: 6,
     expanded: true,
     subtasks: [
       {
-        id: "ST-1003-A",
-        team: "Electrical",
-        title: "Upload site photos",
-        description: "Add panel, conduit, device, and final label photos.",
-        notes: "Photos from east riser are missing. Ask field team for closeups.",
-        assignee: "Nia C.",
-        initials: "NC",
+        id: "ST-FE-003-A",
+        team: "Electrical Infrastructure",
+        title: "Attach current panel photos",
+        description: "Upload door labels, breaker schedules, and panel interiors.",
+        notes: "Need east riser photos before final review.",
+        assignee: "Field Tech",
+        initials: "FT",
         avatar: "amber",
         status: "In Progress",
         priority: "Normal",
-        due: "Jul 11",
-        dueState: "soon",
+        due: "Jul 06",
+        dueState: "",
         completion: 58,
         attachments: 8,
       },
       {
-        id: "ST-1003-B",
-        team: "Electrical",
-        title: "Review submittal package",
-        description: "Compare installed components against approved submittals.",
-        notes: "Breaker schedule matches. Need final label sheet attached.",
-        assignee: "Alex M.",
-        initials: "AM",
+        id: "ST-FE-003-B",
+        team: "Electrical Infrastructure",
+        title: "Verify breaker naming convention",
+        description: "Normalize labels before publishing updated schedule.",
+        notes: "Use equipment ID first, then area served.",
+        assignee: "Electrical Lead",
+        initials: "EL",
         avatar: "",
-        status: "Complete",
-        priority: "Low",
+        status: "Waiting",
+        priority: "Normal",
         due: "Jul 09",
         dueState: "",
-        completion: 100,
+        completion: 40,
+        attachments: 1,
+      },
+    ],
+  },
+  {
+    id: "T-FE-004",
+    team: "Plumbing / Utilities",
+    title: "Map critical isolation valves",
+    description: "Confirm valve location, condition, area served, and access notes.",
+    assignee: "Utilities Lead",
+    initials: "UL",
+    avatar: "green",
+    status: "Waiting",
+    priority: "High",
+    due: "Jul 15",
+    dueState: "",
+    completion: 38,
+    attachments: 4,
+    expanded: false,
+    subtasks: [
+      {
+        id: "ST-FE-004-A",
+        team: "Plumbing / Utilities",
+        title: "Field verify valve tags",
+        description: "Confirm tags against drawings and update missing identifiers.",
+        notes: "North mechanical room has two untagged valves.",
+        assignee: "Field Tech",
+        initials: "FT",
+        avatar: "green",
+        status: "Waiting",
+        priority: "High",
+        due: "Jul 11",
+        dueState: "",
+        completion: 50,
+        attachments: 1,
+      },
+    ],
+  },
+  {
+    id: "T-FE-005",
+    team: "Safety / Compliance",
+    title: "Close monthly PM evidence gaps",
+    description: "Collect missing checklists, photos, and exception notes for audit trail.",
+    assignee: "Compliance Lead",
+    initials: "CL",
+    avatar: "red",
+    status: "In Progress",
+    priority: "High",
+    due: "Jul 05",
+    dueState: "",
+    completion: 66,
+    attachments: 7,
+    expanded: true,
+    subtasks: [
+      {
+        id: "ST-FE-005-A",
+        team: "Safety / Compliance",
+        title: "Review overdue PM exceptions",
+        description: "Confirm which overdue items are access issues versus actual misses.",
+        notes: "Separate contractor-dependent items before reporting.",
+        assignee: "Compliance Lead",
+        initials: "CL",
+        avatar: "red",
+        status: "In Progress",
+        priority: "High",
+        due: "Jul 02",
+        dueState: "",
+        completion: 60,
         attachments: 2,
       },
     ],
   },
   {
-    id: "T-1004",
-    team: "Service",
-    title: "Confirm material lead time",
-    description: "Validate long-lead parts before issuing customer schedule.",
-    assignee: "Chris V.",
-    initials: "CV",
-    avatar: "green",
-    status: "Waiting",
-    priority: "High",
-    due: "Jul 16",
+    id: "T-FE-006",
+    team: "Capital Projects",
+    title: "Track lab refresh closeout",
+    description: "Coordinate punch list, owner signoff, and final documentation.",
+    assignee: "Project Lead",
+    initials: "PL",
+    avatar: "",
+    status: "Not Started",
+    priority: "Normal",
+    due: "Jul 18",
     dueState: "",
-    completion: 44,
-    attachments: 3,
-    expanded: false,
+    completion: 0,
+    attachments: 2,
+    expanded: true,
     subtasks: [
       {
-        id: "ST-1004-A",
-        team: "Service",
-        title: "Check actuator availability",
-        description: "Confirm count, voltage, and replacement model.",
-        notes: "Supplier says partial shipment is possible if approved today.",
-        assignee: "Chris V.",
-        initials: "CV",
-        avatar: "green",
-        status: "Waiting",
-        priority: "High",
-        due: "Jul 13",
-        dueState: "soon",
-        completion: 50,
+        id: "ST-FE-006-A",
+        team: "Capital Projects",
+        title: "Collect closeout documents",
+        description: "Gather warranty letters, O&M documents, and final redlines.",
+        notes: "Keep outstanding vendor items visible until the closeout package is complete.",
+        assignee: "Project Lead",
+        initials: "PL",
+        avatar: "",
+        status: "Not Started",
+        priority: "Normal",
+        due: "Jul 14",
+        dueState: "",
+        completion: 0,
         attachments: 1,
       },
     ],
@@ -1367,6 +1615,7 @@ const sync = {
 sync.enabled = Boolean(sync.endpoint);
 
 let tasks = loadTasks();
+let workstreams = loadWorkstreams(tasks);
 
 const state = {
   team: "All",
@@ -1377,6 +1626,19 @@ const state = {
 const body = document.querySelector("#taskTableBody");
 const emptyTemplate = document.querySelector("#emptyStateTemplate");
 const searchInput = document.querySelector("#searchInput");
+const workstreamList = document.querySelector("#workstreamList");
+const workstreamForm = document.querySelector("#workstreamForm");
+const workstreamNameInput = document.querySelector("#workstreamNameInput");
+const addWorkstreamButton = document.querySelector("#addWorkstreamButton");
+const cancelWorkstreamButton = document.querySelector("#cancelWorkstreamButton");
+const openTasksMetric = document.querySelector("#openTasksMetric");
+const dueTasksMetric = document.querySelector("#dueTasksMetric");
+const blockedTasksMetric = document.querySelector("#blockedTasksMetric");
+const completedTasksMetric = document.querySelector("#completedTasksMetric");
+const openTasksDetail = document.querySelector("#openTasksDetail");
+const dueTasksDetail = document.querySelector("#dueTasksDetail");
+const blockedTasksDetail = document.querySelector("#blockedTasksDetail");
+const completedTasksDetail = document.querySelector("#completedTasksDetail");
 const syncPanel = document.querySelector("#syncPanel");
 const syncStateLabel = document.querySelector("#syncState");
 const syncDetail = document.querySelector("#syncDetail");
@@ -1384,6 +1646,93 @@ const calendarSyncButton = document.querySelector("#calendarSyncButton");
 
 function cloneDefaultTasks() {
   return JSON.parse(JSON.stringify(defaultTasks));
+}
+
+function cloneDefaultWorkstreams() {
+  return JSON.parse(JSON.stringify(defaultWorkstreams));
+}
+
+function slugify(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getInitials(name) {
+  const clean = String(name || "").trim();
+  if (!clean || clean.toLowerCase() === "unassigned") return "--";
+
+  return clean
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function getAvatarClass(name) {
+  const clean = String(name || "").trim();
+  if (!clean || clean.toLowerCase() === "unassigned") return "";
+
+  const classes = ["green", "amber", "red", ""];
+  const total = [...clean].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return classes[total % classes.length];
+}
+
+function parseDueLabel(value) {
+  const match = String(value || "").trim().match(/^([A-Za-z]{3,9})\s+(\d{1,2})$/);
+  if (!match) return null;
+
+  const parsed = new Date(`${match[1]} ${match[2]}, ${new Date().getFullYear()}`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function computeDueState(value, status, archivedAt) {
+  if (status === "Complete" || status === "Archived" || archivedAt) return "";
+
+  const parsed = parseDueLabel(value);
+  if (!parsed) return "";
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  parsed.setHours(0, 0, 0, 0);
+
+  const days = Math.round((parsed.getTime() - today.getTime()) / 86400000);
+  if (days < 0) return "overdue";
+  if (days <= 7) return "soon";
+  return "";
+}
+
+function normalizeTask(task, parentTeam = "") {
+  const assignee = task.assignee || "Unassigned";
+  const status = statusOptions.includes(task.status) ? task.status : "In Progress";
+  const archivedAt = task.archivedAt || (status === "Archived" ? new Date().toISOString() : "");
+
+  return {
+    ...task,
+    id: task.id || `T-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    team: task.team || parentTeam || defaultWorkstreams[0].name,
+    title: task.title || "New project task",
+    description: task.description || "",
+    notes: task.notes || "",
+    assignee,
+    initials: getInitials(assignee),
+    avatar: task.avatar || getAvatarClass(assignee),
+    status: archivedAt ? "Archived" : status,
+    priority: priorityOptions.includes(task.priority) ? task.priority : "Normal",
+    due: task.due || "Set date",
+    dueState: computeDueState(task.due, archivedAt ? "Archived" : status, archivedAt),
+    completion: Math.max(0, Math.min(100, Number(task.completion) || 0)),
+    attachments: Math.max(0, Number.parseInt(task.attachments, 10) || 0),
+    archivedAt,
+    expanded: task.expanded !== false,
+    subtasks: (Array.isArray(task.subtasks) ? task.subtasks : []).map((subtask) =>
+      normalizeTask(subtask, task.team || parentTeam),
+    ),
+  };
 }
 
 function getClientId() {
@@ -1455,15 +1804,55 @@ function loadTasks() {
     const stored = localStorage.getItem(STORAGE_KEY);
     return normalizeTaskList(stored ? JSON.parse(stored) : cloneDefaultTasks());
   } catch {
-    return cloneDefaultTasks();
+    return normalizeTaskList(cloneDefaultTasks());
   }
 }
 
 function normalizeTaskList(nextTasks) {
-  return (Array.isArray(nextTasks) ? nextTasks : cloneDefaultTasks()).map((task) => ({
-    ...task,
-    subtasks: Array.isArray(task.subtasks) ? task.subtasks : [],
-  }));
+  return (Array.isArray(nextTasks) ? nextTasks : cloneDefaultTasks()).map((task) => normalizeTask(task));
+}
+
+function normalizeWorkstreams(nextWorkstreams, taskList = tasks) {
+  const byName = new Map();
+
+  [...cloneDefaultWorkstreams(), ...(Array.isArray(nextWorkstreams) ? nextWorkstreams : [])].forEach((workstream) => {
+    const name = String(workstream.name || "").trim();
+    if (!name) return;
+    byName.set(name, {
+      id: workstream.id || slugify(name),
+      name,
+      color: workstream.color || workstreamPalette[byName.size % workstreamPalette.length],
+    });
+  });
+
+  flattenTasks(taskList).forEach((task) => {
+    const name = String(task.team || "").trim();
+    if (!name || byName.has(name)) return;
+    byName.set(name, {
+      id: slugify(name),
+      name,
+      color: workstreamPalette[byName.size % workstreamPalette.length],
+    });
+  });
+
+  return [...byName.values()];
+}
+
+function loadWorkstreams(taskList) {
+  try {
+    const stored = localStorage.getItem(WORKSTREAM_STORAGE_KEY);
+    return normalizeWorkstreams(stored ? JSON.parse(stored) : cloneDefaultWorkstreams(), taskList);
+  } catch {
+    return normalizeWorkstreams(cloneDefaultWorkstreams(), taskList);
+  }
+}
+
+function saveWorkstreams(options = {}) {
+  localStorage.setItem(WORKSTREAM_STORAGE_KEY, JSON.stringify(workstreams));
+  if (options.sync !== false) {
+    queueRemoteSave();
+  }
+  renderWorkstreams();
 }
 
 function saveTasks(options = {}) {
@@ -1471,6 +1860,8 @@ function saveTasks(options = {}) {
   if (options.sync !== false) {
     queueRemoteSave();
   }
+  renderWorkstreams();
+  renderMetrics();
 }
 
 function setSyncStatus(mode, label, detail) {
@@ -1532,7 +1923,10 @@ function requestJsonp(action, params = {}) {
 }
 
 function hasActiveEditable() {
-  return Boolean(document.activeElement && document.activeElement.closest("[data-edit-field]"));
+  return Boolean(
+    document.activeElement &&
+      document.activeElement.closest("[data-edit-field], [data-field-control], #workstreamNameInput"),
+  );
 }
 
 function queueRemoteSave() {
@@ -1553,9 +1947,11 @@ function queueRemoteSave() {
 function createSyncPayload() {
   return {
     namespace: sync.namespace,
+    schemaVersion: DATA_VERSION,
     baseVersion: sync.version,
     clientId: sync.clientId,
     updatedAt: new Date().toISOString(),
+    workstreams,
     tasks,
   };
 }
@@ -1591,9 +1987,11 @@ function applyRemoteState(remote) {
   if (!remote || !Array.isArray(remote.tasks)) return false;
 
   tasks = normalizeTaskList(remote.tasks);
+  workstreams = normalizeWorkstreams(remote.workstreams, tasks);
   sync.version = Number(remote.version) || sync.version;
   sync.lastLocalAt = remote.updatedAt || sync.lastLocalAt;
   saveTasks({ sync: false });
+  saveWorkstreams({ sync: false });
   saveSyncMeta({
     version: sync.version,
     updatedAt: sync.lastLocalAt,
@@ -1691,14 +2089,6 @@ function flattenTasks(taskList) {
   return taskList.flatMap((task) => [task, ...(Array.isArray(task.subtasks) ? task.subtasks : [])]);
 }
 
-function parseDueLabel(value) {
-  const match = String(value || "").trim().match(/^([A-Za-z]{3,9})\s+(\d{1,2})$/);
-  if (!match) return null;
-
-  const parsed = new Date(`${match[1]} ${match[2]}, ${new Date().getFullYear()}`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
 async function syncCalendarDueDates() {
   if (!sync.enabled) {
     setSyncStatus("local", "Local", "Connect Google sync first");
@@ -1748,12 +2138,207 @@ async function syncCalendarDueDates() {
 }
 
 function findTask(taskId) {
+  const entry = findTaskEntry(taskId);
+  return entry ? entry.task : null;
+}
+
+function findTaskEntry(taskId) {
   for (const task of tasks) {
-    if (task.id === taskId) return task;
-    const subtask = task.subtasks.find((item) => item.id === taskId);
-    if (subtask) return subtask;
+    if (task.id === taskId) {
+      return { task, parent: null, list: tasks, index: tasks.indexOf(task) };
+    }
+
+    const subtaskIndex = task.subtasks.findIndex((item) => item.id === taskId);
+    if (subtaskIndex >= 0) {
+      return {
+        task: task.subtasks[subtaskIndex],
+        parent: task,
+        list: task.subtasks,
+        index: subtaskIndex,
+      };
+    }
   }
   return null;
+}
+
+function isArchived(task) {
+  return Boolean(task.archivedAt) || task.status === "Archived";
+}
+
+function updateTaskDueState(task) {
+  task.dueState = computeDueState(task.due, task.status, task.archivedAt);
+  task.subtasks?.forEach(updateTaskDueState);
+}
+
+function setTaskArchived(task, archived) {
+  task.archivedAt = archived ? task.archivedAt || new Date().toISOString() : "";
+  task.status = archived ? "Archived" : task.status === "Archived" ? "In Progress" : task.status;
+  updateTaskDueState(task);
+  task.subtasks?.forEach((subtask) => setTaskArchived(subtask, archived));
+}
+
+function updateTaskField(task, field, value) {
+  if (field === "assignee") {
+    task.assignee = value.trim() || "Unassigned";
+    task.initials = getInitials(task.assignee);
+    task.avatar = getAvatarClass(task.assignee);
+  } else if (field === "status") {
+    task.status = value;
+    if (value === "Complete") {
+      task.completion = 100;
+      task.archivedAt = "";
+    } else if (value === "Archived") {
+      task.archivedAt = task.archivedAt || new Date().toISOString();
+    } else {
+      task.archivedAt = "";
+      if (task.completion >= 100) task.completion = 75;
+    }
+  } else if (field === "priority") {
+    task.priority = value;
+  } else if (field === "due") {
+    task.due = value.trim() || "Set date";
+  } else if (field === "attachments") {
+    task.attachments = Math.max(0, Number.parseInt(value, 10) || 0);
+  } else if (field === "completion") {
+    task.completion = Math.max(0, Math.min(100, Number(value) || 0));
+    if (task.completion >= 100) {
+      task.status = "Complete";
+      task.archivedAt = "";
+    } else if (task.status === "Complete") {
+      task.status = "In Progress";
+    }
+  }
+
+  updateTaskDueState(task);
+}
+
+function removeTask(taskId) {
+  const entry = findTaskEntry(taskId);
+  if (!entry) return;
+  entry.list.splice(entry.index, 1);
+  saveTasks();
+  renderTable();
+}
+
+function archiveTask(taskId) {
+  const entry = findTaskEntry(taskId);
+  if (!entry) return;
+  setTaskArchived(entry.task, true);
+  saveTasks();
+  renderTable();
+}
+
+function restoreTask(taskId) {
+  const entry = findTaskEntry(taskId);
+  if (!entry) return;
+  setTaskArchived(entry.task, false);
+  saveTasks();
+  renderTable();
+}
+
+function createSelectControl(task, field, options, className) {
+  const select = document.createElement("select");
+  select.className = `field-control select-control ${className || ""}`.trim();
+  select.dataset.taskId = task.id;
+  select.dataset.fieldControl = field;
+
+  options.forEach((option) => {
+    if (option === "Archived" && !isArchived(task)) return;
+    const item = document.createElement("option");
+    item.value = option;
+    item.textContent = option;
+    item.selected = task[field] === option;
+    select.append(item);
+  });
+
+  return select;
+}
+
+function createTextControl(task, field, className) {
+  const input = document.createElement("input");
+  input.className = `field-control ${className || ""}`.trim();
+  input.type = "text";
+  input.value = task[field] || "";
+  input.dataset.taskId = task.id;
+  input.dataset.fieldControl = field;
+  return input;
+}
+
+function createNumberControl(task, field, className) {
+  const input = document.createElement("input");
+  input.className = `field-control ${className || ""}`.trim();
+  input.type = "number";
+  input.min = "0";
+  input.step = "1";
+  input.value = String(task[field] || 0);
+  input.dataset.taskId = task.id;
+  input.dataset.fieldControl = field;
+  return input;
+}
+
+function getVisibleTasks() {
+  return flattenTasks(tasks).filter((task) => !isArchived(task));
+}
+
+function getWorkstreamCount(name) {
+  return getVisibleTasks().filter((task) => task.team === name && task.status !== "Complete").length;
+}
+
+function renderMetrics() {
+  const visible = getVisibleTasks();
+  const active = visible.filter((task) => task.status !== "Complete");
+  const due = active.filter((task) => task.dueState === "soon" || task.dueState === "overdue");
+  const blocked = active.filter((task) => task.status === "Blocked");
+  const complete = visible.filter((task) => task.status === "Complete");
+
+  if (openTasksMetric) openTasksMetric.textContent = String(active.length);
+  if (dueTasksMetric) dueTasksMetric.textContent = String(due.length);
+  if (blockedTasksMetric) blockedTasksMetric.textContent = String(blocked.length);
+  if (completedTasksMetric) completedTasksMetric.textContent = String(complete.length);
+  if (openTasksDetail) openTasksDetail.textContent = `Across ${workstreams.length} workstreams`;
+  if (dueTasksDetail) dueTasksDetail.textContent = `${due.filter((task) => task.dueState === "overdue").length} overdue`;
+  if (blockedTasksDetail) blockedTasksDetail.textContent = `${blocked.length} need action`;
+  if (completedTasksDetail) completedTasksDetail.textContent = "Current shared board";
+}
+
+function createWorkstreamButton(workstream, count) {
+  const button = document.createElement("button");
+  button.className = `team-item ${state.team === workstream.name ? "is-selected" : ""}`.trim();
+  button.type = "button";
+  button.dataset.teamFilter = workstream.name;
+
+  const dot = document.createElement("span");
+  dot.className = "team-dot";
+  dot.style.setProperty("--dot-color", workstream.color);
+
+  const label = document.createElement("span");
+  label.textContent = workstream.name;
+
+  const total = document.createElement("strong");
+  total.textContent = String(count);
+
+  button.append(dot, label, total);
+  return button;
+}
+
+function renderWorkstreams() {
+  if (!workstreamList) return;
+
+  workstreams = normalizeWorkstreams(workstreams, tasks);
+  workstreamList.innerHTML = "";
+
+  const allButton = createWorkstreamButton(
+    { name: "All", color: "#14b878" },
+    getVisibleTasks().filter((task) => task.status !== "Complete").length,
+  );
+  allButton.dataset.teamFilter = "All";
+  allButton.querySelector("span:nth-child(2)").textContent = "All Workstreams";
+  allButton.classList.toggle("is-selected", state.team === "All");
+  workstreamList.append(allButton);
+
+  workstreams.forEach((workstream) => {
+    workstreamList.append(createWorkstreamButton(workstream, getWorkstreamCount(workstream.name)));
+  });
 }
 
 function statusClass(status) {
@@ -1789,6 +2374,8 @@ function matchesSearch(task) {
 }
 
 function matchesView(task) {
+  if (state.view === "Archived") return isArchived(task);
+  if (isArchived(task)) return false;
   if (state.view === "All") return true;
   if (state.view === "Due") return task.dueState === "soon" || task.dueState === "overdue";
   return task.status !== "Complete";
@@ -1818,37 +2405,36 @@ function createEditable(text, className = "editable", taskId, field) {
 
 function renderAssignee(task) {
   const wrap = document.createElement("span");
-  wrap.className = "assignee";
+  wrap.className = "assignee-editor";
 
   const avatar = document.createElement("span");
   avatar.className = `avatar ${task.avatar || ""}`.trim();
   avatar.textContent = task.initials;
 
-  const name = document.createElement("span");
-  name.textContent = task.assignee;
+  const name = createTextControl(task, "assignee", "assignee-input");
+  name.setAttribute("aria-label", "Assignee");
 
   wrap.append(avatar, name);
   return wrap;
 }
 
 function renderCompletion(task) {
-  const ring = document.createElement("span");
+  const ring = document.createElement("button");
+  ring.type = "button";
   ring.className = `completion-ring ${completionClass(task.completion, task.status)}`.trim();
   ring.style.setProperty("--p", task.completion);
-  ring.setAttribute("role", "img");
+  ring.dataset.cycleCompletion = task.id;
   ring.setAttribute("aria-label", `${task.completion} percent complete`);
-  ring.title = "Completion";
+  ring.title = "Cycle completion";
   return ring;
 }
 
 function renderAttachment(task) {
-  const button = document.createElement("button");
-  button.className = "attachment-count";
-  button.type = "button";
-  button.title = `${task.attachments} attachments`;
-  button.dataset.openDriveRepository = "true";
-  button.append(createIcon("paperclip"), document.createTextNode(String(task.attachments)));
-  return button;
+  const wrap = document.createElement("label");
+  wrap.className = "attachment-editor";
+  wrap.title = "Attachment count";
+  wrap.append(createIcon("paperclip"), createNumberControl(task, "attachments", "attachment-input"));
+  return wrap;
 }
 
 function renderTaskCell(task, isSubtask) {
@@ -1865,7 +2451,7 @@ function renderTaskCell(task, isSubtask) {
     chevron.className = `chevron-button ${task.expanded ? "" : "is-collapsed"}`.trim();
     chevron.type = "button";
     chevron.title = task.expanded ? "Collapse subtasks" : "Expand subtasks";
-    chevron.dataset.taskId = task.id;
+    chevron.dataset.toggleTask = task.id;
     chevron.append(createIcon("chevron-down"));
     wrap.append(chevron);
   }
@@ -1913,22 +2499,13 @@ function appendCells(row, task, isSubtask = false) {
   assigneeCell.append(renderAssignee(task));
 
   const statusCell = document.createElement("td");
-  const status = document.createElement("span");
-  status.className = `pill ${statusClass(task.status)}`;
-  status.textContent = task.status;
-  statusCell.append(status);
+  statusCell.append(createSelectControl(task, "status", statusOptions, `status-select ${statusClass(task.status)}`));
 
   const priorityCell = document.createElement("td");
-  const priority = document.createElement("span");
-  priority.className = `priority ${priorityClass(task.priority)}`;
-  priority.textContent = task.priority;
-  priorityCell.append(priority);
+  priorityCell.append(createSelectControl(task, "priority", priorityOptions, `priority-select ${priorityClass(task.priority)}`));
 
   const dueCell = document.createElement("td");
-  const due = document.createElement("span");
-  due.className = `due-label ${task.dueState || ""}`.trim();
-  due.textContent = task.due;
-  dueCell.append(due);
+  dueCell.append(createTextControl(task, "due", `due-control ${task.dueState || ""}`));
 
   const completionCell = document.createElement("td");
   completionCell.className = "completion-col";
@@ -1937,6 +2514,10 @@ function appendCells(row, task, isSubtask = false) {
   const attachmentCell = document.createElement("td");
   attachmentCell.className = "attachment-col";
   attachmentCell.append(renderAttachment(task));
+
+  const actionCell = document.createElement("td");
+  actionCell.className = "action-col";
+  actionCell.append(renderRowActions(task));
 
   row.append(
     taskCell,
@@ -1948,7 +2529,30 @@ function appendCells(row, task, isSubtask = false) {
     dueCell,
     completionCell,
     attachmentCell,
+    actionCell,
   );
+}
+
+function renderRowActions(task) {
+  const wrap = document.createElement("div");
+  wrap.className = "table-actions";
+
+  const archive = document.createElement("button");
+  archive.className = "row-action";
+  archive.type = "button";
+  archive.title = isArchived(task) ? "Restore row" : "Archive row";
+  archive.dataset[isArchived(task) ? "restoreTask" : "archiveTask"] = task.id;
+  archive.append(createIcon(isArchived(task) ? "rotate-ccw" : "archive"));
+
+  const remove = document.createElement("button");
+  remove.className = "row-action danger";
+  remove.type = "button";
+  remove.title = "Delete row";
+  remove.dataset.deleteTask = task.id;
+  remove.append(createIcon("trash-2"));
+
+  wrap.append(archive, remove);
+  return wrap;
 }
 
 function parentShouldRender(task) {
@@ -1995,15 +2599,9 @@ function renderTable() {
 }
 
 body.addEventListener("click", (event) => {
-  const attachment = event.target.closest("[data-open-drive-repository]");
-  if (attachment) {
-    window.open(DRIVE_REPOSITORY_URL, "_blank", "noopener");
-    return;
-  }
-
-  const toggle = event.target.closest("[data-task-id]");
+  const toggle = event.target.closest("[data-toggle-task]");
   if (toggle) {
-    const task = tasks.find((item) => item.id === toggle.dataset.taskId);
+    const task = tasks.find((item) => item.id === toggle.dataset.toggleTask);
     if (task) {
       task.expanded = !task.expanded;
       saveTasks();
@@ -2032,7 +2630,41 @@ body.addEventListener("click", (event) => {
         dueState: "",
         completion: 0,
         attachments: 0,
+        archivedAt: "",
       });
+      saveTasks();
+      renderTable();
+    }
+  }
+
+  const archive = event.target.closest("[data-archive-task]");
+  if (archive) {
+    archiveTask(archive.dataset.archiveTask);
+    return;
+  }
+
+  const restore = event.target.closest("[data-restore-task]");
+  if (restore) {
+    restoreTask(restore.dataset.restoreTask);
+    return;
+  }
+
+  const remove = event.target.closest("[data-delete-task]");
+  if (remove) {
+    const entry = findTaskEntry(remove.dataset.deleteTask);
+    const label = entry ? entry.task.title : "this row";
+    if (window.confirm(`Delete "${label}"? This removes it from the shared board.`)) {
+      removeTask(remove.dataset.deleteTask);
+    }
+    return;
+  }
+
+  const completion = event.target.closest("[data-cycle-completion]");
+  if (completion) {
+    const task = findTask(completion.dataset.cycleCompletion);
+    if (task) {
+      const nextValue = task.completion >= 100 ? 0 : Math.min(100, Math.ceil((task.completion + 25) / 25) * 25);
+      updateTaskField(task, "completion", nextValue);
       saveTasks();
       renderTable();
     }
@@ -2050,14 +2682,28 @@ body.addEventListener("input", (event) => {
   saveTasks();
 });
 
-document.querySelectorAll("[data-team-filter]").forEach((button) => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll("[data-team-filter]").forEach((item) => item.classList.remove("is-selected"));
-    button.classList.add("is-selected");
+body.addEventListener("change", (event) => {
+  const control = event.target.closest("[data-field-control]");
+  if (!control) return;
+
+  const task = findTask(control.dataset.taskId);
+  if (!task) return;
+
+  updateTaskField(task, control.dataset.fieldControl, control.value);
+  saveTasks();
+  renderTable();
+});
+
+if (workstreamList) {
+  workstreamList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-team-filter]");
+    if (!button) return;
+
     state.team = button.dataset.teamFilter;
+    renderWorkstreams();
     renderTable();
   });
-});
+}
 
 document.querySelectorAll("[data-view-filter]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -2081,14 +2727,55 @@ if (calendarSyncButton) {
   calendarSyncButton.addEventListener("click", syncCalendarDueDates);
 }
 
+if (addWorkstreamButton && workstreamForm && workstreamNameInput) {
+  addWorkstreamButton.addEventListener("click", () => {
+    workstreamForm.hidden = false;
+    workstreamNameInput.focus();
+  });
+}
+
+if (cancelWorkstreamButton && workstreamForm) {
+  cancelWorkstreamButton.addEventListener("click", () => {
+    workstreamForm.hidden = true;
+    if (workstreamNameInput) workstreamNameInput.value = "";
+  });
+}
+
+if (workstreamForm && workstreamNameInput) {
+  workstreamForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = workstreamNameInput.value.trim();
+    if (!name) return;
+
+    const existing = workstreams.find((workstream) => workstream.name.toLowerCase() === name.toLowerCase());
+    if (!existing) {
+      workstreams.push({
+        id: slugify(name),
+        name,
+        color: workstreamPalette[workstreams.length % workstreamPalette.length],
+      });
+      saveWorkstreams();
+    }
+
+    state.team = existing ? existing.name : name;
+    workstreamNameInput.value = "";
+    workstreamForm.hidden = true;
+    renderWorkstreams();
+    renderTable();
+  });
+}
+
 window.addEventListener("beforeunload", flushRemoteSave);
 
 document.querySelector("#addTaskButton").addEventListener("click", () => {
+  const selectedTeam = state.team === "All" ? workstreams[0]?.name || defaultWorkstreams[0].name : state.team;
+
   tasks.unshift({
     id: `T-NEW-${Date.now()}`,
-    team: state.team === "All" ? "Controls" : state.team,
+    team: selectedTeam,
     title: "New project task",
     description: "Define the main task scope in this row.",
+    notes: "",
     assignee: "Unassigned",
     initials: "--",
     avatar: "",
@@ -2098,11 +2785,12 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
     dueState: "",
     completion: 0,
     attachments: 0,
+    archivedAt: "",
     expanded: true,
     subtasks: [
       {
         id: `ST-NEW-${Date.now()}`,
-        team: state.team === "All" ? "Controls" : state.team,
+        team: selectedTeam,
         title: "New subtask",
         description: "Add the field or workflow step.",
         notes: "Keep notes visible here so the work record stays in the table.",
@@ -2115,6 +2803,7 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
         dueState: "",
         completion: 0,
         attachments: 0,
+        archivedAt: "",
       },
     ],
   });
@@ -2122,6 +2811,8 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
   renderTable();
 });
 
+renderWorkstreams();
+renderMetrics();
 renderTable();
 startSync();
 
