@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -250,6 +250,11 @@ button {
 .team-item:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--white);
+}
+
+.nav-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
 }
 
 .nav-item.is-active {
@@ -551,6 +556,43 @@ button {
   padding: 14px;
 }
 
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.2fr);
+  gap: 12px;
+}
+
+.settings-box {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--gray-25);
+  padding: 12px;
+}
+
+.settings-box-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-box-header span,
+.backup-toolbar small,
+.backup-meta {
+  color: var(--gray-400);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.settings-box-header strong {
+  color: var(--ink);
+  font-size: 0.94rem;
+}
+
 .settings-add-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -560,7 +602,10 @@ button {
 
 .settings-add-form input,
 .settings-name-input,
-.settings-substation-form input {
+.settings-substation-form input,
+.settings-box input,
+.filter-panel input,
+.filter-panel select {
   width: 100%;
   min-width: 0;
   height: 36px;
@@ -574,7 +619,10 @@ button {
 
 .settings-add-form input:focus,
 .settings-name-input:focus,
-.settings-substation-form input:focus {
+.settings-substation-form input:focus,
+.settings-box input:focus,
+.filter-panel input:focus,
+.filter-panel select:focus {
   border-color: rgba(20, 184, 120, 0.5);
   box-shadow: 0 0 0 3px rgba(20, 184, 120, 0.13);
 }
@@ -673,6 +721,7 @@ button {
 
 .icon-button,
 .primary-button,
+.secondary-button,
 .segmented-control button,
 .row-action {
   display: inline-flex;
@@ -704,6 +753,66 @@ button {
   box-shadow: 0 12px 24px rgba(20, 184, 120, 0.24);
   color: var(--white);
   font-weight: 800;
+}
+
+.secondary-button {
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-600);
+  font-weight: 800;
+}
+
+.secondary-button:hover,
+.icon-button.is-active {
+  border-color: rgba(20, 184, 120, 0.48);
+  background: var(--green-soft);
+  color: var(--green-2);
+}
+
+.filter-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.filter-panel[hidden] {
+  display: none;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.filter-panel label,
+.settings-box label {
+  display: grid;
+  gap: 5px;
+}
+
+.filter-panel label span,
+.settings-box label span {
+  color: var(--gray-400);
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .segmented-control {
@@ -776,8 +885,123 @@ button {
   color: var(--red);
 }
 
-.metric.complete strong {
+.metric.backup strong {
   color: var(--green-2);
+}
+
+.utility-panel {
+  margin-bottom: 12px;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.utility-panel[hidden] {
+  display: none;
+}
+
+.utility-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--gray-100);
+  background: #f9fbfb;
+}
+
+.utility-panel-header span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--gray-400);
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.utility-panel-header strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.utility-panel-body {
+  padding: 14px;
+}
+
+.utility-panel-body.compact {
+  padding: 12px 14px;
+}
+
+.status-callout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid rgba(20, 184, 120, 0.18);
+  border-radius: 8px;
+  background: var(--green-soft);
+  color: #1d3028;
+}
+
+.status-callout svg {
+  width: 22px;
+  height: 22px;
+  color: var(--green-2);
+}
+
+.status-callout div {
+  display: grid;
+  gap: 2px;
+}
+
+.status-callout strong {
+  font-size: 0.94rem;
+}
+
+.status-callout span {
+  color: var(--gray-600);
+  font-size: 0.8rem;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+
+.report-card {
+  min-height: 86px;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--gray-25);
+  padding: 11px 12px;
+}
+
+.report-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gray-400);
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.report-card strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.report-card small {
+  display: block;
+  margin-top: 7px;
+  color: var(--gray-400);
+  font-size: 0.72rem;
 }
 
 .task-surface {
@@ -1190,6 +1414,89 @@ button {
   text-align: center;
 }
 
+.jira-editor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.jira-editor .jira-control {
+  min-width: 0;
+}
+
+.jira-link {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--gray-600);
+  flex: 0 0 auto;
+}
+
+.jira-link:hover {
+  border-color: rgba(20, 184, 120, 0.45);
+  color: var(--green-2);
+}
+
+.jira-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+.jira-control.is-invalid {
+  border-color: rgba(194, 65, 53, 0.45);
+  background: #fff1f2;
+  color: var(--red);
+}
+
+.backup-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.backup-list {
+  display: grid;
+  gap: 6px;
+  max-height: 232px;
+  overflow: auto;
+}
+
+.backup-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+  padding: 7px 8px;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.backup-row strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backup-meta {
+  display: block;
+  margin-top: 3px;
+  text-transform: none;
+}
+
+.backup-row .row-action {
+  text-decoration: none;
+}
+
 .attachment-input::-webkit-outer-spin-button,
 .attachment-input::-webkit-inner-spin-button {
   margin: 0;
@@ -1254,9 +1561,19 @@ button {
   .metric-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .settings-grid,
+  .filter-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-grid,
+  .report-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-</style>
+    </style>
   </head>
   <body>
     <div class="app-shell">
@@ -1292,23 +1609,23 @@ button {
         </div>
 
         <nav class="primary-nav" aria-label="Main menu">
-          <button class="nav-item is-active" type="button">
+          <button class="nav-item is-active" type="button" data-nav-target="overview">
             <i data-lucide="layout-dashboard" aria-hidden="true"></i>
             <span>Overview</span>
           </button>
-          <button class="nav-item" type="button">
+          <button class="nav-item" type="button" data-nav-target="workstations">
             <i data-lucide="users" aria-hidden="true"></i>
             <span>Workstations</span>
           </button>
-          <button class="nav-item" type="button">
+          <button class="nav-item" type="button" data-nav-target="calendar">
             <i data-lucide="calendar-days" aria-hidden="true"></i>
             <span>Calendar</span>
           </button>
-          <button class="nav-item" type="button">
+          <button class="nav-item" type="button" data-nav-target="reports">
             <i data-lucide="bar-chart-3" aria-hidden="true"></i>
             <span>Reports</span>
           </button>
-          <button class="nav-item" id="settingsNavButton" type="button">
+          <button class="nav-item" id="settingsNavButton" type="button" data-nav-target="settings">
             <i data-lucide="settings" aria-hidden="true"></i>
             <span>Settings</span>
           </button>
@@ -1373,6 +1690,57 @@ button {
           </div>
         </header>
 
+        <section class="filter-panel" id="filterPanel" aria-label="Table filters" hidden>
+          <div class="filter-grid">
+            <label>
+              <span>Status</span>
+              <select id="statusFilter">
+                <option value="">Any status</option>
+              </select>
+            </label>
+            <label>
+              <span>Priority</span>
+              <select id="priorityFilter">
+                <option value="">Any priority</option>
+              </select>
+            </label>
+            <label>
+              <span>Creator</span>
+              <input id="creatorFilter" type="search" placeholder="Name" />
+            </label>
+            <label>
+              <span>Jira</span>
+              <input id="jiraFilter" type="search" placeholder="Key or link" />
+            </label>
+            <label>
+              <span>Date from</span>
+              <input id="dateFromFilter" type="date" />
+            </label>
+            <label>
+              <span>Date to</span>
+              <input id="dateToFilter" type="date" />
+            </label>
+            <label>
+              <span>Due from</span>
+              <input id="dueFromFilter" type="date" />
+            </label>
+            <label>
+              <span>Due to</span>
+              <input id="dueToFilter" type="date" />
+            </label>
+          </div>
+          <div class="filter-actions">
+            <button class="secondary-button" id="clearFiltersButton" type="button">
+              <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+              <span>Clear</span>
+            </button>
+            <button class="primary-button" id="closeFiltersButton" type="button">
+              <i data-lucide="check" aria-hidden="true"></i>
+              <span>Done</span>
+            </button>
+          </div>
+        </section>
+
         <section class="metric-strip" aria-label="Project summary">
           <article class="metric">
             <span>Open Tasks</span>
@@ -1389,11 +1757,45 @@ button {
             <strong id="blockedTasksMetric">0</strong>
             <small id="blockedTasksDetail">0 need action</small>
           </article>
-          <article class="metric complete">
-            <span>Completed</span>
-            <strong id="completedTasksMetric">0</strong>
-            <small id="completedTasksDetail">Current shared board</small>
+          <article class="metric backup">
+            <span>Backups</span>
+            <strong id="backupMetric">0</strong>
+            <small id="backupMetricDetail">Drive recovery</small>
           </article>
+        </section>
+
+        <section class="utility-panel" id="calendarPanel" aria-label="Calendar" hidden>
+          <div class="utility-panel-header">
+            <div>
+              <span>Calendar</span>
+              <strong>Google Calendar sync is parked</strong>
+            </div>
+            <button class="icon-button" id="closeCalendarButton" type="button" title="Close calendar">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="utility-panel-body compact">
+            <div class="status-callout">
+              <i data-lucide="calendar-clock" aria-hidden="true"></i>
+              <div>
+                <strong id="calendarReadyCount">0 dated tasks</strong>
+                <span>Calendar scheduling will be connected in a later build.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="utility-panel" id="reportsPanel" aria-label="Reports" hidden>
+          <div class="utility-panel-header">
+            <div>
+              <span>Reports</span>
+              <strong>Workflow snapshot</strong>
+            </div>
+            <button class="icon-button" id="closeReportsButton" type="button" title="Close reports">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="report-grid" id="reportsGrid"></div>
         </section>
 
         <section class="settings-panel" id="settingsPanel" aria-label="Settings" hidden>
@@ -1418,6 +1820,32 @@ button {
               </button>
             </form>
             <div class="settings-workstation-list" id="settingsWorkstationList"></div>
+            <div class="settings-grid">
+              <section class="settings-box">
+                <div class="settings-box-header">
+                  <span>Jira</span>
+                  <strong>Link base</strong>
+                </div>
+                <label>
+                  <span>Base URL</span>
+                  <input id="jiraBaseUrlInput" type="url" placeholder="https://your-domain.atlassian.net/browse/" />
+                </label>
+              </section>
+              <section class="settings-box">
+                <div class="settings-box-header">
+                  <span>Recovery</span>
+                  <strong>Drive backups</strong>
+                </div>
+                <div class="backup-toolbar">
+                  <button class="secondary-button" id="refreshBackupsButton" type="button">
+                    <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                    <span>Refresh</span>
+                  </button>
+                  <small id="backupStatusText">Latest backups load from Google Drive.</small>
+                </div>
+                <div class="backup-list" id="backupList"></div>
+              </section>
+            </div>
           </div>
         </section>
 
@@ -1464,13 +1892,14 @@ window.COMMAND_CENTER_SYNC_CONFIG = {
   pollMs: 15000,
 };
 
-</script>
+    </script>
     <script>
 const STORAGE_KEY = "fes-command-center-tasks-v1";
 const WORKSTREAM_STORAGE_KEY = "fes-command-center-workstreams-v1";
 const SYNC_META_KEY = "fes-command-center-sync-meta-v1";
 const SYNC_CLIENT_KEY = "fes-command-center-client-id-v1";
 const SYNC_ENDPOINT_STORAGE_KEY = "fes-command-center-sync-endpoint-v1";
+const JIRA_BASE_STORAGE_KEY = "fes-command-center-jira-base-url-v1";
 const DATA_VERSION = 4;
 
 const statusOptions = ["Not Started", "In Progress", "Waiting", "Blocked", "Complete", "Archived"];
@@ -1784,6 +2213,7 @@ const sync = {
   saveTimer: null,
   pollTimer: null,
   lastLocalAt: syncMeta.updatedAt || null,
+  backups: [],
 };
 
 sync.enabled = Boolean(sync.endpoint);
@@ -1795,11 +2225,34 @@ const state = {
   team: "All",
   view: "Active",
   search: "",
+  panel: "overview",
+  filters: {
+    status: "",
+    priority: "",
+    creator: "",
+    jira: "",
+    dateFrom: "",
+    dateTo: "",
+    dueFrom: "",
+    dueTo: "",
+  },
 };
 
 const body = document.querySelector("#taskTableBody");
 const emptyTemplate = document.querySelector("#emptyStateTemplate");
 const searchInput = document.querySelector("#searchInput");
+const filterButton = document.querySelector("#filterButton");
+const filterPanel = document.querySelector("#filterPanel");
+const statusFilter = document.querySelector("#statusFilter");
+const priorityFilter = document.querySelector("#priorityFilter");
+const creatorFilter = document.querySelector("#creatorFilter");
+const jiraFilter = document.querySelector("#jiraFilter");
+const dateFromFilter = document.querySelector("#dateFromFilter");
+const dateToFilter = document.querySelector("#dateToFilter");
+const dueFromFilter = document.querySelector("#dueFromFilter");
+const dueToFilter = document.querySelector("#dueToFilter");
+const clearFiltersButton = document.querySelector("#clearFiltersButton");
+const closeFiltersButton = document.querySelector("#closeFiltersButton");
 const workstreamList = document.querySelector("#workstreamList");
 const workstreamForm = document.querySelector("#workstreamForm");
 const workstreamNameInput = document.querySelector("#workstreamNameInput");
@@ -1811,14 +2264,24 @@ const settingsCloseButton = document.querySelector("#settingsCloseButton");
 const settingsWorkstationForm = document.querySelector("#settingsWorkstationForm");
 const settingsWorkstationNameInput = document.querySelector("#settingsWorkstationNameInput");
 const settingsWorkstationList = document.querySelector("#settingsWorkstationList");
+const jiraBaseUrlInput = document.querySelector("#jiraBaseUrlInput");
+const refreshBackupsButton = document.querySelector("#refreshBackupsButton");
+const backupList = document.querySelector("#backupList");
+const backupStatusText = document.querySelector("#backupStatusText");
+const reportsPanel = document.querySelector("#reportsPanel");
+const reportsGrid = document.querySelector("#reportsGrid");
+const closeReportsButton = document.querySelector("#closeReportsButton");
+const calendarPanel = document.querySelector("#calendarPanel");
+const closeCalendarButton = document.querySelector("#closeCalendarButton");
+const calendarReadyCount = document.querySelector("#calendarReadyCount");
 const openTasksMetric = document.querySelector("#openTasksMetric");
 const dueTasksMetric = document.querySelector("#dueTasksMetric");
 const blockedTasksMetric = document.querySelector("#blockedTasksMetric");
-const completedTasksMetric = document.querySelector("#completedTasksMetric");
+const backupMetric = document.querySelector("#backupMetric");
 const openTasksDetail = document.querySelector("#openTasksDetail");
 const dueTasksDetail = document.querySelector("#dueTasksDetail");
 const blockedTasksDetail = document.querySelector("#blockedTasksDetail");
-const completedTasksDetail = document.querySelector("#completedTasksDetail");
+const backupMetricDetail = document.querySelector("#backupMetricDetail");
 const syncPanel = document.querySelector("#syncPanel");
 const syncStateLabel = document.querySelector("#syncState");
 const syncDetail = document.querySelector("#syncDetail");
@@ -1862,18 +2325,56 @@ function getAvatarClass(name) {
   return classes[total % classes.length];
 }
 
-function parseDueLabel(value) {
-  const match = String(value || "").trim().match(/^([A-Za-z]{3,9})\s+(\d{1,2})$/);
-  if (!match) return null;
+function parseDateValue(value) {
+  const clean = String(value || "").trim();
+  if (!clean || clean.toLowerCase() === "set date") return null;
 
-  const parsed = new Date(`${match[1]} ${match[2]}, ${new Date().getFullYear()}`);
+  const isoMatch = clean.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const parsed = new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const slashMatch = clean.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+  if (slashMatch) {
+    const year = slashMatch[3]
+      ? Number(slashMatch[3].length === 2 ? `20${slashMatch[3]}` : slashMatch[3])
+      : new Date().getFullYear();
+    const parsed = new Date(year, Number(slashMatch[1]) - 1, Number(slashMatch[2]));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const labelMatch = clean.match(/^([A-Za-z]{3,9})\s+(\d{1,2})(?:,\s*(\d{4}))?$/);
+  if (!labelMatch) return null;
+
+  const parsed = new Date(`${labelMatch[1]} ${labelMatch[2]}, ${labelMatch[3] || new Date().getFullYear()}`);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function toDateInputValue(value) {
+  const parsed = parseDateValue(value);
+  if (!parsed) return "";
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateLabel(value) {
+  const parsed = parseDateValue(value);
+  if (!parsed) return String(value || "Set date");
+
+  return parsed.toLocaleDateString(undefined, {
+    month: "short",
+    day: "2-digit",
+  });
 }
 
 function computeDueState(value, status, archivedAt) {
   if (status === "Complete" || status === "Archived" || archivedAt) return "";
 
-  const parsed = parseDueLabel(value);
+  const parsed = parseDateValue(value);
   if (!parsed) return "";
 
   const today = new Date();
@@ -2100,6 +2601,8 @@ function saveWorkstreams(options = {}) {
   }
   renderWorkstreams();
   renderSettingsWorkstations();
+  renderReports();
+  renderCalendarPanel();
 }
 
 function saveTasks(options = {}) {
@@ -2109,6 +2612,8 @@ function saveTasks(options = {}) {
   }
   renderWorkstreams();
   renderMetrics();
+  renderReports();
+  renderCalendarPanel();
 }
 
 function setSyncStatus(mode, label, detail) {
@@ -2237,6 +2742,7 @@ function applyRemoteState(remote) {
 
   tasks = normalizeTaskList(remote.tasks);
   workstreams = normalizeWorkstreams(remote.workstreams, tasks);
+  sync.backups = Array.isArray(remote.backups) ? remote.backups : sync.backups;
   sync.version = Number(remote.version) || sync.version;
   sync.lastLocalAt = remote.updatedAt || sync.lastLocalAt;
   saveTasks({ sync: false });
@@ -2246,6 +2752,7 @@ function applyRemoteState(remote) {
     updatedAt: sync.lastLocalAt,
     updatedBy: remote.updatedBy || "",
   });
+  renderBackupList(sync.backups);
   renderTable();
   return true;
 }
@@ -2271,6 +2778,12 @@ async function fetchRemoteState(options = {}) {
       sync.dirty = true;
       await pushRemoteSave();
       return;
+    }
+
+    if (Array.isArray(remote.backups)) {
+      sync.backups = remote.backups;
+      renderBackupList(sync.backups);
+      renderMetrics();
     }
 
     const remoteVersion = Number(remote.version) || 0;
@@ -2331,7 +2844,7 @@ function startSync() {
 }
 
 function countSchedulableTasks() {
-  return flattenTasks(tasks).filter((task) => task.status !== "Complete" && parseDueLabel(task.due)).length;
+  return flattenTasks(tasks).filter((task) => task.status !== "Complete" && parseDateValue(task.due)).length;
 }
 
 function flattenTasks(taskList) {
@@ -2446,11 +2959,12 @@ function updateTaskField(task, field, value) {
   } else if (field === "priority") {
     task.priority = value;
   } else if (field === "date") {
-    task.date = value.trim() || "Set date";
+    task.date = toDateInputValue(value) || "Set date";
   } else if (field === "jira") {
-    task.jira = value.trim();
+    const clean = value.trim();
+    task.jira = /^[A-Z][A-Z0-9]+-\d+$/i.test(clean) ? clean.toUpperCase() : clean;
   } else if (field === "due") {
-    task.due = value.trim() || "Set date";
+    task.due = toDateInputValue(value) || "Set date";
   } else if (field === "attachments") {
     task.attachments = Math.max(0, Number.parseInt(value, 10) || 0);
   } else if (field === "completion") {
@@ -2518,6 +3032,86 @@ function createTextControl(task, field, className) {
   return input;
 }
 
+function createDateControl(task, field, className) {
+  const input = document.createElement("input");
+  input.className = `field-control ${className || ""}`.trim();
+  input.type = "date";
+  input.value = toDateInputValue(task[field]);
+  input.dataset.taskId = task.id;
+  input.dataset.fieldControl = field;
+  input.title = task[field] && task[field] !== "Set date" ? formatDateLabel(task[field]) : "Set date";
+  return input;
+}
+
+function getJiraBaseUrl() {
+  return localStorage.getItem(JIRA_BASE_STORAGE_KEY) || normalizeJiraBaseUrl(syncConfig.jiraBaseUrl || "");
+}
+
+function normalizeJiraBaseUrl(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return "";
+
+  try {
+    const url = new URL(clean);
+    if (!/^https?:$/.test(url.protocol)) return "";
+    return url.toString().endsWith("/") ? url.toString() : `${url.toString()}/`;
+  } catch {
+    return "";
+  }
+}
+
+function getJiraHref(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return "";
+
+  try {
+    const url = new URL(clean);
+    return /^https?:$/.test(url.protocol) ? url.toString() : "";
+  } catch {
+    const key = clean.toUpperCase();
+    if (!/^[A-Z][A-Z0-9]+-\d+$/.test(key)) return "";
+    const base = getJiraBaseUrl();
+    return base ? `${base}${encodeURIComponent(key)}` : "";
+  }
+}
+
+function isJiraValueValid(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return true;
+  if (/^[A-Z][A-Z0-9]+-\d+$/i.test(clean)) return true;
+  try {
+    const url = new URL(clean);
+    return /^https?:$/.test(url.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function createJiraControl(task) {
+  const wrap = document.createElement("span");
+  wrap.className = "jira-editor";
+
+  const input = createTextControl(task, "jira", "jira-control");
+  input.placeholder = "FAC-123";
+  input.classList.toggle("is-invalid", !isJiraValueValid(task.jira));
+  input.setAttribute("aria-label", "Jira key or link");
+  wrap.append(input);
+
+  const href = getJiraHref(task.jira);
+  if (href) {
+    const link = document.createElement("a");
+    link.className = "jira-link";
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.title = "Open Jira";
+    link.append(createIcon("external-link"));
+    wrap.append(link);
+  }
+
+  return wrap;
+}
+
 function createNumberControl(task, field, className) {
   const input = document.createElement("input");
   input.className = `field-control ${className || ""}`.trim();
@@ -2558,16 +3152,184 @@ function renderMetrics() {
   const active = visible.filter((task) => task.status !== "Complete");
   const due = active.filter((task) => task.dueState === "soon" || task.dueState === "overdue");
   const blocked = active.filter((task) => task.status === "Blocked");
-  const complete = visible.filter((task) => task.status === "Complete");
 
   if (openTasksMetric) openTasksMetric.textContent = String(active.length);
   if (dueTasksMetric) dueTasksMetric.textContent = String(due.length);
   if (blockedTasksMetric) blockedTasksMetric.textContent = String(blocked.length);
-  if (completedTasksMetric) completedTasksMetric.textContent = String(complete.length);
+  if (backupMetric) backupMetric.textContent = String(sync.backups.length);
   if (openTasksDetail) openTasksDetail.textContent = `Across ${workstreams.length} workstations`;
   if (dueTasksDetail) dueTasksDetail.textContent = `${due.filter((task) => task.dueState === "overdue").length} overdue`;
   if (blockedTasksDetail) blockedTasksDetail.textContent = `${blocked.length} need action`;
-  if (completedTasksDetail) completedTasksDetail.textContent = "Current shared board";
+  if (backupMetricDetail) backupMetricDetail.textContent = sync.enabled ? "Drive recovery" : "Local mode";
+}
+
+function createReportCard(label, value, detail) {
+  const card = document.createElement("article");
+  card.className = "report-card";
+
+  const labelEl = document.createElement("span");
+  labelEl.textContent = label;
+
+  const valueEl = document.createElement("strong");
+  valueEl.textContent = String(value);
+
+  const detailEl = document.createElement("small");
+  detailEl.textContent = detail;
+
+  card.append(labelEl, valueEl, detailEl);
+  return card;
+}
+
+function renderReports() {
+  if (!reportsGrid) return;
+
+  const all = flattenTasks(tasks);
+  const visible = all.filter((task) => !isArchived(task));
+  const active = visible.filter((task) => task.status !== "Complete");
+  const complete = visible.filter((task) => task.status === "Complete");
+  const due = active.filter((task) => task.dueState === "soon" || task.dueState === "overdue");
+  const overdue = due.filter((task) => task.dueState === "overdue");
+  const blocked = active.filter((task) => task.status === "Blocked");
+  const urgent = active.filter((task) => task.priority === "Urgent");
+  const archived = all.filter(isArchived);
+
+  reportsGrid.innerHTML = "";
+  reportsGrid.append(
+    createReportCard("Active", active.length, "Open non-complete rows"),
+    createReportCard("Due", due.length, `${overdue.length} overdue`),
+    createReportCard("Blocked", blocked.length, "Rows needing action"),
+    createReportCard("Urgent", urgent.length, "Urgent priority"),
+    createReportCard("Complete", complete.length, "Closed rows"),
+    createReportCard("Archived", archived.length, "Stored out of active view"),
+    createReportCard("Workstations", flattenWorkstations().length, `${workstreams.length} top level`),
+    createReportCard("Backups", sync.backups.length, sync.enabled ? "Google Drive versions" : "Connect Google sync"),
+  );
+}
+
+function renderCalendarPanel() {
+  if (!calendarReadyCount) return;
+  const count = countSchedulableTasks();
+  calendarReadyCount.textContent = `${count} dated ${count === 1 ? "task" : "tasks"}`;
+}
+
+function formatTimestamp(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return String(value);
+
+  return parsed.toLocaleString(undefined, {
+    month: "short",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function setBackupStatus(message) {
+  if (backupStatusText) backupStatusText.textContent = message;
+}
+
+function renderBackupList(backups = sync.backups) {
+  sync.backups = Array.isArray(backups) ? backups : [];
+  renderMetrics();
+  renderReports();
+
+  if (!backupList) return;
+  backupList.innerHTML = "";
+
+  if (!sync.backups.length) {
+    const empty = document.createElement("div");
+    empty.className = "backup-row";
+    const text = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = sync.enabled ? "No Drive backups yet" : "Connect Google sync";
+    const meta = document.createElement("span");
+    meta.className = "backup-meta";
+    meta.textContent = sync.enabled ? "Backups are created before each shared overwrite." : "Backups load from Drive.";
+    text.append(title, meta);
+    empty.append(text);
+    backupList.append(empty);
+    return;
+  }
+
+  sync.backups.forEach((backup) => {
+    const row = document.createElement("div");
+    row.className = "backup-row";
+
+    const detail = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = backup.name || "Command Center backup";
+    const meta = document.createElement("span");
+    meta.className = "backup-meta";
+    meta.textContent = formatTimestamp(backup.createdAt || backup.updatedAt);
+    detail.append(title, meta);
+
+    const open = document.createElement("a");
+    open.className = "row-action";
+    open.href = backup.url || DRIVE_REPOSITORY_URL;
+    open.target = "_blank";
+    open.rel = "noreferrer";
+    open.title = "Open backup";
+    open.append(createIcon("external-link"));
+
+    const restore = document.createElement("button");
+    restore.className = "row-action";
+    restore.type = "button";
+    restore.title = "Restore backup";
+    restore.dataset.restoreBackup = backup.name || "";
+    restore.append(createIcon("history"));
+
+    row.append(detail, open, restore);
+    backupList.append(row);
+  });
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+async function loadBackupList() {
+  if (!sync.enabled) {
+    setBackupStatus("Connect Google sync to load backups.");
+    renderBackupList([]);
+    return;
+  }
+
+  setBackupStatus("Loading Drive backups...");
+  try {
+    const result = await requestJsonp("backups", { limit: 10 });
+    if (!result || result.ok === false) {
+      throw new Error(result && result.error ? result.error : "Backup list failed");
+    }
+    renderBackupList(result.backups || []);
+    setBackupStatus(`${sync.backups.length} backups available.`);
+  } catch {
+    setBackupStatus("Backup list failed.");
+  }
+}
+
+async function restoreBackup(name) {
+  if (!sync.enabled || !name) return;
+  if (!window.confirm(`Restore "${name}"? This replaces the current shared board with that backup.`)) return;
+
+  setBackupStatus("Restoring backup...");
+  try {
+    const result = await requestJsonp("restoreBackup", {
+      name,
+      clientId: sync.clientId,
+    });
+
+    if (!result || result.ok === false) {
+      throw new Error(result && result.error ? result.error : "Backup restore failed");
+    }
+
+    applyRemoteState(result);
+    setBackupStatus("Backup restored.");
+    setSyncStatus("saved", "Saved", "Backup restored to shared storage");
+  } catch {
+    setBackupStatus("Restore failed. Apps Script may need the restore update deployed.");
+    setSyncStatus("offline", "Offline", "Backup restore failed");
+  }
 }
 
 function createWorkstreamButton(workstream, count, options = {}) {
@@ -2897,11 +3659,34 @@ function renderSettingsWorkstations() {
   }
 }
 
+function setActivePanel(panel = "overview") {
+  state.panel = panel;
+
+  const showSettings = panel === "settings" || panel === "workstations";
+  if (settingsPanel) settingsPanel.hidden = !showSettings;
+  if (reportsPanel) reportsPanel.hidden = panel !== "reports";
+  if (calendarPanel) calendarPanel.hidden = panel !== "calendar";
+
+  document.querySelectorAll("[data-nav-target]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.navTarget === panel);
+  });
+
+  if (showSettings) {
+    renderSettingsWorkstations();
+    renderBackupList(sync.backups);
+    if (sync.enabled) loadBackupList();
+  }
+
+  if (panel === "reports") renderReports();
+  if (panel === "calendar") renderCalendarPanel();
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
 function setSettingsVisible(visible) {
-  if (!settingsPanel) return;
-  settingsPanel.hidden = !visible;
-  if (settingsNavButton) settingsNavButton.classList.toggle("is-active", visible);
-  if (visible) renderSettingsWorkstations();
+  setActivePanel(visible ? "settings" : "overview");
 }
 
 function statusClass(status) {
@@ -2948,6 +3733,51 @@ function matchesView(task) {
 
 function matchesTeam(task) {
   return taskMatchesTeamFilter(task, state.team);
+}
+
+function normalizeFilterText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function dateInRange(value, from, to) {
+  const parsed = parseDateValue(value);
+  if ((from || to) && !parsed) return false;
+
+  if (from) {
+    const fromDate = parseDateValue(from);
+    if (fromDate && parsed < fromDate) return false;
+  }
+
+  if (to) {
+    const toDate = parseDateValue(to);
+    if (toDate && parsed > toDate) return false;
+  }
+
+  return true;
+}
+
+function hasAdvancedFilters() {
+  return Object.values(state.filters).some((value) => String(value || "").trim());
+}
+
+function updateFilterButtonState() {
+  if (!filterButton) return;
+  const active = hasAdvancedFilters() || (filterPanel && !filterPanel.hidden);
+  filterButton.classList.toggle("is-active", active);
+  filterButton.title = hasAdvancedFilters() ? "Filters active" : "Filter table";
+}
+
+function matchesAdvancedFilters(task) {
+  const filters = state.filters;
+
+  if (filters.status && task.status !== filters.status) return false;
+  if (filters.priority && task.priority !== filters.priority) return false;
+  if (filters.creator && !normalizeFilterText(task.creator).includes(filters.creator)) return false;
+  if (filters.jira && !normalizeFilterText(task.jira).includes(filters.jira)) return false;
+  if (!dateInRange(task.date, filters.dateFrom, filters.dateTo)) return false;
+  if (!dateInRange(task.due, filters.dueFrom, filters.dueTo)) return false;
+
+  return true;
 }
 
 function createIcon(name) {
@@ -3041,7 +3871,7 @@ function appendCells(row, task, isSubtask = false) {
   statusCell.append(createSelectControl(task, "status", statusOptions, `status-select ${statusClass(task.status)}`));
 
   const dateCell = document.createElement("td");
-  dateCell.append(createTextControl(task, "date", "date-control"));
+  dateCell.append(createDateControl(task, "date", "date-control"));
 
   const taskCell = document.createElement("td");
   taskCell.append(renderTaskCell(task, isSubtask));
@@ -3063,13 +3893,13 @@ function appendCells(row, task, isSubtask = false) {
   creatorCell.append(renderCreator(task));
 
   const jiraCell = document.createElement("td");
-  jiraCell.append(createTextControl(task, "jira", "jira-control"));
+  jiraCell.append(createJiraControl(task));
 
   const priorityCell = document.createElement("td");
   priorityCell.append(createSelectControl(task, "priority", priorityOptions, `priority-select ${priorityClass(task.priority)}`));
 
   const dueCell = document.createElement("td");
-  dueCell.append(createTextControl(task, "due", `due-control ${task.dueState || ""}`));
+  dueCell.append(createDateControl(task, "due", `due-control ${task.dueState || ""}`));
 
   row.append(
     statusCell,
@@ -3107,9 +3937,9 @@ function renderRowActions(task) {
 }
 
 function parentShouldRender(task) {
-  const parentMatches = matchesTeam(task) && matchesView(task) && matchesSearch(task);
+  const parentMatches = matchesTeam(task) && matchesView(task) && matchesSearch(task) && matchesAdvancedFilters(task);
   const childMatches = task.subtasks.some(
-    (subtask) => matchesTeam(subtask) && matchesView(subtask) && matchesSearch(subtask),
+    (subtask) => matchesTeam(subtask) && matchesView(subtask) && matchesSearch(subtask) && matchesAdvancedFilters(subtask),
   );
   return parentMatches || childMatches;
 }
@@ -3128,7 +3958,10 @@ function renderTable() {
 
     if (task.expanded) {
       task.subtasks
-        .filter((subtask) => matchesTeam(subtask) && matchesView(subtask) && matchesSearch(subtask))
+        .filter(
+          (subtask) =>
+            matchesTeam(subtask) && matchesView(subtask) && matchesSearch(subtask) && matchesAdvancedFilters(subtask),
+        )
         .forEach((subtask) => {
           const subtaskRow = document.createElement("tr");
           subtaskRow.className = "subtask-row";
@@ -3143,6 +3976,8 @@ function renderTable() {
   if (rowCount === 0) {
     body.append(emptyTemplate.content.cloneNode(true));
   }
+
+  updateFilterButtonState();
 
   if (window.lucide) {
     window.lucide.createIcons();
@@ -3263,6 +4098,85 @@ searchInput.addEventListener("input", (event) => {
   renderTable();
 });
 
+function setFilterValue(key, value) {
+  state.filters[key] = key === "creator" || key === "jira" ? normalizeFilterText(value) : value;
+  renderTable();
+}
+
+function clearAdvancedFilters() {
+  state.filters = {
+    status: "",
+    priority: "",
+    creator: "",
+    jira: "",
+    dateFrom: "",
+    dateTo: "",
+    dueFrom: "",
+    dueTo: "",
+  };
+
+  [
+    statusFilter,
+    priorityFilter,
+    creatorFilter,
+    jiraFilter,
+    dateFromFilter,
+    dateToFilter,
+    dueFromFilter,
+    dueToFilter,
+  ].forEach((control) => {
+    if (control) control.value = "";
+  });
+
+  renderTable();
+}
+
+function fillSelectOptions(select, options) {
+  if (!select) return;
+  options.forEach((option) => {
+    const item = document.createElement("option");
+    item.value = option;
+    item.textContent = option;
+    select.append(item);
+  });
+}
+
+fillSelectOptions(statusFilter, statusOptions);
+fillSelectOptions(priorityFilter, priorityOptions);
+
+[
+  [statusFilter, "status"],
+  [priorityFilter, "priority"],
+  [creatorFilter, "creator"],
+  [jiraFilter, "jira"],
+  [dateFromFilter, "dateFrom"],
+  [dateToFilter, "dateTo"],
+  [dueFromFilter, "dueFrom"],
+  [dueToFilter, "dueTo"],
+].forEach(([control, key]) => {
+  if (!control) return;
+  control.addEventListener("input", (event) => setFilterValue(key, event.target.value));
+  control.addEventListener("change", (event) => setFilterValue(key, event.target.value));
+});
+
+if (filterButton && filterPanel) {
+  filterButton.addEventListener("click", () => {
+    filterPanel.hidden = !filterPanel.hidden;
+    updateFilterButtonState();
+  });
+}
+
+if (clearFiltersButton) {
+  clearFiltersButton.addEventListener("click", clearAdvancedFilters);
+}
+
+if (closeFiltersButton && filterPanel) {
+  closeFiltersButton.addEventListener("click", () => {
+    filterPanel.hidden = true;
+    updateFilterButtonState();
+  });
+}
+
 if (syncPanel) {
   syncPanel.addEventListener("dblclick", configureSyncEndpoint);
 }
@@ -3271,15 +4185,55 @@ if (calendarSyncButton) {
   calendarSyncButton.addEventListener("click", syncCalendarDueDates);
 }
 
-if (settingsNavButton) {
-  settingsNavButton.addEventListener("click", () => {
-    setSettingsVisible(settingsPanel ? settingsPanel.hidden : true);
+document.querySelectorAll("[data-nav-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = button.dataset.navTarget || "overview";
+    if (target === "settings" && state.panel === "settings") {
+      setActivePanel("overview");
+      return;
+    }
+    setActivePanel(target);
   });
-}
+});
 
 if (settingsCloseButton) {
   settingsCloseButton.addEventListener("click", () => {
-    setSettingsVisible(false);
+    setActivePanel("overview");
+  });
+}
+
+if (closeReportsButton) {
+  closeReportsButton.addEventListener("click", () => setActivePanel("overview"));
+}
+
+if (closeCalendarButton) {
+  closeCalendarButton.addEventListener("click", () => setActivePanel("overview"));
+}
+
+if (refreshBackupsButton) {
+  refreshBackupsButton.addEventListener("click", loadBackupList);
+}
+
+if (backupList) {
+  backupList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-restore-backup]");
+    if (!button) return;
+    restoreBackup(button.dataset.restoreBackup);
+  });
+}
+
+if (jiraBaseUrlInput) {
+  jiraBaseUrlInput.value = getJiraBaseUrl();
+  jiraBaseUrlInput.addEventListener("change", (event) => {
+    const normalized = normalizeJiraBaseUrl(event.target.value);
+    if (normalized) {
+      localStorage.setItem(JIRA_BASE_STORAGE_KEY, normalized);
+      jiraBaseUrlInput.value = normalized;
+    } else {
+      localStorage.removeItem(JIRA_BASE_STORAGE_KEY);
+      jiraBaseUrlInput.value = "";
+    }
+    renderTable();
   });
 }
 
@@ -3465,9 +4419,13 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
 renderWorkstreams();
 renderSettingsWorkstations();
 renderMetrics();
+renderReports();
+renderCalendarPanel();
+renderBackupList(sync.backups);
 renderTable();
 startSync();
 
-</script>
+    </script>
   </body>
 </html>
+

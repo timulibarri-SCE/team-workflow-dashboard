@@ -22,6 +22,13 @@ function doGet(e) {
       return respond_({ ok: true, backups: listBackups_(10) }, getParameter_(e, "callback"));
     }
 
+    if (action === "restoreBackup") {
+      return respond_(
+        restoreBackup_(getParameter_(e, "name"), getParameter_(e, "clientId")),
+        getParameter_(e, "callback"),
+      );
+    }
+
     return respond_(readState_(), getParameter_(e, "callback"));
   } catch (error) {
     return respond_(toError_(error), getParameter_(e, "callback"));
@@ -210,6 +217,53 @@ function listBackups_(limit) {
   return backups.slice(0, limit || 10);
 }
 
+function restoreBackup_(backupName, clientId) {
+  const cleanName = String(backupName || "").trim();
+  if (!cleanName) {
+    throw new Error("Backup name is required.");
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    const backupFolder = getBackupFolder_();
+    const backups = backupFolder.getFilesByName(cleanName);
+    if (!backups.hasNext()) {
+      throw new Error("Backup was not found.");
+    }
+
+    const backupFile = backups.next();
+    const restored = JSON.parse(backupFile.getBlob().getDataAsString() || "{}");
+    if (!Array.isArray(restored.tasks)) {
+      throw new Error("Backup does not contain a valid task list.");
+    }
+
+    const current = readState_();
+    const dataFile = getDataFile_(true);
+    const backup = createBackup_(dataFile, current);
+    const nextState = {
+      ok: true,
+      namespace: COMMAND_CENTER_CONFIG.namespace,
+      schemaVersion: Number(restored.schemaVersion) || 2,
+      version: (Number(current.version) || 0) + 1,
+      updatedAt: new Date().toISOString(),
+      updatedBy: clientId || "backup-restore",
+      restoredFrom: cleanName,
+      calendar: restored.calendar || current.calendar || {},
+      workstreams: Array.isArray(restored.workstreams) ? restored.workstreams : current.workstreams || [],
+      backup,
+      tasks: restored.tasks,
+    };
+
+    dataFile.setContent(JSON.stringify(nextState, null, 2));
+    nextState.backups = listBackups_(10);
+    return nextState;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function pruneBackups_(folder) {
   const files = [];
   const iterator = folder.getFiles();
@@ -318,12 +372,36 @@ function walkTasks_(tasks, callback) {
 }
 
 function parseDueDate_(value) {
-  const match = String(value || "").trim().match(/^([A-Za-z]{3,9})\s+(\d{1,2})$/);
-  if (!match) {
-    return null;
+  const clean = String(value || "").trim();
+  const isoMatch = clean.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const date = new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    date.setHours(0, 0, 0, 0);
+    return date;
   }
 
-  const date = new Date(`${match[1]} ${match[2]}, ${new Date().getFullYear()}`);
+  const match = clean.match(/^([A-Za-z]{3,9})\s+(\d{1,2})(?:,\s*(\d{4}))?$/);
+  if (!match) {
+    const slashMatch = clean.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+    if (!slashMatch) {
+      return null;
+    }
+
+    const year = slashMatch[3]
+      ? Number(slashMatch[3].length === 2 ? `20${slashMatch[3]}` : slashMatch[3])
+      : new Date().getFullYear();
+    const slashDate = new Date(year, Number(slashMatch[1]) - 1, Number(slashMatch[2]));
+    if (Number.isNaN(slashDate.getTime())) {
+      return null;
+    }
+    slashDate.setHours(0, 0, 0, 0);
+    return slashDate;
+  }
+
+  const date = new Date(`${match[1]} ${match[2]}, ${match[3] || new Date().getFullYear()}`);
   if (Number.isNaN(date.getTime())) {
     return null;
   }
