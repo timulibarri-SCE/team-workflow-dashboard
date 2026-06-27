@@ -813,6 +813,12 @@ button {
   font-weight: 800;
 }
 
+.compact-command {
+  min-width: 48px;
+  padding: 0 11px;
+  text-transform: lowercase;
+}
+
 .secondary-button:hover,
 .icon-button.is-active {
   border-color: rgba(20, 184, 120, 0.48);
@@ -1907,7 +1913,8 @@ button {
 
   .search-box,
   .segmented-control,
-  .primary-button {
+  .primary-button,
+  .compact-command {
     grid-column: 1 / -1;
     width: 100%;
   }
@@ -2108,6 +2115,9 @@ button {
             <button class="primary-button" id="addTaskButton" type="button">
               <i data-lucide="plus" aria-hidden="true"></i>
               <span>Add Task</span>
+            </button>
+            <button class="secondary-button compact-command" id="minimizeSubtasksButton" type="button" title="Minimize all subtasks">
+              <span>min</span>
             </button>
           </div>
         </header>
@@ -2692,6 +2702,7 @@ const body = document.querySelector("#taskTableBody");
 const emptyTemplate = document.querySelector("#emptyStateTemplate");
 const searchInput = document.querySelector("#searchInput");
 const filterButton = document.querySelector("#filterButton");
+const minimizeSubtasksButton = document.querySelector("#minimizeSubtasksButton");
 const filterPanel = document.querySelector("#filterPanel");
 const statusFilter = document.querySelector("#statusFilter");
 const priorityFilter = document.querySelector("#priorityFilter");
@@ -3494,6 +3505,14 @@ function restoreTask(taskId) {
   const entry = findTaskEntry(taskId);
   if (!entry) return;
   setTaskArchived(entry.task, false);
+  saveTasks();
+  renderTable();
+}
+
+function minimizeAllSubtasks() {
+  tasks.forEach((task) => {
+    task.expanded = false;
+  });
   saveTasks();
   renderTable();
 }
@@ -5063,6 +5082,10 @@ if (settingsWorkstationList) {
 }
 
 window.addEventListener("beforeunload", flushRemoteSave);
+
+if (minimizeSubtasksButton) {
+  minimizeSubtasksButton.addEventListener("click", minimizeAllSubtasks);
+}
 
 document.querySelector("#addTaskButton").addEventListener("click", () => {
   const selectedTeam = state.team === "All" ? workstreams[0]?.name || defaultWorkstreams[0].name : state.team;
