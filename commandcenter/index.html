@@ -794,7 +794,7 @@ button {
 
 .task-table {
   width: 100%;
-  min-width: 1210px;
+  min-width: 1320px;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -833,8 +833,18 @@ button {
   font-size: 0.86rem;
 }
 
-.task-table .task-col {
-  width: 220px;
+.task-table th:nth-child(1),
+.task-table td:nth-child(1) {
+  width: 126px;
+}
+
+.task-table th:nth-child(2),
+.task-table td:nth-child(2) {
+  width: 104px;
+}
+
+.task-table .topic-col {
+  width: 260px;
 }
 
 .description-col {
@@ -845,39 +855,24 @@ button {
   width: 230px;
 }
 
-.task-table th:nth-child(4),
-.task-table td:nth-child(4) {
-  width: 138px;
-}
-
-.task-table th:nth-child(5),
-.task-table td:nth-child(5) {
-  width: 126px;
-}
-
 .task-table th:nth-child(6),
 .task-table td:nth-child(6) {
-  width: 98px;
+  width: 142px;
 }
 
 .task-table th:nth-child(7),
 .task-table td:nth-child(7) {
+  width: 126px;
+}
+
+.task-table th:nth-child(8),
+.task-table td:nth-child(8) {
+  width: 98px;
+}
+
+.task-table th:nth-child(9),
+.task-table td:nth-child(9) {
   width: 92px;
-}
-
-.completion-col {
-  width: 62px;
-  text-align: center;
-}
-
-.attachment-col {
-  width: 74px;
-  text-align: center;
-}
-
-.action-col {
-  width: 82px;
-  text-align: center;
 }
 
 .task-table tr.parent-row td {
@@ -897,7 +892,8 @@ button {
 }
 
 .task-title {
-  min-width: 0;
+  min-width: 64px;
+  flex: 1;
   overflow: hidden;
   color: #13201b;
   font-weight: 800;
@@ -937,6 +933,11 @@ button {
 
 .chevron-button.is-collapsed svg {
   transform: rotate(-90deg);
+}
+
+.topic-actions {
+  margin-left: auto;
+  flex: 0 0 auto;
 }
 
 .editable,
@@ -989,7 +990,7 @@ button {
   overflow: hidden;
 }
 
-.assignee-editor {
+.creator-editor {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -1031,7 +1032,9 @@ button {
 .priority,
 .status-select,
 .priority-select,
-.due-control {
+.due-control,
+.date-control,
+.jira-control {
   display: inline-flex;
   align-items: center;
   min-height: 28px;
@@ -1097,7 +1100,9 @@ button {
 }
 
 .due-label,
-.due-control {
+.due-control,
+.date-control,
+.jira-control {
   padding: 0 9px;
   background: #f1f5f9;
   color: #334155;
@@ -1128,7 +1133,7 @@ button {
   box-shadow: 0 0 0 2px rgba(20, 184, 120, 0.16);
 }
 
-.assignee-input {
+.creator-input {
   min-width: 0;
   padding: 0 2px;
   background: transparent;
@@ -1140,43 +1145,6 @@ button {
   appearance: none;
   cursor: pointer;
   text-align: center;
-}
-
-.completion-ring {
-  --p: 0;
-  --ring-color: var(--green);
-  position: relative;
-  display: inline-grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border-radius: 50%;
-  border: 0;
-  background: conic-gradient(var(--ring-color) calc(var(--p) * 1%), #dce5e9 0);
-}
-
-.completion-ring::after {
-  width: 19px;
-  height: 19px;
-  border-radius: 50%;
-  background: var(--white);
-  content: "";
-}
-
-.subtask-row .completion-ring::after {
-  background: var(--green-soft);
-}
-
-.completion-ring.low {
-  --ring-color: var(--amber);
-}
-
-.completion-ring.blocked {
-  --ring-color: var(--red);
-}
-
-.completion-ring.done {
-  --ring-color: var(--green-2);
 }
 
 .attachment-count {
@@ -1387,7 +1355,7 @@ button {
           <div class="toolbar">
             <label class="search-box">
               <i data-lucide="search" aria-hidden="true"></i>
-              <input id="searchInput" type="search" placeholder="Search tasks, notes, assignees" />
+              <input id="searchInput" type="search" placeholder="Search topics, notes, creators" />
             </label>
             <button class="icon-button" id="filterButton" type="button" title="Filter table">
               <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
@@ -1458,22 +1426,15 @@ button {
             <table class="task-table">
               <thead>
                 <tr>
-                  <th class="task-col">Task</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th class="topic-col">Topic</th>
                   <th class="description-col">Description</th>
                   <th class="notes-col">Notes</th>
-                  <th>Assignee</th>
-                  <th>Status</th>
+                  <th>Creator</th>
+                  <th>Jira</th>
                   <th>Priority</th>
                   <th>Due</th>
-                  <th class="completion-col">Done</th>
-                  <th class="attachment-col">
-                    <span class="sr-only">Attachments</span>
-                    <i data-lucide="paperclip" aria-hidden="true"></i>
-                  </th>
-                  <th class="action-col">
-                    <span class="sr-only">Actions</span>
-                    <i data-lucide="more-horizontal" aria-hidden="true"></i>
-                  </th>
                 </tr>
               </thead>
               <tbody id="taskTableBody"></tbody>
@@ -1485,7 +1446,7 @@ button {
 
     <template id="emptyStateTemplate">
       <tr class="empty-row">
-        <td colspan="10">
+        <td colspan="9">
           <div class="empty-state">
             <i data-lucide="search-x" aria-hidden="true"></i>
             <strong>No matching work found</strong>
@@ -1510,7 +1471,7 @@ const WORKSTREAM_STORAGE_KEY = "fes-command-center-workstreams-v1";
 const SYNC_META_KEY = "fes-command-center-sync-meta-v1";
 const SYNC_CLIENT_KEY = "fes-command-center-client-id-v1";
 const SYNC_ENDPOINT_STORAGE_KEY = "fes-command-center-sync-endpoint-v1";
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
 
 const statusOptions = ["Not Started", "In Progress", "Waiting", "Blocked", "Complete", "Archived"];
 const priorityOptions = ["Low", "Normal", "High", "Urgent"];
@@ -1926,7 +1887,7 @@ function computeDueState(value, status, archivedAt) {
 }
 
 function normalizeTask(task, parentTeam = "") {
-  const assignee = task.assignee || "Unassigned";
+  const creator = task.creator || task.assignee || "Unassigned";
   const status = statusOptions.includes(task.status) ? task.status : "In Progress";
   const archivedAt = task.archivedAt || (status === "Archived" ? new Date().toISOString() : "");
 
@@ -1935,11 +1896,14 @@ function normalizeTask(task, parentTeam = "") {
     id: task.id || `T-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     team: task.team || parentTeam || defaultWorkstreams[0].name,
     title: task.title || "New project task",
+    date: task.date || task.createdDate || "Set date",
     description: task.description || "",
     notes: task.notes || "",
-    assignee,
-    initials: getInitials(assignee),
-    avatar: task.avatar || getAvatarClass(assignee),
+    creator,
+    assignee: creator,
+    jira: task.jira || task.jiraKey || "",
+    initials: getInitials(creator),
+    avatar: task.avatar || getAvatarClass(creator),
     status: archivedAt ? "Archived" : status,
     priority: priorityOptions.includes(task.priority) ? task.priority : "Normal",
     due: task.due || "Set date",
@@ -2463,10 +2427,11 @@ function setTaskArchived(task, archived) {
 }
 
 function updateTaskField(task, field, value) {
-  if (field === "assignee") {
-    task.assignee = value.trim() || "Unassigned";
-    task.initials = getInitials(task.assignee);
-    task.avatar = getAvatarClass(task.assignee);
+  if (field === "assignee" || field === "creator") {
+    task.creator = value.trim() || "Unassigned";
+    task.assignee = task.creator;
+    task.initials = getInitials(task.creator);
+    task.avatar = getAvatarClass(task.creator);
   } else if (field === "status") {
     task.status = value;
     if (value === "Complete") {
@@ -2480,6 +2445,10 @@ function updateTaskField(task, field, value) {
     }
   } else if (field === "priority") {
     task.priority = value;
+  } else if (field === "date") {
+    task.date = value.trim() || "Set date";
+  } else if (field === "jira") {
+    task.jira = value.trim();
   } else if (field === "due") {
     task.due = value.trim() || "Set date";
   } else if (field === "attachments") {
@@ -2941,9 +2910,11 @@ function matchesSearch(task) {
   if (!state.search) return true;
   const haystack = [
     task.title,
+    task.date,
     task.description,
     task.notes,
-    task.assignee,
+    task.creator,
+    task.jira,
     task.status,
     task.priority,
     task.team,
@@ -2984,30 +2955,19 @@ function createEditable(text, className = "editable", taskId, field) {
   return editable;
 }
 
-function renderAssignee(task) {
+function renderCreator(task) {
   const wrap = document.createElement("span");
-  wrap.className = "assignee-editor";
+  wrap.className = "creator-editor";
 
   const avatar = document.createElement("span");
   avatar.className = `avatar ${task.avatar || ""}`.trim();
   avatar.textContent = task.initials;
 
-  const name = createTextControl(task, "assignee", "assignee-input");
-  name.setAttribute("aria-label", "Assignee");
+  const name = createTextControl(task, "creator", "creator-input");
+  name.setAttribute("aria-label", "Creator");
 
   wrap.append(avatar, name);
   return wrap;
-}
-
-function renderCompletion(task) {
-  const ring = document.createElement("button");
-  ring.type = "button";
-  ring.className = `completion-ring ${completionClass(task.completion, task.status)}`.trim();
-  ring.style.setProperty("--p", task.completion);
-  ring.dataset.cycleCompletion = task.id;
-  ring.setAttribute("aria-label", `${task.completion} percent complete`);
-  ring.title = "Cycle completion";
-  return ring;
 }
 
 function renderAttachment(task) {
@@ -3056,10 +3016,20 @@ function renderTaskCell(task, isSubtask) {
     wrap.append(addSubtask);
   }
 
+  const actions = renderRowActions(task);
+  actions.classList.add("topic-actions");
+  wrap.append(actions);
+
   return wrap;
 }
 
 function appendCells(row, task, isSubtask = false) {
+  const statusCell = document.createElement("td");
+  statusCell.append(createSelectControl(task, "status", statusOptions, `status-select ${statusClass(task.status)}`));
+
+  const dateCell = document.createElement("td");
+  dateCell.append(createTextControl(task, "date", "date-control"));
+
   const taskCell = document.createElement("td");
   taskCell.append(renderTaskCell(task, isSubtask));
 
@@ -3076,11 +3046,11 @@ function appendCells(row, task, isSubtask = false) {
     notesCell.append(parentNote);
   }
 
-  const assigneeCell = document.createElement("td");
-  assigneeCell.append(renderAssignee(task));
+  const creatorCell = document.createElement("td");
+  creatorCell.append(renderCreator(task));
 
-  const statusCell = document.createElement("td");
-  statusCell.append(createSelectControl(task, "status", statusOptions, `status-select ${statusClass(task.status)}`));
+  const jiraCell = document.createElement("td");
+  jiraCell.append(createTextControl(task, "jira", "jira-control"));
 
   const priorityCell = document.createElement("td");
   priorityCell.append(createSelectControl(task, "priority", priorityOptions, `priority-select ${priorityClass(task.priority)}`));
@@ -3088,29 +3058,16 @@ function appendCells(row, task, isSubtask = false) {
   const dueCell = document.createElement("td");
   dueCell.append(createTextControl(task, "due", `due-control ${task.dueState || ""}`));
 
-  const completionCell = document.createElement("td");
-  completionCell.className = "completion-col";
-  completionCell.append(renderCompletion(task));
-
-  const attachmentCell = document.createElement("td");
-  attachmentCell.className = "attachment-col";
-  attachmentCell.append(renderAttachment(task));
-
-  const actionCell = document.createElement("td");
-  actionCell.className = "action-col";
-  actionCell.append(renderRowActions(task));
-
   row.append(
+    statusCell,
+    dateCell,
     taskCell,
     descriptionCell,
     notesCell,
-    assigneeCell,
-    statusCell,
+    creatorCell,
+    jiraCell,
     priorityCell,
     dueCell,
-    completionCell,
-    attachmentCell,
-    actionCell,
   );
 }
 
@@ -3200,8 +3157,11 @@ body.addEventListener("click", (event) => {
         id: `${task.id}-NEW-${Date.now()}`,
         team: task.team,
         title: "New field follow-up",
+        date: "Set date",
         description: "Add scope detail directly in the grid.",
         notes: "Capture current blocker, field note, or customer update here.",
+        creator: "Unassigned",
+        jira: "",
         assignee: "Unassigned",
         initials: "--",
         avatar: "",
@@ -3240,16 +3200,6 @@ body.addEventListener("click", (event) => {
     return;
   }
 
-  const completion = event.target.closest("[data-cycle-completion]");
-  if (completion) {
-    const task = findTask(completion.dataset.cycleCompletion);
-    if (task) {
-      const nextValue = task.completion >= 100 ? 0 : Math.min(100, Math.ceil((task.completion + 25) / 25) * 25);
-      updateTaskField(task, "completion", nextValue);
-      saveTasks();
-      renderTable();
-    }
-  }
 });
 
 body.addEventListener("input", (event) => {
@@ -3438,8 +3388,11 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
     id: `T-NEW-${Date.now()}`,
     team: selectedTeam,
     title: "New project task",
+    date: "Set date",
     description: "Define the main task scope in this row.",
     notes: "",
+    creator: "Unassigned",
+    jira: "",
     assignee: "Unassigned",
     initials: "--",
     avatar: "",
@@ -3456,8 +3409,11 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
         id: `ST-NEW-${Date.now()}`,
         team: selectedTeam,
         title: "New subtask",
+        date: "Set date",
         description: "Add the field or workflow step.",
         notes: "Keep notes visible here so the work record stays in the table.",
+        creator: "Unassigned",
+        jira: "",
         assignee: "Unassigned",
         initials: "--",
         avatar: "",
