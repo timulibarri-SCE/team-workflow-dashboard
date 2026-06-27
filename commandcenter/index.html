@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -338,6 +338,11 @@ button {
   gap: 2px;
 }
 
+.workstation-group {
+  display: grid;
+  gap: 2px;
+}
+
 .team-item {
   justify-content: space-between;
   gap: 8px;
@@ -351,6 +356,19 @@ button {
 .team-item strong {
   color: #d7f7e9;
   font-size: 0.78rem;
+}
+
+.team-item.is-substation {
+  min-height: 34px;
+  padding-left: 28px;
+  color: #a7beb5;
+  font-size: 0.82rem;
+}
+
+.team-item.is-substation .team-dot {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 0 0 2px rgba(20, 184, 120, 0.1);
 }
 
 .team-item.is-selected {
@@ -487,6 +505,149 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.settings-panel {
+  margin-bottom: 12px;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.settings-panel[hidden] {
+  display: none;
+}
+
+.settings-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--gray-100);
+  background: #f9fbfb;
+}
+
+.settings-panel-header span,
+.settings-add-form span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--gray-400);
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.settings-panel-header strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.settings-panel-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.settings-add-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.settings-add-form input,
+.settings-name-input,
+.settings-substation-form input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--ink);
+  outline: 0;
+  padding: 0 10px;
+}
+
+.settings-add-form input:focus,
+.settings-name-input:focus,
+.settings-substation-form input:focus {
+  border-color: rgba(20, 184, 120, 0.5);
+  box-shadow: 0 0 0 3px rgba(20, 184, 120, 0.13);
+}
+
+.settings-workstation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-workstation-card {
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--gray-25);
+  overflow: hidden;
+}
+
+.settings-workstation-row,
+.settings-substation-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 32px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+}
+
+.settings-workstation-row {
+  background: var(--white);
+}
+
+.settings-substation-list {
+  display: grid;
+  gap: 1px;
+  padding: 4px 10px 8px 28px;
+}
+
+.settings-substation-row {
+  grid-template-columns: 14px minmax(0, 1fr) 32px;
+  padding: 6px 0;
+}
+
+.settings-substation-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  gap: 8px;
+  padding: 0 10px 10px 44px;
+}
+
+.settings-action-button {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--gray-600);
+}
+
+.settings-action-button:hover {
+  border-color: rgba(20, 184, 120, 0.42);
+  color: var(--green-2);
+}
+
+.settings-action-button.danger:hover {
+  border-color: rgba(194, 65, 53, 0.32);
+  background: #fff1f2;
+  color: var(--red);
+}
+
+.settings-action-button svg,
+.settings-panel-header svg {
+  width: 16px;
+  height: 16px;
 }
 
 .search-box {
@@ -1127,7 +1288,7 @@ button {
   }
 }
 
-    </style>
+</style>
   </head>
   <body>
     <div class="app-shell">
@@ -1169,7 +1330,7 @@ button {
           </button>
           <button class="nav-item" type="button">
             <i data-lucide="users" aria-hidden="true"></i>
-            <span>Workstreams</span>
+            <span>Workstations</span>
           </button>
           <button class="nav-item" type="button">
             <i data-lucide="calendar-days" aria-hidden="true"></i>
@@ -1179,22 +1340,22 @@ button {
             <i data-lucide="bar-chart-3" aria-hidden="true"></i>
             <span>Reports</span>
           </button>
-          <button class="nav-item" type="button">
+          <button class="nav-item" id="settingsNavButton" type="button">
             <i data-lucide="settings" aria-hidden="true"></i>
             <span>Settings</span>
           </button>
         </nav>
 
-        <section class="team-menu" aria-label="Workstream filters">
+        <section class="team-menu" aria-label="Workstation filters">
           <div class="section-heading">
-            <div class="section-label">Workstreams</div>
-            <button class="sidebar-icon-button" id="addWorkstreamButton" type="button" title="New workstream">
+            <div class="section-label">Workstations</div>
+            <button class="sidebar-icon-button" id="addWorkstreamButton" type="button" title="New workstation">
               <i data-lucide="plus" aria-hidden="true"></i>
             </button>
           </div>
           <form class="workstream-form" id="workstreamForm" hidden>
-            <input id="workstreamNameInput" type="text" placeholder="New workstream" />
-            <button type="submit" title="Add workstream">
+            <input id="workstreamNameInput" type="text" placeholder="New workstation" />
+            <button type="submit" title="Add workstation">
               <i data-lucide="check" aria-hidden="true"></i>
             </button>
             <button id="cancelWorkstreamButton" type="button" title="Cancel">
@@ -1248,7 +1409,7 @@ button {
           <article class="metric">
             <span>Open Tasks</span>
             <strong id="openTasksMetric">0</strong>
-            <small id="openTasksDetail">Across workstreams</small>
+            <small id="openTasksDetail">Across workstations</small>
           </article>
           <article class="metric">
             <span>Due This Week</span>
@@ -1265,6 +1426,31 @@ button {
             <strong id="completedTasksMetric">0</strong>
             <small id="completedTasksDetail">Current shared board</small>
           </article>
+        </section>
+
+        <section class="settings-panel" id="settingsPanel" aria-label="Settings" hidden>
+          <div class="settings-panel-header">
+            <div>
+              <span>Settings</span>
+              <strong>Workstations</strong>
+            </div>
+            <button class="icon-button" id="settingsCloseButton" type="button" title="Close settings">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="settings-panel-body">
+            <form class="settings-add-form" id="settingsWorkstationForm">
+              <label>
+                <span>New workstation</span>
+                <input id="settingsWorkstationNameInput" type="text" placeholder="Workstation name" />
+              </label>
+              <button class="primary-button" type="submit">
+                <i data-lucide="plus" aria-hidden="true"></i>
+                <span>Add</span>
+              </button>
+            </form>
+            <div class="settings-workstation-list" id="settingsWorkstationList"></div>
+          </div>
         </section>
 
         <section class="task-surface" aria-label="Project task table">
@@ -1303,21 +1489,28 @@ button {
           <div class="empty-state">
             <i data-lucide="search-x" aria-hidden="true"></i>
             <strong>No matching work found</strong>
-            <span>Adjust the workstream, view, or search filter.</span>
+            <span>Adjust the workstation, view, or search filter.</span>
           </div>
         </td>
       </tr>
     </template>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="sync-config.js"></script>
+    <script>
+window.COMMAND_CENTER_SYNC_CONFIG = {
+  endpoint: "https://script.google.com/macros/s/AKfycbz14BNHwFlXw0FNxGkCH988UroD-L97z3dCQwQxUDb3oXOyLWwM_0-H71__4GhFu9hO/exec",
+  namespace: "commandcenter",
+  pollMs: 15000,
+};
+
+</script>
     <script>
 const STORAGE_KEY = "fes-command-center-tasks-v1";
 const WORKSTREAM_STORAGE_KEY = "fes-command-center-workstreams-v1";
 const SYNC_META_KEY = "fes-command-center-sync-meta-v1";
 const SYNC_CLIENT_KEY = "fes-command-center-client-id-v1";
 const SYNC_ENDPOINT_STORAGE_KEY = "fes-command-center-sync-endpoint-v1";
-const DATA_VERSION = 2;
+const DATA_VERSION = 3;
 
 const statusOptions = ["Not Started", "In Progress", "Waiting", "Blocked", "Complete", "Archived"];
 const priorityOptions = ["Low", "Normal", "High", "Urgent"];
@@ -1332,6 +1525,26 @@ const syncConfig = {
 };
 
 const defaultWorkstreams = [
+  {
+    id: "workstation-a",
+    name: "Workstation A",
+    color: "#14b878",
+    children: [
+      { id: "workstation-a-575-site", name: "575 Site", color: "#14b878" },
+      { id: "workstation-a-pms", name: "PM's", color: "#0e7490" },
+      { id: "workstation-a-improvement", name: "Improvement", color: "#7c3aed" },
+    ],
+  },
+  {
+    id: "workstation-b",
+    name: "Workstation B",
+    color: "#0e7490",
+    children: [
+      { id: "workstation-b-575-site", name: "575 Site", color: "#0e7490" },
+      { id: "workstation-b-pms", name: "PM's", color: "#2663eb" },
+      { id: "workstation-b-improvement", name: "Improvement", color: "#b7791f" },
+    ],
+  },
   { id: "controls-bas", name: "Controls / BAS", color: "#0e7490" },
   { id: "mechanical-systems", name: "Mechanical Systems", color: "#b7791f" },
   { id: "electrical-infrastructure", name: "Electrical Infrastructure", color: "#2663eb" },
@@ -1631,6 +1844,12 @@ const workstreamForm = document.querySelector("#workstreamForm");
 const workstreamNameInput = document.querySelector("#workstreamNameInput");
 const addWorkstreamButton = document.querySelector("#addWorkstreamButton");
 const cancelWorkstreamButton = document.querySelector("#cancelWorkstreamButton");
+const settingsNavButton = document.querySelector("#settingsNavButton");
+const settingsPanel = document.querySelector("#settingsPanel");
+const settingsCloseButton = document.querySelector("#settingsCloseButton");
+const settingsWorkstationForm = document.querySelector("#settingsWorkstationForm");
+const settingsWorkstationNameInput = document.querySelector("#settingsWorkstationNameInput");
+const settingsWorkstationList = document.querySelector("#settingsWorkstationList");
 const openTasksMetric = document.querySelector("#openTasksMetric");
 const dueTasksMetric = document.querySelector("#dueTasksMetric");
 const blockedTasksMetric = document.querySelector("#blockedTasksMetric");
@@ -1812,26 +2031,89 @@ function normalizeTaskList(nextTasks) {
   return (Array.isArray(nextTasks) ? nextTasks : cloneDefaultTasks()).map((task) => normalizeTask(task));
 }
 
+function getSubstationFullName(workstation, substation) {
+  return `${workstation.name} / ${substation.name}`;
+}
+
+function getWorkstationTaskNames(workstation) {
+  return [
+    workstation.name,
+    ...(Array.isArray(workstation.children)
+      ? workstation.children.map((child) => getSubstationFullName(workstation, child))
+      : []),
+  ];
+}
+
+function flattenWorkstations(list = workstreams) {
+  return list.flatMap((workstation) => [
+    { item: workstation, parent: null, fullName: workstation.name },
+    ...(Array.isArray(workstation.children) ? workstation.children : []).map((child) => ({
+      item: child,
+      parent: workstation,
+      fullName: getSubstationFullName(workstation, child),
+    })),
+  ]);
+}
+
+function findWorkstationEntryByName(name, list = workstreams) {
+  const target = String(name || "").trim().toLowerCase();
+  if (!target) return null;
+  return (
+    flattenWorkstations(list).find(
+      (entry) => entry.fullName.toLowerCase() === target || entry.item.name.toLowerCase() === target,
+    ) || null
+  );
+}
+
+function normalizeWorkstreamChildren(workstation, children = []) {
+  const byName = new Map();
+  children.forEach((child, index) => {
+    const name = String(child.name || "").trim();
+    if (!name) return;
+    const key = name.toLowerCase();
+    if (byName.has(key)) return;
+    byName.set(key, {
+      id: child.id || slugify(`${workstation.name}-${name}`),
+      name,
+      color: child.color || workstation.color || workstreamPalette[index % workstreamPalette.length],
+    });
+  });
+  return [...byName.values()];
+}
+
 function normalizeWorkstreams(nextWorkstreams, taskList = tasks) {
   const byName = new Map();
+  const source =
+    Array.isArray(nextWorkstreams) && nextWorkstreams.length > 0 ? nextWorkstreams : cloneDefaultWorkstreams();
 
-  [...cloneDefaultWorkstreams(), ...(Array.isArray(nextWorkstreams) ? nextWorkstreams : [])].forEach((workstream) => {
+  source.forEach((workstream) => {
     const name = String(workstream.name || "").trim();
     if (!name) return;
-    byName.set(name, {
+
+    const key = name.toLowerCase();
+    const existing = byName.get(key);
+    const next = existing || {
       id: workstream.id || slugify(name),
       name,
       color: workstream.color || workstreamPalette[byName.size % workstreamPalette.length],
-    });
+      children: [],
+    };
+
+    next.children = normalizeWorkstreamChildren(next, [
+      ...(Array.isArray(next.children) ? next.children : []),
+      ...(Array.isArray(workstream.children) ? workstream.children : []),
+    ]);
+    byName.set(key, next);
   });
 
   flattenTasks(taskList).forEach((task) => {
     const name = String(task.team || "").trim();
-    if (!name || byName.has(name)) return;
-    byName.set(name, {
+    if (!name || findWorkstationEntryByName(name, [...byName.values()])) return;
+    byName.set(name.toLowerCase(), {
       id: slugify(name),
       name,
       color: workstreamPalette[byName.size % workstreamPalette.length],
+      children: [],
     });
   });
 
@@ -1853,6 +2135,7 @@ function saveWorkstreams(options = {}) {
     queueRemoteSave();
   }
   renderWorkstreams();
+  renderSettingsWorkstations();
 }
 
 function saveTasks(options = {}) {
@@ -1925,7 +2208,9 @@ function requestJsonp(action, params = {}) {
 function hasActiveEditable() {
   return Boolean(
     document.activeElement &&
-      document.activeElement.closest("[data-edit-field], [data-field-control], #workstreamNameInput"),
+      document.activeElement.closest(
+        "[data-edit-field], [data-field-control], #workstreamNameInput, .settings-panel input",
+      ),
   );
 }
 
@@ -2280,8 +2565,23 @@ function getVisibleTasks() {
   return flattenTasks(tasks).filter((task) => !isArchived(task));
 }
 
-function getWorkstreamCount(name) {
-  return getVisibleTasks().filter((task) => task.team === name && task.status !== "Complete").length;
+function getTeamFilterNames(filterName) {
+  if (filterName === "All") return null;
+
+  const entry = findWorkstationEntryByName(filterName);
+  if (!entry) return [filterName];
+  if (entry.parent) return [entry.fullName];
+  return getWorkstationTaskNames(entry.item);
+}
+
+function taskMatchesTeamFilter(task, filterName) {
+  const names = getTeamFilterNames(filterName);
+  return !names || names.includes(task.team);
+}
+
+function getWorkstreamCount(filterName) {
+  return getVisibleTasks().filter((task) => taskMatchesTeamFilter(task, filterName) && task.status !== "Complete")
+    .length;
 }
 
 function renderMetrics() {
@@ -2295,24 +2595,27 @@ function renderMetrics() {
   if (dueTasksMetric) dueTasksMetric.textContent = String(due.length);
   if (blockedTasksMetric) blockedTasksMetric.textContent = String(blocked.length);
   if (completedTasksMetric) completedTasksMetric.textContent = String(complete.length);
-  if (openTasksDetail) openTasksDetail.textContent = `Across ${workstreams.length} workstreams`;
+  if (openTasksDetail) openTasksDetail.textContent = `Across ${workstreams.length} workstations`;
   if (dueTasksDetail) dueTasksDetail.textContent = `${due.filter((task) => task.dueState === "overdue").length} overdue`;
   if (blockedTasksDetail) blockedTasksDetail.textContent = `${blocked.length} need action`;
   if (completedTasksDetail) completedTasksDetail.textContent = "Current shared board";
 }
 
-function createWorkstreamButton(workstream, count) {
+function createWorkstreamButton(workstream, count, options = {}) {
   const button = document.createElement("button");
-  button.className = `team-item ${state.team === workstream.name ? "is-selected" : ""}`.trim();
+  const filterName = options.filterName || workstream.name;
+  button.className = `team-item ${options.substation ? "is-substation" : ""} ${
+    state.team === filterName ? "is-selected" : ""
+  }`.trim();
   button.type = "button";
-  button.dataset.teamFilter = workstream.name;
+  button.dataset.teamFilter = filterName;
 
   const dot = document.createElement("span");
   dot.className = "team-dot";
   dot.style.setProperty("--dot-color", workstream.color);
 
   const label = document.createElement("span");
-  label.textContent = workstream.name;
+  label.textContent = options.label || workstream.name;
 
   const total = document.createElement("strong");
   total.textContent = String(count);
@@ -2332,13 +2635,291 @@ function renderWorkstreams() {
     getVisibleTasks().filter((task) => task.status !== "Complete").length,
   );
   allButton.dataset.teamFilter = "All";
-  allButton.querySelector("span:nth-child(2)").textContent = "All Workstreams";
+  allButton.querySelector("span:nth-child(2)").textContent = "All Workstations";
   allButton.classList.toggle("is-selected", state.team === "All");
   workstreamList.append(allButton);
 
   workstreams.forEach((workstream) => {
-    workstreamList.append(createWorkstreamButton(workstream, getWorkstreamCount(workstream.name)));
+    const group = document.createElement("div");
+    group.className = "workstation-group";
+    group.append(createWorkstreamButton(workstream, getWorkstreamCount(workstream.name)));
+
+    (workstream.children || []).forEach((substation) => {
+      const fullName = getSubstationFullName(workstream, substation);
+      group.append(
+        createWorkstreamButton(substation, getWorkstreamCount(fullName), {
+          filterName: fullName,
+          label: substation.name,
+          substation: true,
+        }),
+      );
+    });
+
+    workstreamList.append(group);
   });
+}
+
+function getWorkstationById(id) {
+  return workstreams.find((workstation) => workstation.id === id) || null;
+}
+
+function getSubstationById(parentId, childId) {
+  const parent = getWorkstationById(parentId);
+  if (!parent) return null;
+  const child = (parent.children || []).find((item) => item.id === childId) || null;
+  return child ? { parent, child } : null;
+}
+
+function createWorkstation(name) {
+  const clean = String(name || "").trim();
+  if (!clean) return null;
+
+  const existing = workstreams.find((workstation) => workstation.name.toLowerCase() === clean.toLowerCase());
+  if (existing) return existing;
+
+  const workstation = {
+    id: slugify(clean) || `workstation-${Date.now()}`,
+    name: clean,
+    color: workstreamPalette[workstreams.length % workstreamPalette.length],
+    children: [],
+  };
+  workstreams.push(workstation);
+  return workstation;
+}
+
+function replaceTaskTeam(oldName, newName) {
+  flattenTasks(tasks).forEach((task) => {
+    if (task.team === oldName) {
+      task.team = newName;
+    }
+  });
+}
+
+function getFallbackWorkstationName(excludedId = "") {
+  const fallback = workstreams.find((workstation) => workstation.id !== excludedId);
+  if (fallback) return fallback.name;
+  return createWorkstation("General")?.name || "General";
+}
+
+function renameWorkstation(id, nextName) {
+  const workstation = getWorkstationById(id);
+  const clean = String(nextName || "").trim();
+  if (!workstation || !clean) {
+    renderSettingsWorkstations();
+    return;
+  }
+  if (clean === workstation.name) return;
+
+  const duplicate = workstreams.find(
+    (item) => item.id !== id && item.name.toLowerCase() === clean.toLowerCase(),
+  );
+  if (duplicate) {
+    renderSettingsWorkstations();
+    return;
+  }
+
+  const previousName = workstation.name;
+  const previousChildNames = (workstation.children || []).map((child) => ({
+    child,
+    fullName: getSubstationFullName(workstation, child),
+  }));
+
+  workstation.name = clean;
+  replaceTaskTeam(previousName, workstation.name);
+  previousChildNames.forEach(({ child, fullName }) => {
+    replaceTaskTeam(fullName, getSubstationFullName(workstation, child));
+  });
+
+  if (state.team === previousName) state.team = workstation.name;
+  previousChildNames.forEach(({ child, fullName }) => {
+    if (state.team === fullName) state.team = getSubstationFullName(workstation, child);
+  });
+
+  saveWorkstreams();
+  saveTasks();
+  renderTable();
+}
+
+function deleteWorkstation(id) {
+  const index = workstreams.findIndex((workstation) => workstation.id === id);
+  if (index < 0) return;
+
+  const [removed] = workstreams.splice(index, 1);
+  const fallbackName = getFallbackWorkstationName(removed.id);
+  const removedNames = getWorkstationTaskNames(removed);
+
+  if (fallbackName !== "All") {
+    flattenTasks(tasks).forEach((task) => {
+      if (removedNames.includes(task.team)) {
+        task.team = fallbackName;
+      }
+    });
+  }
+
+  if (removedNames.includes(state.team)) state.team = fallbackName;
+  saveWorkstreams();
+  saveTasks();
+  renderTable();
+}
+
+function addSubstation(parentId, name) {
+  const parent = getWorkstationById(parentId);
+  const clean = String(name || "").trim();
+  if (!parent || !clean) return null;
+
+  parent.children = Array.isArray(parent.children) ? parent.children : [];
+  const existing = parent.children.find((child) => child.name.toLowerCase() === clean.toLowerCase());
+  if (existing) return existing;
+
+  const child = {
+    id: slugify(`${parent.name}-${clean}`) || `substation-${Date.now()}`,
+    name: clean,
+    color: parent.color,
+  };
+  parent.children.push(child);
+  return child;
+}
+
+function renameSubstation(parentId, childId, nextName) {
+  const entry = getSubstationById(parentId, childId);
+  const clean = String(nextName || "").trim();
+  if (!entry || !clean) {
+    renderSettingsWorkstations();
+    return;
+  }
+  if (clean === entry.child.name) return;
+
+  const duplicate = entry.parent.children.find(
+    (item) => item.id !== childId && item.name.toLowerCase() === clean.toLowerCase(),
+  );
+  if (duplicate) {
+    renderSettingsWorkstations();
+    return;
+  }
+
+  const previousName = getSubstationFullName(entry.parent, entry.child);
+  entry.child.name = clean;
+  const nextFullName = getSubstationFullName(entry.parent, entry.child);
+  replaceTaskTeam(previousName, nextFullName);
+  if (state.team === previousName) state.team = nextFullName;
+  saveWorkstreams();
+  saveTasks();
+  renderTable();
+}
+
+function deleteSubstation(parentId, childId) {
+  const parent = getWorkstationById(parentId);
+  if (!parent || !Array.isArray(parent.children)) return;
+
+  const index = parent.children.findIndex((child) => child.id === childId);
+  if (index < 0) return;
+
+  const [removed] = parent.children.splice(index, 1);
+  const removedName = getSubstationFullName(parent, removed);
+  replaceTaskTeam(removedName, parent.name);
+  if (state.team === removedName) state.team = parent.name;
+  saveWorkstreams();
+  saveTasks();
+  renderTable();
+}
+
+function createSettingsIconButton(icon, title, dataset, danger = false) {
+  const button = document.createElement("button");
+  button.className = `settings-action-button ${danger ? "danger" : ""}`.trim();
+  button.type = "button";
+  button.title = title;
+  Object.entries(dataset).forEach(([key, value]) => {
+    button.dataset[key] = value;
+  });
+  button.append(createIcon(icon));
+  return button;
+}
+
+function renderSettingsWorkstations() {
+  if (!settingsWorkstationList) return;
+
+  settingsWorkstationList.innerHTML = "";
+  workstreams.forEach((workstation) => {
+    const card = document.createElement("article");
+    card.className = "settings-workstation-card";
+
+    const row = document.createElement("div");
+    row.className = "settings-workstation-row";
+
+    const dot = document.createElement("span");
+    dot.className = "team-dot";
+    dot.style.setProperty("--dot-color", workstation.color);
+
+    const name = document.createElement("input");
+    name.className = "settings-name-input";
+    name.value = workstation.name;
+    name.dataset.workstationName = workstation.id;
+    name.setAttribute("aria-label", "Workstation name");
+
+    row.append(
+      dot,
+      name,
+      createSettingsIconButton("trash-2", "Delete workstation", { deleteWorkstation: workstation.id }, true),
+    );
+    card.append(row);
+
+    const substationList = document.createElement("div");
+    substationList.className = "settings-substation-list";
+    (workstation.children || []).forEach((substation) => {
+      const subRow = document.createElement("div");
+      subRow.className = "settings-substation-row";
+
+      const subDot = document.createElement("span");
+      subDot.className = "team-dot";
+      subDot.style.setProperty("--dot-color", substation.color || workstation.color);
+
+      const subName = document.createElement("input");
+      subName.className = "settings-name-input";
+      subName.value = substation.name;
+      subName.dataset.substationName = substation.id;
+      subName.dataset.parentWorkstation = workstation.id;
+      subName.setAttribute("aria-label", "Sub-workstation name");
+
+      subRow.append(
+        subDot,
+        subName,
+        createSettingsIconButton(
+          "trash-2",
+          "Delete sub-workstation",
+          { deleteSubstation: substation.id, parentWorkstation: workstation.id },
+          true,
+        ),
+      );
+      substationList.append(subRow);
+    });
+    card.append(substationList);
+
+    const addForm = document.createElement("form");
+    addForm.className = "settings-substation-form";
+    addForm.dataset.addSubstationFor = workstation.id;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Add sub-workstation";
+    input.setAttribute("aria-label", `Add sub-workstation to ${workstation.name}`);
+
+    const addButton = createSettingsIconButton("plus", "Add sub-workstation", {});
+    addButton.type = "submit";
+    addForm.append(input, addButton);
+    card.append(addForm);
+    settingsWorkstationList.append(card);
+  });
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+function setSettingsVisible(visible) {
+  if (!settingsPanel) return;
+  settingsPanel.hidden = !visible;
+  if (settingsNavButton) settingsNavButton.classList.toggle("is-active", visible);
+  if (visible) renderSettingsWorkstations();
 }
 
 function statusClass(status) {
@@ -2382,7 +2963,7 @@ function matchesView(task) {
 }
 
 function matchesTeam(task) {
-  return state.team === "All" || task.team === state.team;
+  return taskMatchesTeamFilter(task, state.team);
 }
 
 function createIcon(name) {
@@ -2727,6 +3308,18 @@ if (calendarSyncButton) {
   calendarSyncButton.addEventListener("click", syncCalendarDueDates);
 }
 
+if (settingsNavButton) {
+  settingsNavButton.addEventListener("click", () => {
+    setSettingsVisible(settingsPanel ? settingsPanel.hidden : true);
+  });
+}
+
+if (settingsCloseButton) {
+  settingsCloseButton.addEventListener("click", () => {
+    setSettingsVisible(false);
+  });
+}
+
 if (addWorkstreamButton && workstreamForm && workstreamNameInput) {
   addWorkstreamButton.addEventListener("click", () => {
     workstreamForm.hidden = false;
@@ -2747,21 +3340,92 @@ if (workstreamForm && workstreamNameInput) {
     const name = workstreamNameInput.value.trim();
     if (!name) return;
 
-    const existing = workstreams.find((workstream) => workstream.name.toLowerCase() === name.toLowerCase());
-    if (!existing) {
-      workstreams.push({
-        id: slugify(name),
-        name,
-        color: workstreamPalette[workstreams.length % workstreamPalette.length],
-      });
+    const workstation = createWorkstation(name);
+    if (workstation) {
       saveWorkstreams();
+      state.team = workstation.name;
     }
 
-    state.team = existing ? existing.name : name;
     workstreamNameInput.value = "";
     workstreamForm.hidden = true;
     renderWorkstreams();
     renderTable();
+  });
+}
+
+if (settingsWorkstationForm && settingsWorkstationNameInput) {
+  settingsWorkstationForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const workstation = createWorkstation(settingsWorkstationNameInput.value);
+    if (!workstation) return;
+
+    state.team = workstation.name;
+    settingsWorkstationNameInput.value = "";
+    saveWorkstreams();
+    renderTable();
+  });
+}
+
+if (settingsWorkstationList) {
+  settingsWorkstationList.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-add-substation-for]");
+    if (!form) return;
+    event.preventDefault();
+
+    const input = form.querySelector("input");
+    const child = addSubstation(form.dataset.addSubstationFor, input.value);
+    const parent = getWorkstationById(form.dataset.addSubstationFor);
+    if (!child || !parent) return;
+
+    state.team = getSubstationFullName(parent, child);
+    input.value = "";
+    saveWorkstreams();
+    renderTable();
+  });
+
+  settingsWorkstationList.addEventListener("change", (event) => {
+    const workstationInput = event.target.closest("[data-workstation-name]");
+    if (workstationInput) {
+      renameWorkstation(workstationInput.dataset.workstationName, workstationInput.value);
+      return;
+    }
+
+    const substationInput = event.target.closest("[data-substation-name]");
+    if (substationInput) {
+      renameSubstation(
+        substationInput.dataset.parentWorkstation,
+        substationInput.dataset.substationName,
+        substationInput.value,
+      );
+    }
+  });
+
+  settingsWorkstationList.addEventListener("click", (event) => {
+    const deleteWorkstationButton = event.target.closest("[data-delete-workstation]");
+    if (deleteWorkstationButton) {
+      const workstation = getWorkstationById(deleteWorkstationButton.dataset.deleteWorkstation);
+      if (
+        workstation &&
+        window.confirm(`Delete "${workstation.name}"? Tasks under it will move to the next workstation.`)
+      ) {
+        deleteWorkstation(workstation.id);
+      }
+      return;
+    }
+
+    const deleteSubstationButton = event.target.closest("[data-delete-substation]");
+    if (deleteSubstationButton) {
+      const entry = getSubstationById(
+        deleteSubstationButton.dataset.parentWorkstation,
+        deleteSubstationButton.dataset.deleteSubstation,
+      );
+      if (
+        entry &&
+        window.confirm(`Delete "${entry.child.name}"? Tasks under it will move to "${entry.parent.name}".`)
+      ) {
+        deleteSubstation(entry.parent.id, entry.child.id);
+      }
+    }
   });
 }
 
@@ -2812,11 +3476,11 @@ document.querySelector("#addTaskButton").addEventListener("click", () => {
 });
 
 renderWorkstreams();
+renderSettingsWorkstations();
 renderMetrics();
 renderTable();
 startSync();
 
-    </script>
+</script>
   </body>
 </html>
-
