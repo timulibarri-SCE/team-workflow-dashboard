@@ -1520,6 +1520,11 @@ button {
   color: var(--red);
 }
 
+.row-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
 .empty-row td {
   height: 210px;
   background: var(--gray-25);
@@ -2214,6 +2219,8 @@ const sync = {
   pollTimer: null,
   lastLocalAt: syncMeta.updatedAt || null,
   backups: [],
+  restoreAvailable: false,
+  restoreChecked: false,
 };
 
 sync.enabled = Boolean(sync.endpoint);
@@ -3275,8 +3282,9 @@ function renderBackupList(backups = sync.backups) {
     const restore = document.createElement("button");
     restore.className = "row-action";
     restore.type = "button";
-    restore.title = "Restore backup";
+    restore.title = sync.restoreAvailable ? "Restore backup" : "Deploy Apps Script restore action";
     restore.dataset.restoreBackup = backup.name || "";
+    restore.disabled = !sync.restoreAvailable;
     restore.append(createIcon("history"));
 
     row.append(detail, open, restore);
@@ -3286,6 +3294,29 @@ function renderBackupList(backups = sync.backups) {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+}
+
+async function checkRestoreCapability(force = false) {
+  if (!sync.enabled) {
+    sync.restoreAvailable = false;
+    sync.restoreChecked = true;
+    return false;
+  }
+
+  if (sync.restoreChecked && !force) return sync.restoreAvailable;
+
+  try {
+    const result = await requestJsonp("restoreBackup", {
+      name: "__command_center_capability_probe__",
+      clientId: "capability-check",
+    });
+    sync.restoreAvailable = Boolean(result && result.ok === false && /backup/i.test(result.error || ""));
+  } catch {
+    sync.restoreAvailable = false;
+  }
+
+  sync.restoreChecked = true;
+  return sync.restoreAvailable;
 }
 
 async function loadBackupList() {
@@ -3301,8 +3332,13 @@ async function loadBackupList() {
     if (!result || result.ok === false) {
       throw new Error(result && result.error ? result.error : "Backup list failed");
     }
+    await checkRestoreCapability();
     renderBackupList(result.backups || []);
-    setBackupStatus(`${sync.backups.length} backups available.`);
+    setBackupStatus(
+      sync.restoreAvailable
+        ? `${sync.backups.length} backups available.`
+        : `${sync.backups.length} backups available. Restore needs Apps Script deployment.`,
+    );
   } catch {
     setBackupStatus("Backup list failed.");
   }
@@ -3310,6 +3346,10 @@ async function loadBackupList() {
 
 async function restoreBackup(name) {
   if (!sync.enabled || !name) return;
+  if (!sync.restoreAvailable) {
+    setBackupStatus("Restore needs Apps Script deployment.");
+    return;
+  }
   if (!window.confirm(`Restore "${name}"? This replaces the current shared board with that backup.`)) return;
 
   setBackupStatus("Restoring backup...");
