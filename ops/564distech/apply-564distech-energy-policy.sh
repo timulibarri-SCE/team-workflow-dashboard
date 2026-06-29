@@ -13,16 +13,24 @@ required_services=(
 
 optional_services=(
   avahi-daemon.service
+  avahi-daemon.socket
   bluetooth.service
   cups.service
+  cups.path
+  cups.socket
   ModemManager.service
   packagekit.service
   snapd.service
+  snapd.socket
 )
 
 run_or_show() {
   if [[ "${apply}" == "true" ]]; then
-    "$@"
+    "$@" || {
+      status=$?
+      echo "Warning: command failed with status ${status}: $*" >&2
+      return 0
+    }
   else
     printf 'DRY RUN:'
     printf ' %q' "$@"
