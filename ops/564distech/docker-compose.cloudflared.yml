@@ -2,7 +2,7 @@ services:
   564distech-cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: 564distech-cloudflared
-    restart: unless-stopped
+    restart: always
     network_mode: host
     env_file:
       - cloudflared.env

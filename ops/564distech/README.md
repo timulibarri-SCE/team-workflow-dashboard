@@ -68,6 +68,21 @@ $EDITOR cloudflared.env
 The Cloudflare Zero Trust tunnel token must stay in `cloudflared.env` on
 `564Distech` only.
 
+## Power Recovery
+
+To make the tunnel come back automatically after power loss or reboot, install
+the systemd autostart unit on `564Distech` after `cloudflared.env` is set:
+
+```sh
+sudo ./install-564distech-autostart.sh
+```
+
+The installer enables Docker at boot, creates
+`/etc/systemd/system/564distech-cloudflared.service`, starts the tunnel, and
+enables the service for `multi-user.target`. The Docker container also uses
+`restart: always`, so the connector is relaunched if the container exits after
+the host is already running.
+
 Required Cloudflare DNS state:
 
 ```text
