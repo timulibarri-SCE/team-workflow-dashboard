@@ -85,6 +85,7 @@ for unit in "${optional_services[@]}"; do
   fi
 
   run_or_show systemctl disable --now "${unit}"
+  run_or_show systemctl mask --now "${unit}"
 done
 
 echo
