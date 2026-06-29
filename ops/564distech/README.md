@@ -48,6 +48,50 @@ The bootstrap installs or enables:
 After the bootstrap finishes, keep the Tailscale login and Cloudflare tunnel
 token setup on `564Distech`; do not commit tokens or credentials to GitHub.
 
+## Updates And Energy
+
+Check pending updates and current power/process state without changing the
+host:
+
+```sh
+sudo ./audit-564distech-updates-and-power.sh
+```
+
+Refresh package metadata during the audit:
+
+```sh
+REFRESH_PACKAGE_INDEX=true sudo ./audit-564distech-updates-and-power.sh
+```
+
+Show pending updates without installing them:
+
+```sh
+sudo ./update-564distech-software.sh
+```
+
+Install updates and refresh the tunnel container image:
+
+```sh
+APPLY_UPDATES=true sudo ./update-564distech-software.sh
+```
+
+Preview which optional services can be powered down:
+
+```sh
+sudo ./apply-564distech-energy-policy.sh
+```
+
+Apply the conservative energy policy:
+
+```sh
+APPLY_ENERGY_POLICY=true sudo ./apply-564distech-energy-policy.sh
+```
+
+The energy policy keeps `tailscaled`, Docker, SSH, and the
+`564distech-cloudflared` service enabled. It only targets optional services
+such as Bluetooth, printing, local service discovery, modem management,
+PackageKit, and Snap when they exist on the host.
+
 Use Tailscale Serve for tailnet-only administration and verification:
 
 ```sh
