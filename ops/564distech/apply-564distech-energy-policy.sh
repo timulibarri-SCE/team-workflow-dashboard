@@ -4,11 +4,11 @@ set -euo pipefail
 apply="${APPLY_ENERGY_POLICY:-false}"
 
 required_services=(
-  docker.service
   ssh.service
   sshd.service
   tailscaled.service
   564distech-cloudflared.service
+  cloudflared.service
 )
 
 optional_services=(
@@ -22,6 +22,9 @@ optional_services=(
   packagekit.service
   snapd.service
   snapd.socket
+  docker.service
+  docker.socket
+  containerd.service
 )
 
 run_or_show() {
