@@ -29,6 +29,25 @@ tailscale status
 tailscale ping 564distech
 ```
 
+## Software Bootstrap
+
+Run the software bootstrap once on `564Distech` to install the tools needed for
+the tunnel host:
+
+```sh
+sudo ./install-564distech-software.sh
+```
+
+The bootstrap installs or enables:
+
+- Tailscale and `tailscaled`
+- Docker Engine and Docker Compose plugin
+- Cloudflare `cloudflared`
+- Git, curl, jq, certificates, GPG tooling, and OpenSSH server
+
+After the bootstrap finishes, keep the Tailscale login and Cloudflare tunnel
+token setup on `564Distech`; do not commit tokens or credentials to GitHub.
+
 Use Tailscale Serve for tailnet-only administration and verification:
 
 ```sh
