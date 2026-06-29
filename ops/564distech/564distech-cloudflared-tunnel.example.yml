@@ -1,0 +1,13 @@
+# Cloudflare Tunnel config for the 564Distech controller hostname.
+#
+# Install this on 564Distech as /etc/cloudflared/config.yml after replacing the
+# tunnel ID, credentials file path, and service URL with the real values. Keep
+# the real credentials JSON out of this repository.
+
+tunnel: CHANGE_ME_564DISTECH_TUNNEL_ID
+credentials-file: /etc/cloudflared/CHANGE_ME_564DISTECH_TUNNEL_ID.json
+
+ingress:
+  - hostname: 564distech.facilities-engineering.com
+    service: http://127.0.0.1/
+  - service: http_status:404

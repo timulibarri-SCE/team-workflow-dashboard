@@ -1,0 +1,92 @@
+# 564Distech Controller Remote Access
+
+This folder records the deployment pieces for exposing the 564 Pacific Distech
+controller through the `564Distech` tunnel host.
+
+## Origin
+
+- Tunnel host: `564Distech`
+- Tailscale name: `564distech.taileed3dc.ts.net`
+- User-facing module: Systems
+- Local controller origin: `http://127.0.0.1/` by default
+- Public hostname: `564distech.facilities-engineering.com`
+
+If the Distech controller web UI listens on another local port or on another
+site-local address reachable from `564Distech`, set `DISTECH_564_ORIGIN` before
+running the helper scripts and update the Cloudflare config service target.
+
+Do not expose BACnet/IP, raw controller protocols, SSH, RDP, databases, or
+arbitrary TCP services through this route. Only the reviewed HTTP controller UI
+should be published.
+
+## Tailscale
+
+`564Distech` must remain visible in the tailnet before any public tunnel is
+trusted. Verify from an admin workstation with:
+
+```sh
+tailscale status
+tailscale ping 564distech
+```
+
+Use Tailscale Serve for tailnet-only administration and verification:
+
+```sh
+sudo ./configure-564distech-tailscale.sh
+```
+
+If the controller origin is not `http://127.0.0.1/`, pass it explicitly:
+
+```sh
+DISTECH_564_ORIGIN=http://127.0.0.1:8080 sudo ./configure-564distech-tailscale.sh
+```
+
+Cloudflare Tunnel remains the preferred public route for the custom Facilities
+Engineering hostname. Use Tailscale Funnel only as a temporary fallback during
+Cloudflare work:
+
+```sh
+ENABLE_FUNNEL=true sudo ./configure-564distech-tailscale.sh
+```
+
+## Cloudflare
+
+Use Cloudflare Tunnel on `564Distech` as the preferred public path. Apply
+`564distech-cloudflared-tunnel.example.yml` as `/etc/cloudflared/config.yml`
+after replacing the tunnel ID, credentials path, and origin URL with the real
+values.
+
+If `cloudflared` is not installed as a system service, run the Docker-based
+tunnel from this folder instead:
+
+```sh
+cp cloudflared.env.example cloudflared.env
+$EDITOR cloudflared.env
+./start-564distech-cloudflared.sh
+```
+
+The Cloudflare Zero Trust tunnel token must stay in `cloudflared.env` on
+`564Distech` only.
+
+Required Cloudflare DNS state:
+
+```text
+564distech.facilities-engineering.com -> Cloudflare Tunnel for 564Distech
+```
+
+Protect the hostname with Cloudflare Access or the controller application's own
+authentication before relying on it for production operations.
+
+## Validation
+
+Run these checks on or near `564Distech` after applying the live Cloudflare and
+Tailscale configuration:
+
+```sh
+curl -fsS "${DISTECH_564_ORIGIN:-http://127.0.0.1/}" >/dev/null
+tailscale serve status
+curl -I https://564distech.facilities-engineering.com/
+```
+
+Then confirm browser users only see approved Facilities Engineering routes, not
+private controller addresses.
