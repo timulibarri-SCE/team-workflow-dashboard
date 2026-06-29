@@ -13,7 +13,12 @@ controller through the `564Distech` tunnel host.
 
 If the Distech controller web UI listens on another local port or on another
 site-local address reachable from `564Distech`, set `DISTECH_564_ORIGIN` before
-running the helper scripts and update the Cloudflare config service target.
+running the helper scripts. On the deployed host, retarget Cloudflare to the
+real controller with:
+
+```sh
+sudo ./set-564distech-controller-origin.sh http://CONTROLLER_IP:PORT
+```
 
 Do not expose BACnet/IP, raw controller protocols, SSH, RDP, databases, or
 arbitrary TCP services through this route. Only the reviewed HTTP controller UI
@@ -87,10 +92,22 @@ Apply the conservative energy policy:
 APPLY_ENERGY_POLICY=true sudo ./apply-564distech-energy-policy.sh
 ```
 
-The energy policy keeps `tailscaled`, Docker, SSH, and the
-`564distech-cloudflared` service enabled. It only targets optional services
-such as Bluetooth, printing, local service discovery, modem management,
-PackageKit, and Snap when they exist on the host.
+The energy policy keeps `tailscaled`, SSH, and the active Cloudflare route
+enabled. On the live `564Distech` deployment, Cloudflare is running through the
+native `cloudflared` system service, so Docker can remain powered down until it
+is specifically needed for another workload.
+
+Before moving `564Distech` to a new network, apply the pre-deployment hardening
+profile:
+
+```sh
+sudo ./apply-564distech-predeploy-hardening.sh
+```
+
+This keeps Ethernet on DHCP/autoconnect, prevents sleep and suspend, makes
+`cloudflared` wait for network readiness and restart after link changes, keeps
+the normal LAN side closed to inbound access, and allows trusted tailnet traffic
+over the Tailscale interface.
 
 ## Startup Branding
 
