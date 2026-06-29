@@ -1,0 +1,22 @@
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+splash_image = Image("abm-openai-startup.png");
+splash_sprite = Sprite(splash_image);
+
+image_width = splash_image.GetWidth();
+image_height = splash_image.GetHeight();
+
+scale_x = screen_width / image_width;
+scale_y = screen_height / image_height;
+
+if (scale_x < scale_y) {
+  scale = scale_x;
+} else {
+  scale = scale_y;
+}
+
+splash_sprite.SetScale(scale, scale);
+splash_sprite.SetX((screen_width - image_width * scale) / 2);
+splash_sprite.SetY((screen_height - image_height * scale) / 2);
+splash_sprite.SetZ(0);

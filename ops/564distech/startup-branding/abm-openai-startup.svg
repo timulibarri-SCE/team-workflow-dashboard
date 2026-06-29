@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">ABM and OpenAI startup splash</title>
+  <desc id="desc">Startup splash with ABM and OpenAI wordmarks side by side for the 564Distech tunnel computer.</desc>
+  <rect width="1920" height="1080" fill="#f7f8f5"/>
+  <rect x="0" y="0" width="1920" height="18" fill="#005daa"/>
+  <rect x="0" y="1062" width="1920" height="18" fill="#111111"/>
+
+  <g transform="translate(380 402)">
+    <rect x="-58" y="-78" width="500" height="276" rx="28" fill="#ffffff" stroke="#d9dedb" stroke-width="2"/>
+    <text x="0" y="82"
+          font-family="Arial Black, Arial, Helvetica, sans-serif"
+          font-size="148"
+          font-weight="900"
+          letter-spacing="0"
+          fill="#005daa">ABM</text>
+  </g>
+
+  <line x1="960" y1="350" x2="960" y2="730" stroke="#d5dad7" stroke-width="3"/>
+
+  <g transform="translate(1095 402)">
+    <rect x="-58" y="-78" width="500" height="276" rx="28" fill="#ffffff" stroke="#d9dedb" stroke-width="2"/>
+    <text x="0" y="82"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="126"
+          font-weight="700"
+          letter-spacing="0"
+          fill="#111111">OpenAI</text>
+  </g>
+
+  <text x="960" y="792"
+        text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="34"
+        font-weight="700"
+        letter-spacing="0"
+        fill="#454a47">564Distech tunnel starting</text>
+</svg>

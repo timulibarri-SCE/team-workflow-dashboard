@@ -92,6 +92,20 @@ The energy policy keeps `tailscaled`, Docker, SSH, and the
 such as Bluetooth, printing, local service discovery, modem management,
 PackageKit, and Snap when they exist on the host.
 
+## Startup Branding
+
+Install the ABM and OpenAI startup splash on `564Distech`:
+
+```sh
+sudo ./install-564distech-startup-branding.sh
+```
+
+The installer sets a Plymouth boot theme using
+`startup-branding/abm-openai-startup.svg`, converts it to the PNG asset
+Plymouth needs, and refreshes the boot image with `update-initramfs` or
+`dracut` when available. It refuses to run on a host whose local hostname does
+not look like `564Distech` unless explicitly overridden.
+
 Use Tailscale Serve for tailnet-only administration and verification:
 
 ```sh
