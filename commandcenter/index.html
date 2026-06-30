@@ -161,76 +161,10 @@ button {
   overflow: hidden;
 }
 
-.brand-mark svg {
+.brand-mark img {
   width: 40px;
   height: 40px;
-}
-
-.ai-knot {
-  opacity: 0.72;
-  transform-origin: 32px 32px;
-}
-
-.ai-knot path {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.64);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.7;
-}
-
-.ai-knot path:nth-child(2) {
-  transform: rotate(60deg);
-  transform-origin: 32px 32px;
-}
-
-.ai-knot path:nth-child(3) {
-  transform: rotate(120deg);
-  transform-origin: 32px 32px;
-}
-
-.ai-knot path:nth-child(4) {
-  transform: rotate(180deg);
-  transform-origin: 32px 32px;
-}
-
-.ai-knot path:nth-child(5) {
-  transform: rotate(240deg);
-  transform-origin: 32px 32px;
-}
-
-.ai-knot path:nth-child(6) {
-  transform: rotate(300deg);
-  transform-origin: 32px 32px;
-}
-
-.building-core,
-.building-wing {
-  fill: rgba(255, 255, 255, 0.96);
-}
-
-.building-wing {
-  fill: rgba(255, 255, 255, 0.88);
-}
-
-.building-base,
-.building-roof,
-.building-windows,
-.building-door {
-  fill: none;
-  stroke: #07533c;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.building-base,
-.building-roof {
-  stroke-width: 2.35;
-}
-
-.building-windows,
-.building-door {
-  stroke-width: 2.05;
+  object-fit: contain;
 }
 
 .eyebrow {
@@ -1896,7 +1830,7 @@ button {
     height: 40px;
   }
 
-  .brand-mark svg {
+  .brand-mark img {
     width: 35px;
     height: 35px;
   }
@@ -2009,28 +1943,7 @@ button {
       <aside class="command-sidebar" aria-label="Project navigation">
         <div class="brand-block">
           <div class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 64 64" role="img">
-              <g class="ai-knot">
-                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
-                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
-                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
-                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
-                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
-                <path d="M32 8c6 0 9.7 5.8 6.9 11.2L32 32l-6.9-12.8C22.3 13.8 26 8 32 8Z" />
-              </g>
-              <g class="building-mark">
-                <path class="building-base" d="M11 58h42" />
-                <path class="building-wing left" d="M14 57V39l10-5v23H14Z" />
-                <path class="building-wing right" d="M40 57V34l10 5v18H40Z" />
-                <path class="building-core" d="M23 57V26.5L32 21l9 5.5V57H23Z" />
-                <path class="building-roof" d="M21 28 32 21l11 7" />
-                <path
-                  class="building-windows"
-                  d="M28 32h3M34 32h3M28 38h3M34 38h3M28 44h3M34 44h3M17.5 43h3M17.5 49h3M43.5 43h3M43.5 49h3"
-                />
-                <path class="building-door" d="M30 57v-7h4v7" />
-              </g>
-            </svg>
+            <img src="../assets/fes-graphics/ui/site-icon.svg" alt="" />
           </div>
           <div>
             <h1>Command Center</h1>
@@ -5154,4 +5067,3 @@ startSync();
     </script>
   </body>
 </html>
-
