@@ -440,6 +440,10 @@ button {
   color: #fca5a5;
 }
 
+.sync-panel[data-sync-mode="auth"] .sync-state {
+  color: #fde68a;
+}
+
 .sync-panel[data-sync-mode="saved"] .sync-state {
   color: #86efac;
 }
@@ -462,6 +466,11 @@ button {
 .sync-panel[data-sync-mode="offline"] .sync-meter span {
   width: 38%;
   background: linear-gradient(90deg, #ef4444, #fca5a5);
+}
+
+.sync-panel[data-sync-mode="auth"] .sync-meter span {
+  width: 34%;
+  background: linear-gradient(90deg, #f59e0b, #fde68a);
 }
 
 .workspace {
@@ -549,6 +558,62 @@ button {
   border-radius: 8px;
   background: var(--gray-25);
   padding: 12px;
+}
+
+.auth-status-card {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+  background: var(--white);
+  padding: 10px;
+}
+
+.auth-status-card strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.auth-status-card span,
+.auth-help {
+  color: var(--gray-400);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.auth-form {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-actions .secondary-button,
+.auth-actions .primary-button {
+  flex: 1 1 120px;
+}
+
+.role-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-2);
+  font-size: 0.72rem;
+  font-weight: 850;
+  padding: 0 9px;
+  text-transform: uppercase;
+}
+
+.role-badge.is-muted {
+  background: var(--gray-100);
+  color: var(--gray-600);
 }
 
 .settings-box-header {
@@ -1996,7 +2061,7 @@ button {
           class="sync-panel"
           id="syncPanel"
           data-sync-mode="local"
-          title="Double-click to set the Google sync endpoint"
+          title="Double-click to set the legacy Google sync endpoint"
         >
           <div class="sync-row">
             <span>Shared storage</span>
@@ -2201,6 +2266,41 @@ button {
               </section>
               <section class="settings-box">
                 <div class="settings-box-header">
+                  <span>Account</span>
+                  <strong>Firebase access</strong>
+                </div>
+                <div class="auth-status-card" id="firebaseAuthStatus">
+                  <strong>Firebase not configured</strong>
+                  <span>Drive sync remains active until the Firebase project config is added.</span>
+                </div>
+                <form class="auth-form" id="firebaseEmailAuthForm">
+                  <label>
+                    <span>Email</span>
+                    <input id="firebaseEmailInput" type="email" autocomplete="email" placeholder="name@example.com" />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <input id="firebasePasswordInput" type="password" autocomplete="current-password" placeholder="Password" />
+                  </label>
+                  <div class="auth-actions">
+                    <button class="primary-button" id="firebaseEmailSignInButton" type="submit">
+                      <i data-lucide="log-in" aria-hidden="true"></i>
+                      <span>Sign In</span>
+                    </button>
+                    <button class="secondary-button" id="firebaseGoogleSignInButton" type="button">
+                      <i data-lucide="badge-check" aria-hidden="true"></i>
+                      <span>Google</span>
+                    </button>
+                    <button class="secondary-button" id="firebaseSignOutButton" type="button" hidden>
+                      <i data-lucide="log-out" aria-hidden="true"></i>
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </form>
+                <span class="auth-help">Owner/admin accounts are controlled by Firestore member documents, not by this page.</span>
+              </section>
+              <section class="settings-box">
+                <div class="settings-box-header">
                   <span>Recovery</span>
                   <strong>Drive backups</strong>
                 </div>
@@ -2254,6 +2354,10 @@ button {
     </template>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+    <script src="./firebase-config.js"></script>
     <script>
 window.COMMAND_CENTER_SYNC_CONFIG = {
   endpoint: "https://script.google.com/macros/s/AKfycbz14BNHwFlXw0FNxGkCH988UroD-L97z3dCQwQxUDb3oXOyLWwM_0-H71__4GhFu9hO/exec",
@@ -2284,6 +2388,27 @@ const syncConfig = {
   pollMs: 15000,
   ...(window.COMMAND_CENTER_SYNC_CONFIG || {}),
 };
+
+const firebaseSettings = {
+  enabled: false,
+  orgId: "facilities-engineering",
+  statePath: "orgs/facilities-engineering/commandCenter/state",
+  providers: {
+    emailPassword: true,
+    google: true,
+  },
+  config: {},
+  ...(window.COMMAND_CENTER_FIREBASE_CONFIG || {}),
+};
+
+firebaseSettings.providers = {
+  emailPassword: true,
+  google: true,
+  ...(firebaseSettings.providers || {}),
+};
+
+const firebaseWriteRoles = ["owner", "admin", "manager", "tech"];
+const firebaseAdminRoles = ["owner", "admin"];
 
 const defaultWorkstreams = [
   {
@@ -2570,12 +2695,13 @@ const defaultTasks = [
 ];
 
 const DRIVE_REPOSITORY_URL =
-  "https://drive.google.com/drive/folders/1ww8rUXsbrb3v_FrbdthnUSENBdDS_Ct4?usp=drive_link";
+  "https://drive.google.com/drive/folders/1zja8ZdT4tiZ8-yTSi17JepBez493WkSC?usp=drive_link";
 
 const syncMeta = loadSyncMeta();
 const sync = {
   clientId: getClientId(),
   endpoint: getConfiguredSyncEndpoint(),
+  provider: "drive",
   namespace: syncConfig.namespace || "commandcenter",
   pollMs: Number(syncConfig.pollMs) || 15000,
   version: Number(syncMeta.version) || 0,
@@ -2589,7 +2715,25 @@ const sync = {
   restoreChecked: false,
 };
 
-sync.enabled = Boolean(sync.endpoint);
+const firebaseSync = {
+  app: null,
+  auth: null,
+  db: null,
+  user: null,
+  member: null,
+  role: "",
+  configured: false,
+  ready: false,
+  unsubscribeState: null,
+  unsubscribeMember: null,
+};
+
+sync.provider = isFirebaseConfigured() ? "firebase" : "drive";
+sync.enabled = sync.provider === "firebase" ? false : Boolean(sync.endpoint);
+if ((syncMeta.provider || "drive") !== sync.provider) {
+  sync.version = 0;
+  sync.lastLocalAt = null;
+}
 
 let tasks = loadTasks();
 let workstreams = loadWorkstreams(tasks);
@@ -2644,6 +2788,13 @@ const jiraBaseUrlInput = document.querySelector("#jiraBaseUrlInput");
 const refreshBackupsButton = document.querySelector("#refreshBackupsButton");
 const backupList = document.querySelector("#backupList");
 const backupStatusText = document.querySelector("#backupStatusText");
+const firebaseAuthStatus = document.querySelector("#firebaseAuthStatus");
+const firebaseEmailAuthForm = document.querySelector("#firebaseEmailAuthForm");
+const firebaseEmailInput = document.querySelector("#firebaseEmailInput");
+const firebasePasswordInput = document.querySelector("#firebasePasswordInput");
+const firebaseEmailSignInButton = document.querySelector("#firebaseEmailSignInButton");
+const firebaseGoogleSignInButton = document.querySelector("#firebaseGoogleSignInButton");
+const firebaseSignOutButton = document.querySelector("#firebaseSignOutButton");
 const reportsPanel = document.querySelector("#reportsPanel");
 const reportsGrid = document.querySelector("#reportsGrid");
 const closeReportsButton = document.querySelector("#closeReportsButton");
@@ -2848,6 +2999,7 @@ function saveSyncMeta(meta = {}) {
     SYNC_META_KEY,
     JSON.stringify({
       version: sync.version,
+      provider: sync.provider,
       updatedAt: sync.lastLocalAt,
       ...meta,
     }),
@@ -2885,6 +3037,519 @@ function getConfiguredSyncEndpoint() {
     normalizeSyncEndpoint(syncConfig.endpoint) ||
     normalizeSyncEndpoint(localStorage.getItem(SYNC_ENDPOINT_STORAGE_KEY))
   );
+}
+
+function hasFirebaseConfigValue(key) {
+  return Boolean(String((firebaseSettings.config || {})[key] || "").trim());
+}
+
+function isFirebaseConfigured() {
+  return Boolean(
+    firebaseSettings.enabled &&
+      hasFirebaseConfigValue("apiKey") &&
+      hasFirebaseConfigValue("authDomain") &&
+      hasFirebaseConfigValue("projectId") &&
+      hasFirebaseConfigValue("appId") &&
+      window.firebase &&
+      window.firebase.auth &&
+      window.firebase.firestore,
+  );
+}
+
+function getFirebaseOrgId() {
+  return String(firebaseSettings.orgId || "facilities-engineering").trim() || "facilities-engineering";
+}
+
+function getFirebaseStatePath() {
+  return (
+    String(firebaseSettings.statePath || "").trim() ||
+    `orgs/${getFirebaseOrgId()}/commandCenter/state`
+  );
+}
+
+function getFirebaseMemberPath(uid) {
+  return `orgs/${getFirebaseOrgId()}/members/${uid}`;
+}
+
+function getFirebaseStateRef() {
+  return firebaseSync.db.doc(getFirebaseStatePath());
+}
+
+function getFirebaseBackupCollection() {
+  return getFirebaseStateRef().collection("backups");
+}
+
+function getFirebaseActivityCollection() {
+  return firebaseSync.db.collection(`orgs/${getFirebaseOrgId()}/activityLog`);
+}
+
+function canReadFirebaseRole(role = firebaseSync.role) {
+  return ["owner", "admin", "manager", "tech", "viewer"].includes(role);
+}
+
+function canWriteSharedData() {
+  if (sync.provider !== "firebase") return true;
+  return firebaseWriteRoles.includes(firebaseSync.role);
+}
+
+function canAdminSharedData() {
+  if (sync.provider !== "firebase") return true;
+  return firebaseAdminRoles.includes(firebaseSync.role);
+}
+
+function getSharedStorageName() {
+  return sync.provider === "firebase" ? "Firestore" : "Google Drive";
+}
+
+function getBackupLabel() {
+  return sync.provider === "firebase" ? "Firestore recovery" : sync.enabled ? "Drive recovery" : "Local mode";
+}
+
+function toIsoTimestamp(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (typeof value.toDate === "function") return value.toDate().toISOString();
+  if (value instanceof Date) return value.toISOString();
+  return String(value);
+}
+
+function createFirestoreBackupId(version) {
+  const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+  return `command-center-firestore-v${Number(version) || 0}-${stamp}`;
+}
+
+function normalizeFirestoreState(data = {}) {
+  return {
+    ok: true,
+    namespace: data.namespace || sync.namespace,
+    schemaVersion: Number(data.schemaVersion) || DATA_VERSION,
+    version: Number(data.version) || 0,
+    updatedAt: data.updatedAtIso || toIsoTimestamp(data.updatedAt) || toIsoTimestamp(data.serverUpdatedAt),
+    updatedBy: data.updatedBy || data.updatedByEmail || "",
+    calendar: data.calendar || {},
+    workstreams: Array.isArray(data.workstreams) ? data.workstreams : [],
+    backups: Array.isArray(data.backups) ? data.backups : sync.backups,
+    tasks: Array.isArray(data.tasks) ? data.tasks : [],
+  };
+}
+
+function stopFirebaseStateListener() {
+  if (firebaseSync.unsubscribeState) {
+    firebaseSync.unsubscribeState();
+    firebaseSync.unsubscribeState = null;
+  }
+}
+
+function stopFirebaseMemberListener() {
+  if (firebaseSync.unsubscribeMember) {
+    firebaseSync.unsubscribeMember();
+    firebaseSync.unsubscribeMember = null;
+  }
+}
+
+function renderFirebaseAuthStatus(message = "") {
+  const configured = isFirebaseConfigured();
+  const user = firebaseSync.user;
+  const role = firebaseSync.role || "";
+
+  if (firebaseEmailAuthForm) firebaseEmailAuthForm.hidden = !configured || Boolean(user) || !firebaseSettings.providers.emailPassword;
+  if (firebaseEmailSignInButton) firebaseEmailSignInButton.disabled = !configured || !firebaseSettings.providers.emailPassword;
+  if (firebaseGoogleSignInButton) firebaseGoogleSignInButton.disabled = !configured || !firebaseSettings.providers.google;
+  if (firebaseSignOutButton) firebaseSignOutButton.hidden = !configured || !user;
+
+  if (!firebaseAuthStatus) return;
+  firebaseAuthStatus.innerHTML = "";
+
+  const title = document.createElement("strong");
+  const detail = document.createElement("span");
+  const badge = document.createElement("span");
+  badge.className = "role-badge";
+
+  if (!firebaseSettings.enabled) {
+    title.textContent = "Firebase not enabled";
+    detail.textContent = "Add the Firebase web config and set enabled to true when the project is ready.";
+    badge.textContent = "Drive fallback";
+    badge.classList.add("is-muted");
+  } else if (!configured) {
+    title.textContent = "Firebase config incomplete";
+    detail.textContent = message || "Check firebase-config.js and the Firebase browser scripts.";
+    badge.textContent = "Setup";
+    badge.classList.add("is-muted");
+  } else if (!user) {
+    title.textContent = "Sign in required";
+    detail.textContent = message || "Use a Firebase account before Firestore sync starts.";
+    badge.textContent = "Signed out";
+    badge.classList.add("is-muted");
+  } else if (!canReadFirebaseRole(role)) {
+    title.textContent = user.email || user.displayName || "Signed in";
+    detail.textContent = message || "This account needs a member role document before it can read Command Center.";
+    badge.textContent = "No role";
+    badge.classList.add("is-muted");
+  } else {
+    title.textContent = user.email || user.displayName || "Signed in";
+    detail.textContent = message || `${getSharedStorageName()} sync is active for ${getFirebaseOrgId()}.`;
+    badge.textContent = role;
+  }
+
+  firebaseAuthStatus.append(title, detail, badge);
+}
+
+function initializeFirebaseSync() {
+  if (!isFirebaseConfigured()) {
+    renderFirebaseAuthStatus();
+    return false;
+  }
+
+  if (!firebaseSync.app) {
+    firebaseSync.app = window.firebase.initializeApp(firebaseSettings.config);
+    firebaseSync.auth = window.firebase.auth();
+    firebaseSync.db = window.firebase.firestore();
+    firebaseSync.configured = true;
+  }
+
+  if (!firebaseSync.unsubscribeAuth) {
+    firebaseSync.unsubscribeAuth = firebaseSync.auth.onAuthStateChanged((user) => {
+      firebaseSync.user = user || null;
+      firebaseSync.member = null;
+      firebaseSync.role = "";
+      sync.enabled = false;
+      stopFirebaseStateListener();
+      stopFirebaseMemberListener();
+
+      if (!user) {
+        setSyncStatus("auth", "Sign In", "Firebase account required");
+        renderFirebaseAuthStatus();
+        return;
+      }
+
+      watchFirebaseMember(user);
+    });
+  }
+
+  renderFirebaseAuthStatus();
+  return true;
+}
+
+function watchFirebaseMember(user) {
+  const memberRef = firebaseSync.db.doc(getFirebaseMemberPath(user.uid));
+  firebaseSync.unsubscribeMember = memberRef.onSnapshot(
+    (snapshot) => {
+      firebaseSync.member = snapshot.exists ? snapshot.data() : null;
+      firebaseSync.role =
+        firebaseSync.member && firebaseSync.member.status !== "disabled" ? firebaseSync.member.role || "" : "";
+
+      if (!canReadFirebaseRole(firebaseSync.role)) {
+        sync.enabled = false;
+        setSyncStatus("auth", "No Role", "Ask an owner/admin to add this account");
+        renderFirebaseAuthStatus();
+        return;
+      }
+
+      sync.enabled = true;
+      sync.restoreAvailable = canAdminSharedData();
+      renderFirebaseAuthStatus();
+      startFirebaseStateListener();
+      loadBackupList();
+    },
+    () => {
+      sync.enabled = false;
+      setSyncStatus("offline", "Offline", "Member role lookup failed");
+      renderFirebaseAuthStatus("Could not read this account's member role.");
+    },
+  );
+}
+
+function startFirebaseStateListener() {
+  if (!firebaseSync.db || !firebaseSync.user || firebaseSync.unsubscribeState) return;
+
+  setSyncStatus("syncing", "Syncing", "Loading Firestore");
+  firebaseSync.unsubscribeState = getFirebaseStateRef().onSnapshot(
+    (snapshot) => {
+      if (!snapshot.exists) {
+        if (!sync.version && canWriteSharedData()) {
+          sync.dirty = true;
+          pushRemoteSave();
+        } else {
+          setSyncStatus("saved", "Ready", "Firestore has no board state yet");
+        }
+        return;
+      }
+
+      const remote = normalizeFirestoreState(snapshot.data());
+      const remoteVersion = Number(remote.version) || 0;
+      if (remoteVersion > sync.version && !sync.dirty && !hasActiveEditable()) {
+        applyRemoteState(remote);
+      } else if (remoteVersion > sync.version && (sync.dirty || hasActiveEditable())) {
+        setSyncStatus("queued", "Queued", "Shared changes waiting");
+        return;
+      } else if (!sync.version && remoteVersion) {
+        sync.version = remoteVersion;
+        sync.lastLocalAt = remote.updatedAt || sync.lastLocalAt;
+        saveSyncMeta({ version: sync.version, updatedAt: sync.lastLocalAt });
+      }
+
+      setSyncStatus("saved", "Saved", "Firestore current");
+    },
+    () => {
+      setSyncStatus("offline", "Offline", "Firestore read failed");
+    },
+  );
+}
+
+async function fetchFirestoreState(options = {}) {
+  if (!firebaseSync.db || !firebaseSync.user || !sync.enabled) return;
+
+  if (!options.quiet && !sync.dirty) {
+    setSyncStatus("syncing", "Syncing", "Checking Firestore");
+  }
+
+  try {
+    const snapshot = await getFirebaseStateRef().get();
+    if (!snapshot.exists) {
+      if (!sync.version && canWriteSharedData()) {
+        sync.dirty = true;
+        await pushRemoteSave();
+      }
+      return;
+    }
+
+    const remote = normalizeFirestoreState(snapshot.data());
+    const remoteVersion = Number(remote.version) || 0;
+    if (remoteVersion > sync.version && !sync.dirty && !hasActiveEditable()) {
+      applyRemoteState(remote);
+    }
+    setSyncStatus("saved", "Saved", "Firestore current");
+  } catch {
+    setSyncStatus("offline", "Offline", "Using local copy");
+  }
+}
+
+async function pushFirestoreSave() {
+  if (!firebaseSync.db || !firebaseSync.user || !sync.enabled || !sync.dirty || sync.pushInFlight) return;
+
+  if (!canWriteSharedData()) {
+    setSyncStatus("auth", "Read Only", "This role cannot write to Firestore");
+    return;
+  }
+
+  sync.pushInFlight = true;
+  setSyncStatus("saving", "Saving", "Writing to Firestore");
+
+  try {
+    const stateRef = getFirebaseStateRef();
+    let nextState = null;
+
+    await firebaseSync.db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(stateRef);
+      const current = snapshot.exists ? normalizeFirestoreState(snapshot.data()) : null;
+      const currentVersion = Number(current && current.version) || 0;
+      const nowIso = new Date().toISOString();
+      const payload = createSyncPayload();
+      const serverTimestamp = window.firebase.firestore.FieldValue.serverTimestamp();
+
+      nextState = {
+        ...payload,
+        ok: true,
+        provider: "firebase",
+        orgId: getFirebaseOrgId(),
+        version: currentVersion + 1,
+        updatedAt: nowIso,
+        updatedAtIso: nowIso,
+        updatedBy: firebaseSync.user.uid,
+        updatedByEmail: firebaseSync.user.email || "",
+        updatedByRole: firebaseSync.role || "",
+        serverUpdatedAt: serverTimestamp,
+        backups: sync.backups,
+      };
+
+      if (current && Array.isArray(current.tasks) && current.tasks.length) {
+        const backupId = createFirestoreBackupId(currentVersion);
+        const backupRef = getFirebaseBackupCollection().doc(backupId);
+        transaction.set(backupRef, {
+          ...current,
+          id: backupId,
+          name: `${backupId}.json`,
+          createdAt: serverTimestamp,
+          createdAtIso: nowIso,
+          createdBy: firebaseSync.user.uid,
+          createdByEmail: firebaseSync.user.email || "",
+        });
+        nextState.backup = {
+          id: backupId,
+          name: `${backupId}.json`,
+          version: currentVersion,
+          createdAt: nowIso,
+        };
+      }
+
+      transaction.set(stateRef, nextState);
+    });
+
+    sync.dirty = false;
+    sync.version = Number(nextState && nextState.version) || sync.version;
+    sync.lastLocalAt = (nextState && nextState.updatedAt) || sync.lastLocalAt;
+    saveSyncMeta({
+      version: sync.version,
+      updatedAt: sync.lastLocalAt,
+      updatedBy: (nextState && nextState.updatedByEmail) || "",
+    });
+    setSyncStatus("saved", "Saved", "Firestore current");
+    loadBackupList();
+  } catch {
+    sync.dirty = true;
+    setSyncStatus("offline", "Offline", "Will retry Firestore sync");
+    window.clearTimeout(sync.saveTimer);
+    sync.saveTimer = window.setTimeout(pushRemoteSave, 6000);
+  } finally {
+    sync.pushInFlight = false;
+  }
+}
+
+async function loadFirestoreBackups() {
+  if (!firebaseSync.db || !firebaseSync.user || !sync.enabled) {
+    setBackupStatus("Sign in to load Firestore backups.");
+    renderBackupList([]);
+    return;
+  }
+
+  if (!canAdminSharedData()) {
+    setBackupStatus("Firestore backups are visible to owner/admin roles.");
+    renderBackupList([]);
+    return;
+  }
+
+  setBackupStatus("Loading Firestore backups...");
+  try {
+    const snapshot = await getFirebaseBackupCollection().orderBy("createdAt", "desc").limit(10).get();
+    const backups = snapshot.docs.map((doc) => {
+      const data = doc.data() || {};
+      return {
+        id: doc.id,
+        name: data.name || `${doc.id}.json`,
+        version: Number(data.version) || 0,
+        createdAt: data.createdAtIso || toIsoTimestamp(data.createdAt),
+        updatedAt: data.updatedAt || "",
+      };
+    });
+    sync.restoreAvailable = true;
+    renderBackupList(backups);
+    setBackupStatus(`${sync.backups.length} Firestore backups available.`);
+  } catch {
+    setBackupStatus("Firestore backup list failed.");
+  }
+}
+
+async function restoreFirestoreBackup(backupId) {
+  if (!firebaseSync.db || !firebaseSync.user || !sync.enabled || !backupId) return;
+  if (!canAdminSharedData()) {
+    setBackupStatus("Only owner/admin roles can restore Firestore backups.");
+    return;
+  }
+
+  const backup = sync.backups.find((item) => item.id === backupId || item.name === backupId);
+  const label = backup ? backup.name : backupId;
+  if (!window.confirm(`Restore "${label}"? This replaces the current Firestore board state.`)) return;
+
+  setBackupStatus("Restoring Firestore backup...");
+  try {
+    const stateRef = getFirebaseStateRef();
+    const backupRef = getFirebaseBackupCollection().doc(backup ? backup.id : backupId);
+    let nextState = null;
+
+    await firebaseSync.db.runTransaction(async (transaction) => {
+      const backupSnapshot = await transaction.get(backupRef);
+      if (!backupSnapshot.exists) {
+        throw new Error("Backup was not found.");
+      }
+
+      const currentSnapshot = await transaction.get(stateRef);
+      const current = currentSnapshot.exists ? normalizeFirestoreState(currentSnapshot.data()) : null;
+      const restored = normalizeFirestoreState(backupSnapshot.data());
+      if (!Array.isArray(restored.tasks)) {
+        throw new Error("Backup does not contain tasks.");
+      }
+
+      const nowIso = new Date().toISOString();
+      const serverTimestamp = window.firebase.firestore.FieldValue.serverTimestamp();
+      const currentVersion = Number(current && current.version) || 0;
+
+      if (current && Array.isArray(current.tasks) && current.tasks.length) {
+        const safetyBackupId = createFirestoreBackupId(currentVersion);
+        transaction.set(getFirebaseBackupCollection().doc(safetyBackupId), {
+          ...current,
+          id: safetyBackupId,
+          name: `${safetyBackupId}.json`,
+          createdAt: serverTimestamp,
+          createdAtIso: nowIso,
+          createdBy: firebaseSync.user.uid,
+          createdByEmail: firebaseSync.user.email || "",
+          reason: "pre-restore",
+        });
+      }
+
+      nextState = {
+        ...restored,
+        ok: true,
+        provider: "firebase",
+        orgId: getFirebaseOrgId(),
+        version: currentVersion + 1,
+        updatedAt: nowIso,
+        updatedAtIso: nowIso,
+        updatedBy: firebaseSync.user.uid,
+        updatedByEmail: firebaseSync.user.email || "",
+        restoredFrom: label,
+        serverUpdatedAt: serverTimestamp,
+      };
+
+      transaction.set(stateRef, nextState);
+    });
+
+    applyRemoteState(nextState);
+    setBackupStatus("Firestore backup restored.");
+    setSyncStatus("saved", "Saved", "Backup restored to Firestore");
+    loadBackupList();
+  } catch {
+    setBackupStatus("Firestore restore failed.");
+    setSyncStatus("offline", "Offline", "Backup restore failed");
+  }
+}
+
+async function signInWithFirebaseEmail(event) {
+  event.preventDefault();
+  if (!initializeFirebaseSync() || !firebaseEmailInput || !firebasePasswordInput) return;
+
+  const email = firebaseEmailInput.value.trim();
+  const password = firebasePasswordInput.value;
+  if (!email || !password) return;
+
+  setSyncStatus("auth", "Sign In", "Checking Firebase account");
+  try {
+    await firebaseSync.auth.signInWithEmailAndPassword(email, password);
+    firebasePasswordInput.value = "";
+  } catch (error) {
+    const message = error && error.message ? error.message : "Firebase sign-in failed.";
+    setSyncStatus("offline", "Offline", "Firebase sign-in failed");
+    renderFirebaseAuthStatus(message);
+  }
+}
+
+async function signInWithFirebaseGoogle() {
+  if (!initializeFirebaseSync()) return;
+
+  setSyncStatus("auth", "Sign In", "Opening Google sign-in");
+  try {
+    const provider = new window.firebase.auth.GoogleAuthProvider();
+    await firebaseSync.auth.signInWithPopup(provider);
+  } catch (error) {
+    const message = error && error.message ? error.message : "Google sign-in failed.";
+    setSyncStatus("offline", "Offline", "Google sign-in failed");
+    renderFirebaseAuthStatus(message);
+  }
+}
+
+async function signOutFirebase() {
+  if (!firebaseSync.auth) return;
+  await firebaseSync.auth.signOut();
 }
 
 function loadTasks() {
@@ -3091,8 +3756,17 @@ function queueRemoteSave() {
   sync.lastLocalAt = new Date().toISOString();
   saveSyncMeta({ updatedAt: sync.lastLocalAt });
 
+  if (sync.provider === "firebase" && !canWriteSharedData()) {
+    setSyncStatus("auth", "Read Only", "This role cannot write to Firestore");
+    return;
+  }
+
   if (!sync.enabled) {
-    setSyncStatus("local", "Local", "Waiting for Google link");
+    setSyncStatus(
+      sync.provider === "firebase" ? "auth" : "local",
+      sync.provider === "firebase" ? "Sign In" : "Local",
+      sync.provider === "firebase" ? "Firebase account required" : "Waiting for Google link",
+    );
     return;
   }
 
@@ -3115,6 +3789,11 @@ function createSyncPayload() {
 }
 
 async function pushRemoteSave() {
+  if (sync.provider === "firebase") {
+    await pushFirestoreSave();
+    return;
+  }
+
   if (!sync.enabled || !sync.dirty || sync.pushInFlight) return;
 
   sync.pushInFlight = true;
@@ -3162,6 +3841,11 @@ function applyRemoteState(remote) {
 }
 
 async function fetchRemoteState(options = {}) {
+  if (sync.provider === "firebase") {
+    await fetchFirestoreState(options);
+    return;
+  }
+
   if (!sync.enabled || sync.pushInFlight) return;
 
   if (!options.quiet && !sync.dirty) {
@@ -3205,6 +3889,11 @@ async function fetchRemoteState(options = {}) {
 }
 
 function configureSyncEndpoint() {
+  if (sync.provider === "firebase") {
+    window.alert("Firebase sync is configured in firebase-config.js. Drive sync remains available only when Firebase is disabled.");
+    return;
+  }
+
   const nextEndpoint = window.prompt("Google Apps Script Web App URL", sync.endpoint || "");
   if (nextEndpoint === null) return;
 
@@ -3227,6 +3916,7 @@ function configureSyncEndpoint() {
 }
 
 function flushRemoteSave() {
+  if (sync.provider === "firebase") return;
   if (!sync.enabled || !sync.dirty || !navigator.sendBeacon) return;
 
   const body = JSON.stringify(createSyncPayload());
@@ -3236,6 +3926,11 @@ function flushRemoteSave() {
 
 function startSync() {
   window.clearInterval(sync.pollTimer);
+
+  if (sync.provider === "firebase") {
+    initializeFirebaseSync();
+    return;
+  }
 
   if (!sync.enabled) {
     setSyncStatus("local", "Local", "Waiting for Google link");
@@ -3256,6 +3951,11 @@ function flattenTasks(taskList) {
 }
 
 async function syncCalendarDueDates() {
+  if (sync.provider === "firebase") {
+    setSyncStatus("auth", "Calendar", "Calendar sync still uses the legacy Apps Script bridge");
+    return;
+  }
+
   if (!sync.enabled) {
     setSyncStatus("local", "Local", "Connect Google sync first");
     return;
@@ -3604,7 +4304,7 @@ function renderMetrics() {
   if (openTasksDetail) openTasksDetail.textContent = `Across ${workstreams.length} workstations`;
   if (dueTasksDetail) dueTasksDetail.textContent = `${due.filter((task) => task.dueState === "overdue").length} overdue`;
   if (blockedTasksDetail) blockedTasksDetail.textContent = `${blocked.length} need action`;
-  if (backupMetricDetail) backupMetricDetail.textContent = sync.enabled ? "Drive recovery" : "Local mode";
+  if (backupMetricDetail) backupMetricDetail.textContent = getBackupLabel();
 }
 
 function createReportCard(label, value, detail) {
@@ -3659,7 +4359,7 @@ function renderReports() {
     createReportCard("Archived", archived.length, "Stored out of active view"),
     createReportCard("Archived This Month", archivedThisMonth.length, "Monthly report set"),
     createReportCard("Workstations", flattenWorkstations().length, `${workstreams.length} top level`),
-    createReportCard("Backups", sync.backups.length, sync.enabled ? "Google Drive versions" : "Connect Google sync"),
+    createReportCard("Backups", sync.backups.length, getBackupLabel()),
   );
 }
 
@@ -3699,10 +4399,12 @@ function renderBackupList(backups = sync.backups) {
     empty.className = "backup-row";
     const text = document.createElement("div");
     const title = document.createElement("strong");
-    title.textContent = sync.enabled ? "No Drive backups yet" : "Connect Google sync";
+    title.textContent = sync.enabled ? `No ${getSharedStorageName()} backups yet` : "Connect shared storage";
     const meta = document.createElement("span");
     meta.className = "backup-meta";
-    meta.textContent = sync.enabled ? "Backups are created before each shared overwrite." : "Backups load from Drive.";
+    meta.textContent = sync.enabled
+      ? "Backups are created before each shared overwrite."
+      : "Backups load from Drive or Firestore.";
     text.append(title, meta);
     empty.append(text);
     backupList.append(empty);
@@ -3733,7 +4435,7 @@ function renderBackupList(backups = sync.backups) {
     restore.className = "row-action";
     restore.type = "button";
     restore.title = sync.restoreAvailable ? "Restore backup" : "Deploy Apps Script restore action";
-    restore.dataset.restoreBackup = backup.name || "";
+    restore.dataset.restoreBackup = backup.id || backup.name || "";
     restore.disabled = !sync.restoreAvailable;
     restore.append(createIcon("history"));
 
@@ -3747,6 +4449,12 @@ function renderBackupList(backups = sync.backups) {
 }
 
 async function checkRestoreCapability(force = false) {
+  if (sync.provider === "firebase") {
+    sync.restoreAvailable = canAdminSharedData();
+    sync.restoreChecked = true;
+    return sync.restoreAvailable;
+  }
+
   if (!sync.enabled) {
     sync.restoreAvailable = false;
     sync.restoreChecked = true;
@@ -3770,6 +4478,11 @@ async function checkRestoreCapability(force = false) {
 }
 
 async function loadBackupList() {
+  if (sync.provider === "firebase") {
+    await loadFirestoreBackups();
+    return;
+  }
+
   if (!sync.enabled) {
     setBackupStatus("Connect Google sync to load backups.");
     renderBackupList([]);
@@ -3795,6 +4508,11 @@ async function loadBackupList() {
 }
 
 async function restoreBackup(name) {
+  if (sync.provider === "firebase") {
+    await restoreFirestoreBackup(name);
+    return;
+  }
+
   if (!sync.enabled || !name) return;
   if (!sync.restoreAvailable) {
     setBackupStatus("Restore needs Apps Script deployment.");
@@ -4832,6 +5550,18 @@ if (backupList) {
   });
 }
 
+if (firebaseEmailAuthForm) {
+  firebaseEmailAuthForm.addEventListener("submit", signInWithFirebaseEmail);
+}
+
+if (firebaseGoogleSignInButton) {
+  firebaseGoogleSignInButton.addEventListener("click", signInWithFirebaseGoogle);
+}
+
+if (firebaseSignOutButton) {
+  firebaseSignOutButton.addEventListener("click", signOutFirebase);
+}
+
 if (fontFamilySelect) {
   fontFamilySelect.addEventListener("change", (event) => {
     const value = event.target.value;
@@ -5062,6 +5792,7 @@ renderReports();
 renderCalendarPanel();
 renderBackupList(sync.backups);
 renderTable();
+renderFirebaseAuthStatus();
 startSync();
 
     </script>

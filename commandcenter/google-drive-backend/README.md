@@ -1,6 +1,10 @@
 # Command Center Google Drive Sync
 
-This Apps Script stores the Command Center task grid in the shared Google Drive folder as `command-center-data.json`.
+This Apps Script stores the Command Center task grid in the shared Google Drive database folder as `command-center-data.json`.
+
+Database folder:
+
+https://drive.google.com/drive/folders/1zja8ZdT4tiZ8-yTSi17JepBez493WkSC
 
 ## Deploy
 
