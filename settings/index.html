@@ -9,213 +9,1376 @@
     <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=frog-tab-1">
     <meta
       name="description"
-      content="Facilities Engineering settings for adding users, passwords, profiles, and page permissions."
+      content="Facilities Engineering access center for Firebase roles, Firestore rules, page access, and security requirements."
     >
     <title>Settings | Facilities Engineering</title>
-    <link rel="stylesheet" href="../styles.css?v=profiles-4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    >
     <style>
       .require-auth body {
         display: none;
       }
     </style>
-    <script src="../scripts/access-directory.js?v=profiles-10"></script>
+    <script src="../scripts/access-directory.js?v=firebase-access-1"></script>
     <script>
       if (AccessDirectory.requirePageAccess("settings", "../login/?redirect=../settings/")) {
         document.documentElement.classList.remove("require-auth");
       }
     </script>
+    <style>
+      :root {
+        --ink: #101614;
+        --sidebar: #07100d;
+        --sidebar-2: #0c1915;
+        --green: #14b878;
+        --green-2: #0f8f62;
+        --green-soft: #e9f7f0;
+        --teal: #0e7490;
+        --blue: #2663eb;
+        --amber: #b7791f;
+        --red: #c24135;
+        --gray-25: #fbfcfd;
+        --gray-50: #f5f7f8;
+        --gray-100: #e8edf0;
+        --gray-200: #d5dee3;
+        --gray-400: #71818b;
+        --gray-600: #3f4d56;
+        --white: #ffffff;
+        --shadow: 0 22px 70px rgba(15, 23, 42, 0.13);
+        color-scheme: light;
+        font-family: "Atkinson Hyperlegible", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 0;
+        min-height: 100vh;
+        margin: 0;
+        background:
+          linear-gradient(90deg, #08110f 0, #08110f 280px, transparent 280px),
+          var(--gray-50);
+        color: var(--ink);
+        overflow-x: auto;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .access-shell {
+        display: grid;
+        grid-template-columns: minmax(250px, 280px) minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      .access-sidebar {
+        position: sticky;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        padding: 22px 16px 18px;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(20, 184, 120, 0.22), transparent 28%),
+          linear-gradient(145deg, var(--sidebar), var(--sidebar-2) 58%, #06110e);
+        box-shadow: 18px 0 45px rgba(0, 0, 0, 0.28);
+        color: #edfdf6;
+        overflow: hidden;
+      }
+
+      .brand-block {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+        border: 1px solid rgba(82, 232, 160, 0.5);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 34% 22%, rgba(255, 255, 255, 0.2), transparent 26%),
+          linear-gradient(145deg, #16a66c, #07533c 72%);
+        box-shadow: 0 12px 24px rgba(5, 48, 34, 0.7);
+        overflow: hidden;
+      }
+
+      .brand-mark img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+      }
+
+      .brand-block h1 {
+        margin: 0;
+        font-family: Bahnschrift, "DIN Alternate", "Arial Narrow", "Segoe UI", sans-serif;
+        font-size: 1.08rem;
+        font-weight: 800;
+        line-height: 1.05;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        margin: 0 0 4px;
+        color: var(--green);
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .access-nav {
+        display: grid;
+        gap: 6px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 40px;
+        width: 100%;
+        border-radius: 8px;
+        background: transparent;
+        color: #b6c8c0;
+        padding: 0 12px;
+        text-align: left;
+      }
+
+      .nav-item svg,
+      .toolbar svg,
+      .mini-button svg,
+      .action-button svg {
+        width: 17px;
+        height: 17px;
+        stroke-width: 2;
+      }
+
+      .nav-item:hover,
+      .nav-item.is-active {
+        background: linear-gradient(90deg, rgba(20, 184, 120, 0.28), rgba(20, 184, 120, 0.08));
+        color: var(--white);
+      }
+
+      .sidebar-status {
+        display: grid;
+        gap: 10px;
+        margin-top: auto;
+        border: 1px solid rgba(110, 231, 183, 0.18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 12px;
+      }
+
+      .status-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        color: rgba(217, 255, 240, 0.72);
+        font-size: 0.76rem;
+      }
+
+      .status-line strong {
+        color: #86efac;
+      }
+
+      .workspace {
+        min-width: 0;
+        padding: 22px 26px 32px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 14px;
+      }
+
+      .topbar h2 {
+        margin: 0;
+        font-size: 1.85rem;
+        line-height: 1.1;
+      }
+
+      .topbar p {
+        max-width: 760px;
+        margin: 6px 0 0;
+        color: var(--gray-600);
+        line-height: 1.45;
+      }
+
+      .toolbar,
+      .button-row,
+      .form-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .primary-button,
+      .secondary-button,
+      .danger-button,
+      .mini-button,
+      .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 38px;
+        border-radius: 8px;
+        font-weight: 800;
+      }
+
+      .primary-button {
+        background: linear-gradient(135deg, var(--green), var(--green-2));
+        box-shadow: 0 12px 24px rgba(20, 184, 120, 0.24);
+        color: var(--white);
+        padding: 0 14px;
+      }
+
+      .secondary-button,
+      .mini-button,
+      .action-button {
+        border: 1px solid var(--gray-200);
+        background: var(--white);
+        color: var(--gray-600);
+        padding: 0 12px;
+      }
+
+      .danger-button {
+        border: 1px solid rgba(194, 65, 53, 0.25);
+        background: #fff1f2;
+        color: var(--red);
+        padding: 0 12px;
+      }
+
+      .mini-button,
+      .action-button {
+        min-height: 32px;
+        padding: 0 10px;
+        font-size: 0.82rem;
+      }
+
+      .metric-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .metric,
+      .panel,
+      .table-panel {
+        border: 1px solid var(--gray-100);
+        border-radius: 8px;
+        background: var(--white);
+        box-shadow: var(--shadow);
+      }
+
+      .metric {
+        display: grid;
+        gap: 4px;
+        padding: 14px;
+      }
+
+      .metric span,
+      .panel-header span,
+      label span,
+      .meta,
+      .requirement-meta {
+        color: var(--gray-400);
+        font-size: 0.7rem;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .metric strong {
+        font-size: 1.6rem;
+      }
+
+      .metric small {
+        color: var(--gray-600);
+      }
+
+      .panel-grid {
+        display: grid;
+        grid-template-columns: minmax(360px, 0.86fr) minmax(0, 1.14fr);
+        gap: 14px;
+      }
+
+      .wide-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .panel {
+        overflow: hidden;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 58px;
+        border-bottom: 1px solid var(--gray-100);
+        background: #f9fbfb;
+        padding: 12px 14px;
+      }
+
+      .panel-header h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .panel-body {
+        display: grid;
+        gap: 12px;
+        padding: 14px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 5px;
+        min-width: 0;
+        color: var(--gray-600);
+        font-size: 0.86rem;
+        font-weight: 700;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        min-width: 0;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--ink);
+        outline: 0;
+        padding: 0 10px;
+      }
+
+      input,
+      select {
+        height: 36px;
+      }
+
+      textarea {
+        min-height: 110px;
+        padding: 10px;
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: rgba(20, 184, 120, 0.5);
+        box-shadow: 0 0 0 3px rgba(20, 184, 120, 0.13);
+      }
+
+      .full-span {
+        grid-column: 1 / -1;
+      }
+
+      .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 8px;
+      }
+
+      .check-card,
+      .requirement-row,
+      .role-card {
+        border: 1px solid var(--gray-100);
+        border-radius: 8px;
+        background: var(--gray-25);
+      }
+
+      .check-card {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 38px;
+        padding: 8px 10px;
+        color: var(--gray-600);
+        font-weight: 800;
+      }
+
+      .check-card input {
+        width: 16px;
+        height: 16px;
+      }
+
+      .table-wrap {
+        overflow: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 820px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--gray-100);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f9fbfb;
+        color: var(--gray-400);
+        font-size: 0.68rem;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      td {
+        color: var(--gray-600);
+        font-size: 0.86rem;
+      }
+
+      td strong {
+        display: block;
+        color: var(--ink);
+        font-size: 0.9rem;
+      }
+
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .tag,
+      .role-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 23px;
+        width: fit-content;
+        border-radius: 999px;
+        background: var(--green-soft);
+        color: var(--green-2);
+        font-size: 0.7rem;
+        font-weight: 850;
+        padding: 0 8px;
+        text-transform: uppercase;
+      }
+
+      .tag.muted {
+        background: var(--gray-100);
+        color: var(--gray-600);
+      }
+
+      .tag.warn {
+        background: #fff7ed;
+        color: var(--amber);
+      }
+
+      .tag.danger {
+        background: #fff1f2;
+        color: var(--red);
+      }
+
+      .panel-screen {
+        display: none;
+      }
+
+      .panel-screen.is-active {
+        display: block;
+      }
+
+      .rules-editor {
+        min-height: 520px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        white-space: pre;
+      }
+
+      .code-output {
+        min-height: 210px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+
+      .requirement-list,
+      .role-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      .requirement-row {
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr) minmax(220px, 0.45fr);
+        gap: 10px;
+        align-items: start;
+        padding: 10px;
+      }
+
+      .requirement-row input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+      }
+
+      .requirement-row strong {
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .requirement-row p {
+        margin: 0;
+        color: var(--gray-600);
+        line-height: 1.4;
+      }
+
+      .notice {
+        min-height: 38px;
+        border: 1px solid var(--gray-100);
+        border-radius: 8px;
+        background: var(--gray-25);
+        color: var(--gray-600);
+        padding: 10px 12px;
+      }
+
+      .notice.success {
+        border-color: rgba(20, 184, 120, 0.24);
+        background: var(--green-soft);
+        color: var(--green-2);
+      }
+
+      .notice.error {
+        border-color: rgba(194, 65, 53, 0.25);
+        background: #fff1f2;
+        color: var(--red);
+      }
+
+      .role-card {
+        padding: 12px;
+      }
+
+      .role-card h4 {
+        margin: 0 0 6px;
+      }
+
+      .role-card p {
+        margin: 0;
+        color: var(--gray-600);
+        line-height: 1.4;
+      }
+
+      .matrix-table input {
+        width: 16px;
+        height: 16px;
+      }
+
+      .file-input {
+        max-width: 260px;
+      }
+
+      @media (max-width: 1100px) {
+        body {
+          background: var(--gray-50);
+        }
+
+        .access-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .access-sidebar {
+          position: relative;
+          height: auto;
+        }
+
+        .access-nav {
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+
+        .metric-strip,
+        .panel-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .workspace {
+          padding: 16px;
+        }
+
+        .topbar,
+        .panel-header,
+        .requirement-row {
+          grid-template-columns: 1fr;
+          display: grid;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .metric-strip {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
   </head>
   <body>
-    <header class="site-header">
-      <nav class="nav" aria-label="Main navigation">
-        <a class="brand" href="../home/">Facilities Engineering</a>
-        <div class="nav-links">
-          <a href="../home/">Home</a>
-          <a href="../home/#capabilities">Capabilities</a>
-          <a href="../home/#approach">Approach</a>
-          <a href="../dashboard/">Dashboard</a>
+    <div class="access-shell">
+      <aside class="access-sidebar" aria-label="Settings navigation">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="../assets/fes-graphics/ui/site-icon.svg" alt="">
+          </div>
+          <div>
+            <p class="eyebrow">Access center</p>
+            <h1>Settings</h1>
+          </div>
         </div>
-        <a class="login-button" href="../login/">Login</a>
-      </nav>
-    </header>
 
-    <main class="page-shell">
-      <section class="hero compact">
-        <p class="eyebrow">Access administration</p>
-        <h1>Settings</h1>
-        <p class="lead">
-          Add people, define their email login and password, assign a profile,
-          and choose which widgets each profile can see.
-        </p>
-      </section>
+        <nav class="access-nav">
+          <button class="nav-item is-active" type="button" data-panel-target="overview">
+            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+            <span>Overview</span>
+          </button>
+          <button class="nav-item" type="button" data-panel-target="people">
+            <i data-lucide="users" aria-hidden="true"></i>
+            <span>People</span>
+          </button>
+          <button class="nav-item" type="button" data-panel-target="pages">
+            <i data-lucide="panel-top" aria-hidden="true"></i>
+            <span>Pages</span>
+          </button>
+          <button class="nav-item" type="button" data-panel-target="firebase">
+            <i data-lucide="database" aria-hidden="true"></i>
+            <span>Firebase</span>
+          </button>
+          <button class="nav-item" type="button" data-panel-target="rules">
+            <i data-lucide="shield-check" aria-hidden="true"></i>
+            <span>Rules</span>
+          </button>
+          <button class="nav-item" type="button" data-panel-target="requirements">
+            <i data-lucide="list-checks" aria-hidden="true"></i>
+            <span>Requirements</span>
+          </button>
+        </nav>
 
-      <section class="settings-layout" aria-label="Access settings">
-        <form class="settings-panel" id="user-form">
-          <input type="hidden" id="editing-id" name="editing-id">
-
-          <div class="settings-panel-header">
-            <div>
-              <p class="eyebrow">People</p>
-              <h2>Add or update a login</h2>
-            </div>
-            <button class="secondary-action dark" type="button" id="reset-form">New Entry</button>
+        <div class="sidebar-status">
+          <div class="status-line">
+            <span>Route</span>
+            <strong>/settings/</strong>
           </div>
-
-          <div class="form-grid">
-            <label>
-              Full name
-              <input id="name" name="name" type="text" placeholder="Jane Smith" required>
-            </label>
-
-            <label>
-              Email address
-              <input id="email" name="email" type="email" placeholder="jane@company.com" required>
-            </label>
-
-            <label>
-              Password
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autocomplete="new-password"
-                placeholder="Leave blank to keep current password"
-              >
-            </label>
-
-            <label>
-              Profile
-              <select id="profile" name="profile" required></select>
-            </label>
-
-            <label class="toggle-row">
-              <input id="active" name="active" type="checkbox" checked>
-              Active access record
-            </label>
+          <div class="status-line">
+            <span>Firebase</span>
+            <strong id="sidebarFirebaseState">Draft</strong>
           </div>
-
-          <button class="primary-action" type="submit">Save Access Record</button>
-          <p class="settings-footnote">
-            These login records are stored in this browser for planning and demo
-            use. Production authentication should be enforced by a secure
-            identity service, not by static site files.
-          </p>
-        </form>
-
-        <section class="settings-panel" aria-labelledby="directory-title">
-          <div class="settings-panel-header">
-            <div>
-              <p class="eyebrow">Directory</p>
-              <h2 id="directory-title">Current access records</h2>
-            </div>
-            <button class="secondary-action dark" type="button" id="clear-session">Sign Out Local Session</button>
+          <div class="status-line">
+            <span>Signed in</span>
+            <strong id="sidebarUserState">Local</strong>
           </div>
+        </div>
+      </aside>
 
-          <div class="access-table-wrap">
-            <table class="access-table">
-              <thead>
-                <tr>
-                  <th>Login Details</th>
-                  <th>Profile</th>
-                  <th>Status</th>
-                  <th>Allowed Pages</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="user-table"></tbody>
-            </table>
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Facilities Engineering security</p>
+            <h2>Access Settings</h2>
+            <p>
+              Manage Firebase roles, page access, Firestore rule drafts, requirements, and future app permissions from one control surface.
+            </p>
           </div>
+          <div class="toolbar">
+            <a class="secondary-button" href="../home/">Home</a>
+            <a class="secondary-button" href="../commandcenter/">Command Center</a>
+            <button class="primary-button" type="button" id="exportSettingsButton">
+              <i data-lucide="download" aria-hidden="true"></i>
+              <span>Export</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="metric-strip" aria-label="Access summary">
+          <article class="metric">
+            <span>Members</span>
+            <strong id="memberMetric">0</strong>
+            <small id="memberMetricDetail">0 active</small>
+          </article>
+          <article class="metric">
+            <span>Pages</span>
+            <strong id="pageMetric">0</strong>
+            <small>Routes under access control</small>
+          </article>
+          <article class="metric">
+            <span>Roles</span>
+            <strong id="roleMetric">5</strong>
+            <small>Owner through viewer</small>
+          </article>
+          <article class="metric">
+            <span>Requirements</span>
+            <strong id="requirementMetric">0%</strong>
+            <small id="requirementMetricDetail">Not complete</small>
+          </article>
         </section>
 
-        <section class="settings-panel profile-settings-panel" aria-labelledby="profile-settings-title">
-          <div class="settings-panel-header">
-            <div>
-              <p class="eyebrow">Profiles</p>
-              <h2 id="profile-settings-title">Profile settings</h2>
-            </div>
-            <button class="primary-action" type="button" id="save-profile-settings">Save Profiles</button>
-          </div>
+        <div class="notice" id="notice" role="status" aria-live="polite">Ready.</div>
 
-          <p class="settings-footnote">
-            Select the pages and widgets each profile can access.
-          </p>
-
-          <div class="profile-widget-grid" id="profile-settings"></div>
-        </section>
-      </section>
-    </main>
-
-    <script>
-      const form = document.querySelector("#user-form");
-      const editingId = document.querySelector("#editing-id");
-      const nameInput = document.querySelector("#name");
-      const emailInput = document.querySelector("#email");
-      const passwordInput = document.querySelector("#password");
-      const profileInput = document.querySelector("#profile");
-      const activeInput = document.querySelector("#active");
-      const profileSettings = document.querySelector("#profile-settings");
-      const userTable = document.querySelector("#user-table");
-      const resetButton = document.querySelector("#reset-form");
-      const clearSessionButton = document.querySelector("#clear-session");
-      const saveProfileSettingsButton = document.querySelector("#save-profile-settings");
-
-      function renderProfileOptions() {
-        profileInput.innerHTML = AccessDirectory.profiles.map((profile) => `
-          <option value="${profile.id}">${profile.label}</option>
-        `).join("");
-      }
-
-      function renderProfileSettings() {
-        const pageAssignments = AccessDirectory.readProfilePages();
-        const widgetAssignments = AccessDirectory.readProfileWidgets();
-        profileSettings.innerHTML = AccessDirectory.profiles.map((profile) => {
-          const selectedPages = new Set(pageAssignments[profile.id] || []);
-          const selectedWidgets = new Set(widgetAssignments[profile.id] || []);
-          return `
-            <article class="profile-widget-card">
-              <h3>${escapeHtml(profile.label)}</h3>
-              <div class="profile-setting-group">
-                <h4>Allowed pages after login</h4>
-                <div class="profile-checkbox-list">
-                  ${AccessDirectory.pages.map((page) => `
-                    <label class="profile-option">
-                      <input
-                        type="checkbox"
-                        data-profile-page="${profile.id}"
-                        value="${page.id}"
-                        ${selectedPages.has(page.id) ? "checked" : ""}
-                      >
-                      <span>${escapeHtml(page.label)}</span>
-                    </label>
-                  `).join("")}
+        <section class="panel-screen is-active" id="panel-overview">
+          <div class="panel-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <span>Role model</span>
+                  <h3>Firebase access levels</h3>
                 </div>
               </div>
-              <div class="profile-setting-group">
-                <h4>Dashboard widgets</h4>
-                <div class="profile-checkbox-list">
-                ${AccessDirectory.widgets.map((widget) => `
-                  <label class="profile-option">
-                    <input
-                      type="checkbox"
-                      data-profile-widget="${profile.id}"
-                      value="${widget.id}"
-                      ${selectedWidgets.has(widget.id) ? "checked" : ""}
-                    >
-                    <span>${escapeHtml(widget.label)}</span>
+              <div class="panel-body role-grid" id="roleOverview"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <span>Security posture</span>
+                  <h3>Required controls</h3>
+                </div>
+                <button class="mini-button" type="button" data-panel-link="requirements">Open checklist</button>
+              </div>
+              <div class="panel-body requirement-list" id="overviewRequirements"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel-screen" id="panel-people">
+          <div class="panel-grid">
+            <form class="panel" id="memberForm">
+              <div class="panel-header">
+                <div>
+                  <span>People</span>
+                  <h3>Add or edit access</h3>
+                </div>
+                <button class="mini-button" type="button" id="newMemberButton">New</button>
+              </div>
+              <div class="panel-body">
+                <input type="hidden" id="memberEditingId">
+                <div class="form-grid">
+                  <label>
+                    <span>Firebase UID</span>
+                    <input id="memberUid" placeholder="Firebase Auth UID">
                   </label>
-                `).join("")}
+                  <label>
+                    <span>Email</span>
+                    <input id="memberEmail" type="email" placeholder="name@example.com" required>
+                  </label>
+                  <label>
+                    <span>Display name</span>
+                    <input id="memberName" placeholder="Jane Smith" required>
+                  </label>
+                  <label>
+                    <span>Role</span>
+                    <select id="memberRole"></select>
+                  </label>
+                  <label>
+                    <span>Status</span>
+                    <select id="memberStatus">
+                      <option value="active">Active</option>
+                      <option value="disabled">Disabled</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Local demo password</span>
+                    <input id="memberPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep current">
+                  </label>
+                  <label class="full-span">
+                    <span>Title or notes</span>
+                    <textarea id="memberNotes" placeholder="Shift, team, reason for access, approval notes"></textarea>
+                  </label>
+                </div>
+                <div>
+                  <p class="meta">Allowed pages</p>
+                  <div class="checkbox-grid" id="memberPageChecks"></div>
+                </div>
+                <div class="form-actions">
+                  <button class="primary-button" type="submit">Save Member</button>
+                  <button class="danger-button" type="button" id="deleteMemberButton">Delete</button>
                 </div>
               </div>
-            </article>
-          `;
-        }).join("");
+            </form>
+
+            <section class="table-panel">
+              <div class="panel-header">
+                <div>
+                  <span>Directory</span>
+                  <h3>Firestore member documents</h3>
+                </div>
+                <button class="mini-button" type="button" id="copyMembersButton">Copy JSON</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Person</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Pages</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="memberTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel-screen" id="panel-pages">
+          <div class="wide-grid">
+            <div class="panel-grid">
+              <form class="panel" id="pageForm">
+                <div class="panel-header">
+                  <div>
+                    <span>Pages</span>
+                    <h3>Route registry</h3>
+                  </div>
+                  <button class="mini-button" type="button" id="newPageButton">New</button>
+                </div>
+                <div class="panel-body">
+                  <input type="hidden" id="pageEditingId">
+                  <div class="form-grid">
+                    <label>
+                      <span>Page ID</span>
+                      <input id="pageId" placeholder="commandcenter" required>
+                    </label>
+                    <label>
+                      <span>Label</span>
+                      <input id="pageLabel" placeholder="Command Center" required>
+                    </label>
+                    <label>
+                      <span>Path</span>
+                      <input id="pagePath" placeholder="../commandcenter/" required>
+                    </label>
+                    <label>
+                      <span>Minimum role</span>
+                      <select id="pageMinRole"></select>
+                    </label>
+                    <label>
+                      <span>Status</span>
+                      <select id="pageStatus">
+                        <option value="active">Active</option>
+                        <option value="planned">Planned</option>
+                        <option value="locked">Locked</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Collection path</span>
+                      <input id="pageCollection" placeholder="orgs/facilities-engineering/settings/access">
+                    </label>
+                    <label class="full-span">
+                      <span>Description</span>
+                      <textarea id="pageDescription" placeholder="What this page controls"></textarea>
+                    </label>
+                  </div>
+                  <div class="form-actions">
+                    <button class="primary-button" type="submit">Save Page</button>
+                    <button class="danger-button" type="button" id="deletePageButton">Delete</button>
+                  </div>
+                </div>
+              </form>
+
+              <section class="table-panel">
+                <div class="panel-header">
+                  <div>
+                    <span>Registry</span>
+                    <h3>Current pages</h3>
+                  </div>
+                  <button class="mini-button" type="button" id="saveProfilePagesButton">Save Matrix</button>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Page</th>
+                        <th>Path</th>
+                        <th>Minimum</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pageTable"></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+
+            <section class="table-panel">
+              <div class="panel-header">
+                <div>
+                  <span>Access matrix</span>
+                  <h3>Pages by role</h3>
+                </div>
+              </div>
+              <div class="table-wrap" id="profileMatrix"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel-screen" id="panel-firebase">
+          <div class="panel-grid">
+            <form class="panel" id="firebaseForm">
+              <div class="panel-header">
+                <div>
+                  <span>Firebase</span>
+                  <h3>Project configuration draft</h3>
+                </div>
+                <button class="mini-button" type="button" id="resetFirebaseButton">Reset</button>
+              </div>
+              <div class="panel-body">
+                <div class="form-grid">
+                  <label>
+                    <span>Enabled</span>
+                    <select id="firebaseEnabled">
+                      <option value="false">False</option>
+                      <option value="true">True</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Org ID</span>
+                    <input id="firebaseOrgId" placeholder="facilities-engineering">
+                  </label>
+                  <label>
+                    <span>State path</span>
+                    <input id="firebaseStatePath" placeholder="orgs/facilities-engineering/commandCenter/state">
+                  </label>
+                  <label>
+                    <span>Project ID</span>
+                    <input id="firebaseProjectId" placeholder="project-id">
+                  </label>
+                  <label>
+                    <span>Auth domain</span>
+                    <input id="firebaseAuthDomain" placeholder="project-id.firebaseapp.com">
+                  </label>
+                  <label>
+                    <span>API key</span>
+                    <input id="firebaseApiKey" placeholder="AIza...">
+                  </label>
+                  <label>
+                    <span>App ID</span>
+                    <input id="firebaseAppId" placeholder="1:...:web:...">
+                  </label>
+                  <label>
+                    <span>Google sign-in</span>
+                    <select id="firebaseGoogleProvider">
+                      <option value="true">Enabled</option>
+                      <option value="false">Disabled</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Email/password</span>
+                    <select id="firebaseEmailProvider">
+                      <option value="true">Enabled</option>
+                      <option value="false">Disabled</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button class="primary-button" type="submit">Save Draft</button>
+                  <button class="secondary-button" type="button" id="copyFirebaseConfigButton">Copy Config</button>
+                </div>
+              </div>
+            </form>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <span>Live sync</span>
+                  <h3>Firestore connection</h3>
+                </div>
+                <span class="role-badge" id="firebaseRoleBadge">Draft</span>
+              </div>
+              <div class="panel-body">
+                <div class="form-grid">
+                  <label>
+                    <span>Email</span>
+                    <input id="firebaseLoginEmail" type="email" autocomplete="email">
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <input id="firebaseLoginPassword" type="password" autocomplete="current-password">
+                  </label>
+                </div>
+                <div class="button-row">
+                  <button class="primary-button" type="button" id="firebaseEmailLoginButton">Sign In</button>
+                  <button class="secondary-button" type="button" id="firebaseGoogleLoginButton">Google</button>
+                  <button class="secondary-button" type="button" id="firebaseSignOutButton">Sign Out</button>
+                  <button class="secondary-button" type="button" id="pullFirestoreButton">Pull</button>
+                  <button class="primary-button" type="button" id="pushFirestoreButton">Push Drafts</button>
+                </div>
+                <textarea class="code-output" id="firebaseConfigOutput" readonly></textarea>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel-screen" id="panel-rules">
+          <div class="panel-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <span>Firestore</span>
+                  <h3>Security rules editor</h3>
+                </div>
+                <div class="button-row">
+                  <button class="mini-button" type="button" id="copyRulesButton">Copy</button>
+                  <button class="mini-button" type="button" id="downloadRulesButton">Download</button>
+                  <button class="mini-button" type="button" id="resetRulesButton">Reset</button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <textarea class="rules-editor" id="rulesEditor" spellcheck="false"></textarea>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <span>Policy</span>
+                  <h3>Collection access summary</h3>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Path</th>
+                      <th>Read</th>
+                      <th>Write</th>
+                      <th>Admin</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rulePolicyTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel-screen" id="panel-requirements">
+          <div class="panel-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <span>Launch gates</span>
+                  <h3>Security requirements</h3>
+                </div>
+                <button class="mini-button" type="button" id="resetRequirementsButton">Reset</button>
+              </div>
+              <div class="panel-body requirement-list" id="requirementsList"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <span>Deploy</span>
+                  <h3>Commands and exports</h3>
+                </div>
+              </div>
+              <div class="panel-body">
+                <textarea class="code-output" id="deployOutput" readonly></textarea>
+                <div class="button-row">
+                  <button class="secondary-button" type="button" id="copyDeployButton">Copy Commands</button>
+                  <label class="secondary-button file-input">
+                    Import JSON
+                    <input id="importSettingsInput" type="file" accept="application/json" hidden>
+                  </label>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+    <script src="../commandcenter/firebase-config.js"></script>
+    <script>
+      const STORAGE = {
+        members: "fes-settings-members-v1",
+        pagesMeta: "fes-settings-pages-meta-v1",
+        requirements: "fes-settings-requirements-v1",
+        rules: "fes-settings-firestore-rules-v1",
+        firebaseDraft: "fes-settings-firebase-draft-v1"
+      };
+
+      const roleDetails = {
+        owner: {
+          label: "Owner",
+          detail: "Full access, member administration, settings, rules, and restore actions."
+        },
+        admin: {
+          label: "Admin",
+          detail: "Full administration except ownership transfer decisions."
+        },
+        manager: {
+          label: "Manager",
+          detail: "Read and write operational work without member administration."
+        },
+        tech: {
+          label: "Tech",
+          detail: "Read and update field work, notes, tasks, and active project data."
+        },
+        viewer: {
+          label: "Viewer",
+          detail: "Read-only access to approved pages and reports."
+        }
+      };
+
+      const roleOrder = ["owner", "admin", "manager", "tech", "viewer"];
+      const adminRoles = ["owner", "admin"];
+      const writeRoles = ["owner", "admin", "manager", "tech"];
+      const readRoles = ["owner", "admin", "manager", "tech", "viewer"];
+
+      const defaultRequirements = [
+        {
+          id: "firebase-project",
+          label: "Firebase project selected",
+          detail: "Use one production Firebase project for Facilities Engineering and record its project ID here.",
+          owner: "Owner"
+        },
+        {
+          id: "auth-providers",
+          label: "Authentication providers enabled",
+          detail: "Enable Google and/or email-password sign-in in Firebase Authentication before turning on Firestore sync.",
+          owner: "Admin"
+        },
+        {
+          id: "authorized-domains",
+          label: "Authorized domains configured",
+          detail: "Add www.facilities-engineering.com to Firebase Authentication authorized domains.",
+          owner: "Admin"
+        },
+        {
+          id: "rules-deployed",
+          label: "Firestore rules deployed",
+          detail: "Deploy firestore.rules from GitHub before enabling write access for users.",
+          owner: "Owner"
+        },
+        {
+          id: "first-owner",
+          label: "First owner member document seeded",
+          detail: "Create orgs/facilities-engineering/members/{uid} with role owner for the first admin account.",
+          owner: "Owner"
+        },
+        {
+          id: "app-check",
+          label: "App Check reviewed",
+          detail: "Plan App Check enforcement after the static site and Firebase project are stable.",
+          owner: "Admin"
+        },
+        {
+          id: "backup-plan",
+          label: "Backup and restore plan confirmed",
+          detail: "Confirm Firestore backup documents and legacy Drive JSON exports are retained in the database Drive folder.",
+          owner: "Manager"
+        },
+        {
+          id: "least-privilege",
+          label: "Least privilege roles reviewed",
+          detail: "Every user should have the lowest role that can do their work.",
+          owner: "Manager"
+        }
+      ];
+
+      const defaultRules = `rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberPath(orgId) {
+      return /databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid);
+    }
+
+    function isMember(orgId) {
+      return signedIn() && exists(memberPath(orgId));
+    }
+
+    function memberRole(orgId) {
+      return isMember(orgId) ? get(memberPath(orgId)).data.role : "";
+    }
+
+    function hasAnyRole(orgId, roles) {
+      return memberRole(orgId) in roles;
+    }
+
+    function canReadOrg(orgId) {
+      return hasAnyRole(orgId, ["owner", "admin", "manager", "tech", "viewer"]);
+    }
+
+    function canWriteBoard(orgId) {
+      return hasAnyRole(orgId, ["owner", "admin", "manager", "tech"]);
+    }
+
+    function canAdminOrg(orgId) {
+      return hasAnyRole(orgId, ["owner", "admin"]);
+    }
+
+    match /orgs/{orgId} {
+      allow read: if canReadOrg(orgId);
+      allow create, update, delete: if canAdminOrg(orgId);
+
+      match /members/{uid} {
+        allow read: if canAdminOrg(orgId) || (signedIn() && request.auth.uid == uid);
+        allow create, update, delete: if canAdminOrg(orgId);
       }
 
-      function pageLabels(user) {
-        return AccessDirectory.getAllowedPages(user)
-          .map((page) => page.label)
-          .join(", ");
+      match /settings/{settingId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update, delete: if canAdminOrg(orgId);
       }
+
+      match /workstreams/{workstreamId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update: if canWriteBoard(orgId);
+        allow delete: if canAdminOrg(orgId);
+      }
+
+      match /tasks/{taskId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update: if canWriteBoard(orgId);
+        allow delete: if canAdminOrg(orgId);
+      }
+
+      match /commandCenter/{documentId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update: if canWriteBoard(orgId);
+        allow delete: if canAdminOrg(orgId);
+
+        match /backups/{backupId} {
+          allow read: if canAdminOrg(orgId);
+          allow create: if canWriteBoard(orgId);
+          allow update, delete: if canAdminOrg(orgId);
+        }
+      }
+
+      match /activityLog/{eventId} {
+        allow read: if canReadOrg(orgId);
+        allow create: if canWriteBoard(orgId);
+        allow update, delete: if canAdminOrg(orgId);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}`;
+
+      const rulePolicies = [
+        { path: "orgs/{orgId}/members/{uid}", read: "owner, admin, self", write: "owner, admin", admin: "owner, admin" },
+        { path: "orgs/{orgId}/settings/{settingId}", read: readRoles.join(", "), write: adminRoles.join(", "), admin: adminRoles.join(", ") },
+        { path: "orgs/{orgId}/tasks/{taskId}", read: readRoles.join(", "), write: writeRoles.join(", "), admin: adminRoles.join(", ") },
+        { path: "orgs/{orgId}/workstreams/{workstreamId}", read: readRoles.join(", "), write: writeRoles.join(", "), admin: adminRoles.join(", ") },
+        { path: "orgs/{orgId}/commandCenter/state", read: readRoles.join(", "), write: writeRoles.join(", "), admin: adminRoles.join(", ") },
+        { path: "orgs/{orgId}/commandCenter/state/backups/{backupId}", read: adminRoles.join(", "), write: writeRoles.join(", "), admin: adminRoles.join(", ") },
+        { path: "orgs/{orgId}/activityLog/{eventId}", read: readRoles.join(", "), write: writeRoles.join(", "), admin: adminRoles.join(", ") }
+      ];
+
+      const firebaseSourceConfig = window.COMMAND_CENTER_FIREBASE_CONFIG || {};
+      const currentUser = AccessDirectory.getCurrentUser();
+
+      const elements = {
+        notice: document.querySelector("#notice"),
+        memberMetric: document.querySelector("#memberMetric"),
+        memberMetricDetail: document.querySelector("#memberMetricDetail"),
+        pageMetric: document.querySelector("#pageMetric"),
+        roleMetric: document.querySelector("#roleMetric"),
+        requirementMetric: document.querySelector("#requirementMetric"),
+        requirementMetricDetail: document.querySelector("#requirementMetricDetail"),
+        sidebarFirebaseState: document.querySelector("#sidebarFirebaseState"),
+        sidebarUserState: document.querySelector("#sidebarUserState"),
+        roleOverview: document.querySelector("#roleOverview"),
+        overviewRequirements: document.querySelector("#overviewRequirements"),
+        memberForm: document.querySelector("#memberForm"),
+        memberEditingId: document.querySelector("#memberEditingId"),
+        memberUid: document.querySelector("#memberUid"),
+        memberEmail: document.querySelector("#memberEmail"),
+        memberName: document.querySelector("#memberName"),
+        memberRole: document.querySelector("#memberRole"),
+        memberStatus: document.querySelector("#memberStatus"),
+        memberPassword: document.querySelector("#memberPassword"),
+        memberNotes: document.querySelector("#memberNotes"),
+        memberPageChecks: document.querySelector("#memberPageChecks"),
+        memberTable: document.querySelector("#memberTable"),
+        deleteMemberButton: document.querySelector("#deleteMemberButton"),
+        pageForm: document.querySelector("#pageForm"),
+        pageEditingId: document.querySelector("#pageEditingId"),
+        pageId: document.querySelector("#pageId"),
+        pageLabel: document.querySelector("#pageLabel"),
+        pagePath: document.querySelector("#pagePath"),
+        pageMinRole: document.querySelector("#pageMinRole"),
+        pageStatus: document.querySelector("#pageStatus"),
+        pageCollection: document.querySelector("#pageCollection"),
+        pageDescription: document.querySelector("#pageDescription"),
+        pageTable: document.querySelector("#pageTable"),
+        profileMatrix: document.querySelector("#profileMatrix"),
+        firebaseForm: document.querySelector("#firebaseForm"),
+        firebaseConfigOutput: document.querySelector("#firebaseConfigOutput"),
+        rulesEditor: document.querySelector("#rulesEditor"),
+        rulePolicyTable: document.querySelector("#rulePolicyTable"),
+        requirementsList: document.querySelector("#requirementsList"),
+        deployOutput: document.querySelector("#deployOutput"),
+        firebaseRoleBadge: document.querySelector("#firebaseRoleBadge")
+      };
+
+      const firebaseRuntime = {
+        app: null,
+        auth: null,
+        db: null,
+        user: null,
+        role: ""
+      };
 
       function escapeHtml(value) {
         return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -227,123 +1390,926 @@
         }[character]));
       }
 
-      function renderTable() {
-        const users = AccessDirectory.readUsers();
-        userTable.innerHTML = users.map((user) => `
+      function slugify(value) {
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/&/g, "and")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+
+      function parseStored(key, fallback) {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(key));
+          return parsed === null || parsed === undefined ? fallback : parsed;
+        } catch {
+          return fallback;
+        }
+      }
+
+      function writeStored(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+
+      function roleLabel(role) {
+        return roleDetails[role]?.label || AccessDirectory.profileLabel(role);
+      }
+
+      function setNotice(message, type = "") {
+        elements.notice.textContent = message;
+        elements.notice.className = `notice ${type}`.trim();
+      }
+
+      function sourceFirebaseDraft() {
+        return {
+          enabled: Boolean(firebaseSourceConfig.enabled),
+          orgId: firebaseSourceConfig.orgId || "facilities-engineering",
+          statePath: firebaseSourceConfig.statePath || "orgs/facilities-engineering/commandCenter/state",
+          providers: {
+            emailPassword: firebaseSourceConfig.providers?.emailPassword !== false,
+            google: firebaseSourceConfig.providers?.google !== false
+          },
+          config: {
+            apiKey: firebaseSourceConfig.config?.apiKey || "",
+            authDomain: firebaseSourceConfig.config?.authDomain || "",
+            projectId: firebaseSourceConfig.config?.projectId || "",
+            appId: firebaseSourceConfig.config?.appId || ""
+          }
+        };
+      }
+
+      function readFirebaseDraft() {
+        return parseStored(STORAGE.firebaseDraft, sourceFirebaseDraft());
+      }
+
+      function writeFirebaseDraft(draft) {
+        writeStored(STORAGE.firebaseDraft, draft);
+        return draft;
+      }
+
+      function readRequirements() {
+        const stored = parseStored(STORAGE.requirements, null);
+        if (!Array.isArray(stored)) {
+          return defaultRequirements.map((item) => ({ ...item, done: false, notes: "" }));
+        }
+
+        const byId = new Map(stored.map((item) => [item.id, item]));
+        return defaultRequirements.map((item) => ({
+          ...item,
+          done: Boolean(byId.get(item.id)?.done),
+          notes: byId.get(item.id)?.notes || ""
+        }));
+      }
+
+      function writeRequirements(requirements) {
+        writeStored(STORAGE.requirements, requirements);
+      }
+
+      function userToMember(user) {
+        return {
+          id: user.id || `member-${Date.now()}`,
+          uid: user.uid || "",
+          displayName: user.name || user.displayName || "",
+          email: AccessDirectory.normalizeEmail(user.email),
+          role: AccessDirectory.normalizeProfile(user.profile || user.role),
+          status: user.active === false || user.status === "disabled" ? "disabled" : "active",
+          pages: Array.isArray(user.pages) && user.pages.length ? user.pages : AccessDirectory.getPageIdsForProfile(user.profile),
+          notes: user.notes || "",
+          localPassword: user.password || ""
+        };
+      }
+
+      function readMembers() {
+        const stored = parseStored(STORAGE.members, null);
+        if (Array.isArray(stored)) {
+          return stored.map((member) => ({
+            ...member,
+            email: AccessDirectory.normalizeEmail(member.email),
+            role: AccessDirectory.normalizeProfile(member.role),
+            status: member.status === "disabled" ? "disabled" : "active",
+            pages: Array.isArray(member.pages) ? member.pages : []
+          }));
+        }
+
+        return AccessDirectory.readUsers().map(userToMember);
+      }
+
+      function writeMembers(members) {
+        const normalized = members.map((member) => ({
+          id: member.id || `member-${Date.now()}`,
+          uid: String(member.uid || "").trim(),
+          displayName: String(member.displayName || "").trim(),
+          email: AccessDirectory.normalizeEmail(member.email),
+          role: AccessDirectory.normalizeProfile(member.role),
+          status: member.status === "disabled" ? "disabled" : "active",
+          pages: Array.isArray(member.pages) ? member.pages : [],
+          notes: String(member.notes || "").trim(),
+          localPassword: member.localPassword || ""
+        }));
+
+        writeStored(STORAGE.members, normalized);
+
+        const existingUsers = AccessDirectory.readUsers();
+        AccessDirectory.writeUsers(normalized.map((member) => {
+          const existing = existingUsers.find((user) => AccessDirectory.normalizeEmail(user.email) === member.email);
+          return {
+            id: existing?.id || member.id,
+            name: member.displayName,
+            email: member.email,
+            password: member.localPassword || existing?.password || "",
+            profile: member.role,
+            role: roleLabel(member.role),
+            active: member.status === "active",
+            pages: member.pages
+          };
+        }));
+
+        return normalized;
+      }
+
+      function readPageMeta() {
+        return parseStored(STORAGE.pagesMeta, {});
+      }
+
+      function writePageMeta(meta) {
+        writeStored(STORAGE.pagesMeta, meta);
+      }
+
+      function readPagesWithMeta() {
+        const meta = readPageMeta();
+        return AccessDirectory.readPages().map((page) => ({
+          ...page,
+          minRole: meta[page.id]?.minRole || inferMinRole(page.id),
+          status: meta[page.id]?.status || "active",
+          collection: meta[page.id]?.collection || "",
+          appCheck: Boolean(meta[page.id]?.appCheck)
+        }));
+      }
+
+      function inferMinRole(pageId) {
+        if (pageId === "settings") return "admin";
+        if (pageId === "commandcenter") return "tech";
+        return "viewer";
+      }
+
+      function writePagesWithMeta(pages) {
+        AccessDirectory.writePages(pages.map((page) => ({
+          id: page.id,
+          label: page.label,
+          path: page.path,
+          description: page.description
+        })));
+
+        const meta = {};
+        pages.forEach((page) => {
+          meta[page.id] = {
+            minRole: AccessDirectory.normalizeProfile(page.minRole),
+            status: page.status || "active",
+            collection: page.collection || "",
+            appCheck: Boolean(page.appCheck)
+          };
+        });
+        writePageMeta(meta);
+      }
+
+      function readRulesDraft() {
+        return localStorage.getItem(STORAGE.rules) || defaultRules;
+      }
+
+      function writeRulesDraft(value) {
+        localStorage.setItem(STORAGE.rules, value);
+      }
+
+      function getSelectedMemberPages() {
+        return Array.from(elements.memberPageChecks.querySelectorAll("input:checked")).map((input) => input.value);
+      }
+
+      function getProfilePageAssignmentsFromMatrix() {
+        return AccessDirectory.profiles.reduce((assignments, role) => {
+          assignments[role.id] = Array.from(document.querySelectorAll(`[data-profile-page="${role.id}"]:checked`))
+            .map((input) => input.value);
+          return assignments;
+        }, {});
+      }
+
+      function makeMemberDoc(member) {
+        return {
+          displayName: member.displayName,
+          email: member.email,
+          role: member.role,
+          status: member.status,
+          pages: member.pages,
+          notes: member.notes,
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      function makeSettingsPayload() {
+        return {
+          firebase: readFirebaseDraft(),
+          members: readMembers().map(makeMemberDoc),
+          pages: readPagesWithMeta(),
+          profilePages: AccessDirectory.readProfilePages(),
+          requirements: readRequirements(),
+          rules: readRulesDraft()
+        };
+      }
+
+      function generateFirebaseConfig(draft = readFirebaseDraft()) {
+        return `window.COMMAND_CENTER_FIREBASE_CONFIG = ${JSON.stringify(draft, null, 2)};`;
+      }
+
+      function generateDeployText() {
+        const draft = readFirebaseDraft();
+        const project = draft.config.projectId || "YOUR_FIREBASE_PROJECT_ID";
+        return [
+          "firebase login",
+          `firebase use ${project}`,
+          "firebase deploy --only firestore",
+          "",
+          "First owner member document:",
+          "orgs/facilities-engineering/members/USER_UID",
+          "",
+          JSON.stringify({
+            displayName: "Tim Ulibarri",
+            email: "tim@example.com",
+            role: "owner",
+            status: "active",
+            createdAt: new Date().toISOString()
+          }, null, 2)
+        ].join("\n");
+      }
+
+      async function copyText(value, successMessage) {
+        try {
+          await navigator.clipboard.writeText(value);
+          setNotice(successMessage, "success");
+        } catch {
+          const helper = document.createElement("textarea");
+          helper.value = value;
+          document.body.append(helper);
+          helper.select();
+          document.execCommand("copy");
+          helper.remove();
+          setNotice(successMessage, "success");
+        }
+      }
+
+      function downloadText(fileName, value, type = "text/plain") {
+        const blob = new Blob([value], { type });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function renderRoleOptions(select, selected = "tech") {
+        select.innerHTML = AccessDirectory.profiles.map((role) => `
+          <option value="${role.id}" ${role.id === selected ? "selected" : ""}>${escapeHtml(role.label)}</option>
+        `).join("");
+      }
+
+      function renderMemberPageChecks(selected = []) {
+        const selectedSet = new Set(selected);
+        elements.memberPageChecks.innerHTML = AccessDirectory.readPages().map((page) => `
+          <label class="check-card">
+            <input type="checkbox" value="${escapeHtml(page.id)}" ${selectedSet.has(page.id) ? "checked" : ""}>
+            <span>${escapeHtml(page.label)}</span>
+          </label>
+        `).join("");
+      }
+
+      function renderMetrics() {
+        const members = readMembers();
+        const activeMembers = members.filter((member) => member.status === "active");
+        const pages = AccessDirectory.readPages();
+        const requirements = readRequirements();
+        const done = requirements.filter((item) => item.done).length;
+        const percent = requirements.length ? Math.round((done / requirements.length) * 100) : 0;
+        const draft = readFirebaseDraft();
+
+        elements.memberMetric.textContent = String(members.length);
+        elements.memberMetricDetail.textContent = `${activeMembers.length} active`;
+        elements.pageMetric.textContent = String(pages.length);
+        elements.roleMetric.textContent = String(AccessDirectory.profiles.length);
+        elements.requirementMetric.textContent = `${percent}%`;
+        elements.requirementMetricDetail.textContent = `${done} of ${requirements.length} complete`;
+        elements.sidebarFirebaseState.textContent = draft.enabled ? "Enabled" : "Draft";
+        elements.sidebarUserState.textContent = currentUser ? currentUser.name.split(" ")[0] : "Local";
+      }
+
+      function renderRoleOverview() {
+        elements.roleOverview.innerHTML = AccessDirectory.profiles.map((role) => `
+          <article class="role-card">
+            <span class="role-badge">${escapeHtml(role.label)}</span>
+            <h4>${escapeHtml(role.label)}</h4>
+            <p>${escapeHtml(roleDetails[role.id]?.detail || "")}</p>
+          </article>
+        `).join("");
+      }
+
+      function renderOverviewRequirements() {
+        const requirements = readRequirements().slice(0, 5);
+        elements.overviewRequirements.innerHTML = requirements.map((item) => `
+          <article class="requirement-row">
+            <input type="checkbox" ${item.done ? "checked" : ""} disabled>
+            <div>
+              <strong>${escapeHtml(item.label)}</strong>
+              <p>${escapeHtml(item.detail)}</p>
+            </div>
+            <span class="requirement-meta">${escapeHtml(item.owner)}</span>
+          </article>
+        `).join("");
+      }
+
+      function renderMemberTable() {
+        const pages = new Map(AccessDirectory.readPages().map((page) => [page.id, page]));
+        const members = readMembers();
+        elements.memberTable.innerHTML = members.map((member) => {
+          const missingUid = !member.uid;
+          const pageTags = (member.pages || []).map((pageId) => pages.get(pageId)?.label || pageId);
+          return `
+            <tr>
+              <td>
+                <strong>${escapeHtml(member.displayName || "Unnamed")}</strong>
+                <span>${escapeHtml(member.email)}</span>
+                <span class="meta">${missingUid ? "Needs Firebase UID" : escapeHtml(member.uid)}</span>
+              </td>
+              <td><span class="role-badge">${escapeHtml(roleLabel(member.role))}</span></td>
+              <td><span class="tag ${member.status === "active" ? "" : "danger"}">${escapeHtml(member.status)}</span></td>
+              <td><div class="tag-list">${pageTags.map((label) => `<span class="tag muted">${escapeHtml(label)}</span>`).join("") || "<span class=\"tag warn\">No pages</span>"}</div></td>
+              <td>
+                <button class="action-button" type="button" data-edit-member="${escapeHtml(member.id)}">Edit</button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      function resetMemberForm() {
+        elements.memberEditingId.value = "";
+        elements.memberUid.value = "";
+        elements.memberEmail.value = "";
+        elements.memberName.value = "";
+        elements.memberRole.value = "tech";
+        elements.memberStatus.value = "active";
+        elements.memberPassword.value = "";
+        elements.memberNotes.value = "";
+        renderMemberPageChecks(AccessDirectory.getPageIdsForProfile("tech"));
+      }
+
+      function fillMemberForm(member) {
+        elements.memberEditingId.value = member.id;
+        elements.memberUid.value = member.uid || "";
+        elements.memberEmail.value = member.email || "";
+        elements.memberName.value = member.displayName || "";
+        elements.memberRole.value = member.role || "tech";
+        elements.memberStatus.value = member.status || "active";
+        elements.memberPassword.value = "";
+        elements.memberNotes.value = member.notes || "";
+        renderMemberPageChecks(member.pages || []);
+      }
+
+      function saveMemberFromForm(event) {
+        event.preventDefault();
+        const members = readMembers();
+        const email = AccessDirectory.normalizeEmail(elements.memberEmail.value);
+        const editingId = elements.memberEditingId.value;
+        const existingIndex = members.findIndex((member) => member.id === editingId || member.email === email);
+        const existing = existingIndex >= 0 ? members[existingIndex] : null;
+        const member = {
+          id: existing?.id || `member-${Date.now()}`,
+          uid: elements.memberUid.value,
+          displayName: elements.memberName.value,
+          email,
+          role: elements.memberRole.value,
+          status: elements.memberStatus.value,
+          pages: getSelectedMemberPages(),
+          notes: elements.memberNotes.value,
+          localPassword: elements.memberPassword.value || existing?.localPassword || ""
+        };
+
+        if (existingIndex >= 0) {
+          members[existingIndex] = member;
+        } else {
+          members.push(member);
+        }
+
+        writeMembers(members);
+        resetMemberForm();
+        renderAll();
+        setNotice(`Saved ${member.displayName}.`, "success");
+      }
+
+      function deleteSelectedMember() {
+        const id = elements.memberEditingId.value;
+        if (!id) {
+          resetMemberForm();
+          return;
+        }
+
+        writeMembers(readMembers().filter((member) => member.id !== id));
+        resetMemberForm();
+        renderAll();
+        setNotice("Member deleted.", "success");
+      }
+
+      function renderPageTable() {
+        elements.pageTable.innerHTML = readPagesWithMeta().map((page) => `
           <tr>
             <td>
-              <strong>${escapeHtml(user.name)}</strong>
-              <span>${escapeHtml(user.email)}</span>
-              <span>${user.password ? "Password set locally" : "Local password not set"}</span>
+              <strong>${escapeHtml(page.label)}</strong>
+              <span>${escapeHtml(page.description)}</span>
+              <span class="meta">${escapeHtml(page.id)}</span>
             </td>
-            <td>${escapeHtml(AccessDirectory.profileLabel(user.profile))}</td>
-            <td>${user.active ? "Active" : "Inactive"}</td>
-            <td>${escapeHtml(pageLabels(user) || "No pages assigned")}</td>
-            <td>
-              <button type="button" class="table-action" data-edit="${user.id}">Edit</button>
-              <button type="button" class="table-action danger" data-delete="${user.id}">Delete</button>
-            </td>
+            <td>${escapeHtml(page.path)}</td>
+            <td><span class="role-badge">${escapeHtml(roleLabel(page.minRole))}</span></td>
+            <td><span class="tag ${page.status === "active" ? "" : "warn"}">${escapeHtml(page.status)}</span></td>
+            <td><button class="action-button" type="button" data-edit-page="${escapeHtml(page.id)}">Edit</button></td>
           </tr>
         `).join("");
       }
 
-      function resetForm() {
-        form.reset();
-        editingId.value = "";
-        profileInput.value = "engineer";
-        activeInput.checked = true;
+      function resetPageForm() {
+        elements.pageEditingId.value = "";
+        elements.pageId.value = "";
+        elements.pageId.disabled = false;
+        elements.pageLabel.value = "";
+        elements.pagePath.value = "";
+        elements.pageMinRole.value = "viewer";
+        elements.pageStatus.value = "planned";
+        elements.pageCollection.value = "";
+        elements.pageDescription.value = "";
       }
 
-      function fillForm(user) {
-        editingId.value = user.id;
-        nameInput.value = user.name;
-        emailInput.value = user.email;
-        passwordInput.value = "";
-        profileInput.value = AccessDirectory.normalizeProfile(user.profile || user.role);
-        activeInput.checked = Boolean(user.active);
-        nameInput.focus();
+      function fillPageForm(page) {
+        elements.pageEditingId.value = page.id;
+        elements.pageId.value = page.id;
+        elements.pageId.disabled = true;
+        elements.pageLabel.value = page.label;
+        elements.pagePath.value = page.path;
+        elements.pageMinRole.value = page.minRole || "viewer";
+        elements.pageStatus.value = page.status || "active";
+        elements.pageCollection.value = page.collection || "";
+        elements.pageDescription.value = page.description || "";
       }
 
-      renderProfileOptions();
-      renderProfileSettings();
-      renderTable();
-
-      form.addEventListener("submit", (event) => {
+      function savePageFromForm(event) {
         event.preventDefault();
-        const data = new FormData(form);
-        const existingId = editingId.value;
-        const currentUsers = AccessDirectory.readUsers();
-        const existing = currentUsers.find((user) => user.id === existingId);
+        const pages = readPagesWithMeta();
+        const id = elements.pageEditingId.value || slugify(elements.pageId.value);
+        const existingIndex = pages.findIndex((page) => page.id === id);
+        const page = {
+          id,
+          label: elements.pageLabel.value,
+          path: elements.pagePath.value,
+          description: elements.pageDescription.value,
+          minRole: elements.pageMinRole.value,
+          status: elements.pageStatus.value,
+          collection: elements.pageCollection.value
+        };
 
-        const saved = AccessDirectory.upsertUser({
-          name: data.get("name"),
-          email: data.get("email"),
-          password: data.get("password") || (existing && existing.password) || "",
-          profile: data.get("profile"),
-          active: data.has("active")
+        if (existingIndex >= 0) {
+          pages[existingIndex] = page;
+        } else {
+          pages.push(page);
+        }
+
+        writePagesWithMeta(pages);
+        resetPageForm();
+        renderAll();
+        setNotice(`Saved page ${page.label}.`, "success");
+      }
+
+      function deleteSelectedPage() {
+        const id = elements.pageEditingId.value;
+        if (!id) {
+          resetPageForm();
+          return;
+        }
+
+        const defaults = new Set(["home", "dashboard", "commandcenter", "hvac-login", "settings"]);
+        if (defaults.has(id)) {
+          setNotice("Default pages stay registered. Set status to locked instead.", "error");
+          return;
+        }
+
+        const pages = readPagesWithMeta().filter((page) => page.id !== id);
+        writePagesWithMeta(pages);
+        const assignments = AccessDirectory.readProfilePages();
+        Object.keys(assignments).forEach((role) => {
+          assignments[role] = assignments[role].filter((pageId) => pageId !== id);
         });
+        AccessDirectory.writeProfilePages(assignments);
+        resetPageForm();
+        renderAll();
+        setNotice("Page deleted.", "success");
+      }
 
-        if (existing && existing.email !== saved.email) {
-          AccessDirectory.deleteUser(existing.id);
-          AccessDirectory.upsertUser(saved);
-        }
+      function renderProfileMatrix() {
+        const pages = readPagesWithMeta();
+        const assignments = AccessDirectory.readProfilePages();
+        elements.profileMatrix.innerHTML = `
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>Page</th>
+                ${AccessDirectory.profiles.map((role) => `<th>${escapeHtml(role.label)}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${pages.map((page) => `
+                <tr>
+                  <td>
+                    <strong>${escapeHtml(page.label)}</strong>
+                    <span>${escapeHtml(page.path)}</span>
+                  </td>
+                  ${AccessDirectory.profiles.map((role) => `
+                    <td>
+                      <input
+                        type="checkbox"
+                        data-profile-page="${escapeHtml(role.id)}"
+                        value="${escapeHtml(page.id)}"
+                        ${assignments[role.id]?.includes(page.id) ? "checked" : ""}
+                        aria-label="${escapeHtml(role.label)} access to ${escapeHtml(page.label)}"
+                      >
+                    </td>
+                  `).join("")}
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
 
-        resetForm();
-        renderTable();
-      });
+      function saveProfileMatrix() {
+        AccessDirectory.writeProfilePages(getProfilePageAssignmentsFromMatrix());
+        renderAll();
+        setNotice("Page access matrix saved.", "success");
+      }
 
-      resetButton.addEventListener("click", resetForm);
+      function renderFirebaseForm() {
+        const draft = readFirebaseDraft();
+        document.querySelector("#firebaseEnabled").value = String(Boolean(draft.enabled));
+        document.querySelector("#firebaseOrgId").value = draft.orgId || "facilities-engineering";
+        document.querySelector("#firebaseStatePath").value = draft.statePath || "orgs/facilities-engineering/commandCenter/state";
+        document.querySelector("#firebaseProjectId").value = draft.config?.projectId || "";
+        document.querySelector("#firebaseAuthDomain").value = draft.config?.authDomain || "";
+        document.querySelector("#firebaseApiKey").value = draft.config?.apiKey || "";
+        document.querySelector("#firebaseAppId").value = draft.config?.appId || "";
+        document.querySelector("#firebaseGoogleProvider").value = String(draft.providers?.google !== false);
+        document.querySelector("#firebaseEmailProvider").value = String(draft.providers?.emailPassword !== false);
+        elements.firebaseConfigOutput.value = generateFirebaseConfig(draft);
+        elements.deployOutput.value = generateDeployText();
+      }
 
-      saveProfileSettingsButton.addEventListener("click", () => {
-        const nextPageAssignments = AccessDirectory.profiles.reduce((assignments, profile) => {
-          assignments[profile.id] = Array.from(profileSettings.querySelectorAll(`input[data-profile-page="${profile.id}"]:checked`))
-            .map((input) => input.value);
-          return assignments;
-        }, {});
-
-        const nextWidgetAssignments = AccessDirectory.profiles.reduce((assignments, profile) => {
-          assignments[profile.id] = Array.from(profileSettings.querySelectorAll(`input[data-profile-widget="${profile.id}"]:checked`))
-            .map((input) => input.value);
-          return assignments;
-        }, {});
-
-        AccessDirectory.writeProfilePages(nextPageAssignments);
-        AccessDirectory.writeProfileWidgets(nextWidgetAssignments);
-        renderProfileSettings();
-        renderTable();
-        saveProfileSettingsButton.textContent = "Profiles Saved";
-        setTimeout(() => {
-          saveProfileSettingsButton.textContent = "Save Profiles";
-        }, 1500);
-      });
-
-      clearSessionButton.addEventListener("click", () => {
-        AccessDirectory.clearSession();
-        clearSessionButton.textContent = "Local Session Cleared";
-        setTimeout(() => {
-          clearSessionButton.textContent = "Sign Out Local Session";
-        }, 1500);
-      });
-
-      userTable.addEventListener("click", (event) => {
-        const editId = event.target.getAttribute("data-edit");
-        const deleteId = event.target.getAttribute("data-delete");
-
-        if (editId) {
-          const user = AccessDirectory.readUsers().find((entry) => entry.id === editId);
-          if (user) {
-            fillForm(user);
+      function saveFirebaseDraft(event) {
+        event.preventDefault();
+        const orgId = document.querySelector("#firebaseOrgId").value.trim() || "facilities-engineering";
+        const draft = {
+          enabled: document.querySelector("#firebaseEnabled").value === "true",
+          orgId,
+          statePath: document.querySelector("#firebaseStatePath").value.trim() || `orgs/${orgId}/commandCenter/state`,
+          providers: {
+            emailPassword: document.querySelector("#firebaseEmailProvider").value === "true",
+            google: document.querySelector("#firebaseGoogleProvider").value === "true"
+          },
+          config: {
+            apiKey: document.querySelector("#firebaseApiKey").value.trim(),
+            authDomain: document.querySelector("#firebaseAuthDomain").value.trim(),
+            projectId: document.querySelector("#firebaseProjectId").value.trim(),
+            appId: document.querySelector("#firebaseAppId").value.trim()
           }
+        };
+        writeFirebaseDraft(draft);
+        renderAll();
+        setNotice("Firebase config draft saved locally. Copy it into commandcenter/firebase-config.js when ready.", "success");
+      }
+
+      function isFirebaseConfigured() {
+        const draft = readFirebaseDraft();
+        return Boolean(
+          draft.enabled &&
+          draft.config?.apiKey &&
+          draft.config?.authDomain &&
+          draft.config?.projectId &&
+          draft.config?.appId &&
+          window.firebase?.auth &&
+          window.firebase?.firestore
+        );
+      }
+
+      function initializeFirebase() {
+        const draft = readFirebaseDraft();
+        if (!isFirebaseConfigured()) {
+          setNotice("Firebase draft is not fully enabled or configured yet.", "error");
+          return false;
         }
 
-        if (deleteId) {
-          AccessDirectory.deleteUser(deleteId);
-          renderTable();
-          if (editingId.value === deleteId) {
-            resetForm();
-          }
+        if (!firebaseRuntime.app) {
+          firebaseRuntime.app = window.firebase.initializeApp(draft.config, "settings-access");
+          firebaseRuntime.auth = window.firebase.auth(firebaseRuntime.app);
+          firebaseRuntime.db = window.firebase.firestore(firebaseRuntime.app);
+          firebaseRuntime.auth.onAuthStateChanged(async (user) => {
+            firebaseRuntime.user = user;
+            firebaseRuntime.role = "";
+            if (user) {
+              await readFirebaseMemberRole();
+            }
+            renderFirebaseRuntime();
+          });
+        }
+
+        return true;
+      }
+
+      async function readFirebaseMemberRole() {
+        if (!firebaseRuntime.user || !firebaseRuntime.db) return;
+        const orgId = readFirebaseDraft().orgId || "facilities-engineering";
+        const snapshot = await firebaseRuntime.db.doc(`orgs/${orgId}/members/${firebaseRuntime.user.uid}`).get();
+        firebaseRuntime.role = snapshot.exists ? snapshot.data().role || "" : "";
+      }
+
+      function canAdminFirebase() {
+        return adminRoles.includes(firebaseRuntime.role);
+      }
+
+      function renderFirebaseRuntime() {
+        if (!firebaseRuntime.user) {
+          elements.firebaseRoleBadge.textContent = "Signed out";
+          elements.sidebarFirebaseState.textContent = readFirebaseDraft().enabled ? "Enabled" : "Draft";
+          return;
+        }
+        elements.firebaseRoleBadge.textContent = firebaseRuntime.role || "No role";
+        elements.sidebarFirebaseState.textContent = firebaseRuntime.role || "Signed in";
+      }
+
+      async function signInFirebaseEmail() {
+        if (!initializeFirebase()) return;
+        const email = document.querySelector("#firebaseLoginEmail").value.trim();
+        const password = document.querySelector("#firebaseLoginPassword").value;
+        if (!email || !password) {
+          setNotice("Enter Firebase email and password.", "error");
+          return;
+        }
+        await firebaseRuntime.auth.signInWithEmailAndPassword(email, password);
+        document.querySelector("#firebaseLoginPassword").value = "";
+        setNotice("Firebase sign-in complete.", "success");
+      }
+
+      async function signInFirebaseGoogle() {
+        if (!initializeFirebase()) return;
+        const provider = new window.firebase.auth.GoogleAuthProvider();
+        await firebaseRuntime.auth.signInWithPopup(provider);
+        setNotice("Google sign-in complete.", "success");
+      }
+
+      async function signOutFirebase() {
+        if (!firebaseRuntime.auth) return;
+        await firebaseRuntime.auth.signOut();
+        setNotice("Firebase signed out.", "success");
+      }
+
+      async function pushFirestoreDrafts() {
+        if (!initializeFirebase() || !firebaseRuntime.user) return;
+        await readFirebaseMemberRole();
+        if (!canAdminFirebase()) {
+          setNotice("Only owner/admin roles can push access settings to Firestore.", "error");
+          return;
+        }
+
+        const orgId = readFirebaseDraft().orgId || "facilities-engineering";
+        const batch = firebaseRuntime.db.batch();
+        readMembers().forEach((member) => {
+          if (!member.uid) return;
+          batch.set(firebaseRuntime.db.doc(`orgs/${orgId}/members/${member.uid}`), makeMemberDoc(member), { merge: true });
+        });
+        batch.set(firebaseRuntime.db.doc(`orgs/${orgId}/settings/access`), {
+          pages: readPagesWithMeta(),
+          profilePages: AccessDirectory.readProfilePages(),
+          requirements: readRequirements(),
+          rulesUpdatedAt: new Date().toISOString(),
+          updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: firebaseRuntime.user.uid
+        }, { merge: true });
+        await batch.commit();
+        setNotice("Firestore access drafts pushed.", "success");
+      }
+
+      async function pullFirestoreDrafts() {
+        if (!initializeFirebase() || !firebaseRuntime.user) return;
+        await readFirebaseMemberRole();
+        if (!canAdminFirebase()) {
+          setNotice("Only owner/admin roles can pull the full access directory.", "error");
+          return;
+        }
+
+        const orgId = readFirebaseDraft().orgId || "facilities-engineering";
+        const memberSnapshot = await firebaseRuntime.db.collection(`orgs/${orgId}/members`).get();
+        const members = memberSnapshot.docs.map((doc) => ({
+          id: `member-${doc.id}`,
+          uid: doc.id,
+          displayName: doc.data().displayName || "",
+          email: doc.data().email || "",
+          role: doc.data().role || "viewer",
+          status: doc.data().status || "active",
+          pages: doc.data().pages || [],
+          notes: doc.data().notes || "",
+          localPassword: ""
+        }));
+        if (members.length) writeMembers(members);
+
+        const accessSnapshot = await firebaseRuntime.db.doc(`orgs/${orgId}/settings/access`).get();
+        if (accessSnapshot.exists) {
+          const data = accessSnapshot.data();
+          if (Array.isArray(data.pages)) writePagesWithMeta(data.pages);
+          if (data.profilePages) AccessDirectory.writeProfilePages(data.profilePages);
+          if (Array.isArray(data.requirements)) writeRequirements(data.requirements);
+        }
+        renderAll();
+        setNotice("Firestore access settings pulled.", "success");
+      }
+
+      function renderRules() {
+        elements.rulesEditor.value = readRulesDraft();
+        elements.rulePolicyTable.innerHTML = rulePolicies.map((policy) => `
+          <tr>
+            <td><strong>${escapeHtml(policy.path)}</strong></td>
+            <td>${escapeHtml(policy.read)}</td>
+            <td>${escapeHtml(policy.write)}</td>
+            <td>${escapeHtml(policy.admin)}</td>
+          </tr>
+        `).join("");
+      }
+
+      function renderRequirements() {
+        elements.requirementsList.innerHTML = readRequirements().map((item) => `
+          <article class="requirement-row">
+            <input type="checkbox" data-requirement-done="${escapeHtml(item.id)}" ${item.done ? "checked" : ""}>
+            <div>
+              <strong>${escapeHtml(item.label)}</strong>
+              <p>${escapeHtml(item.detail)}</p>
+            </div>
+            <label>
+              <span>${escapeHtml(item.owner)}</span>
+              <input data-requirement-notes="${escapeHtml(item.id)}" value="${escapeHtml(item.notes || "")}" placeholder="Notes">
+            </label>
+          </article>
+        `).join("");
+      }
+
+      function updateRequirement(id, patch) {
+        const requirements = readRequirements().map((item) => item.id === id ? { ...item, ...patch } : item);
+        writeRequirements(requirements);
+      }
+
+      function exportSettings() {
+        downloadText(
+          `facilities-engineering-access-settings-${new Date().toISOString().slice(0, 10)}.json`,
+          JSON.stringify(makeSettingsPayload(), null, 2),
+          "application/json"
+        );
+      }
+
+      async function importSettings(file) {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (Array.isArray(data.members)) {
+          writeMembers(data.members.map((member) => ({
+            ...member,
+            displayName: member.displayName || member.name || "",
+            localPassword: ""
+          })));
+        }
+        if (Array.isArray(data.pages)) writePagesWithMeta(data.pages);
+        if (data.profilePages) AccessDirectory.writeProfilePages(data.profilePages);
+        if (Array.isArray(data.requirements)) writeStored(STORAGE.requirements, data.requirements);
+        if (data.rules) writeRulesDraft(data.rules);
+        if (data.firebase) writeFirebaseDraft(data.firebase);
+        renderAll();
+        setNotice("Settings import complete.", "success");
+      }
+
+      function switchPanel(panelId) {
+        document.querySelectorAll(".panel-screen").forEach((panel) => {
+          panel.classList.toggle("is-active", panel.id === `panel-${panelId}`);
+        });
+        document.querySelectorAll("[data-panel-target]").forEach((button) => {
+          button.classList.toggle("is-active", button.dataset.panelTarget === panelId);
+        });
+      }
+
+      function renderAll() {
+        renderMetrics();
+        renderRoleOverview();
+        renderOverviewRequirements();
+        renderRoleOptions(elements.memberRole, elements.memberRole.value || "tech");
+        renderRoleOptions(elements.pageMinRole, elements.pageMinRole.value || "viewer");
+        renderMemberPageChecks(getSelectedMemberPages());
+        renderMemberTable();
+        renderPageTable();
+        renderProfileMatrix();
+        renderFirebaseForm();
+        renderRules();
+        renderRequirements();
+        renderFirebaseRuntime();
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      document.querySelectorAll("[data-panel-target]").forEach((button) => {
+        button.addEventListener("click", () => switchPanel(button.dataset.panelTarget));
+      });
+
+      document.querySelectorAll("[data-panel-link]").forEach((button) => {
+        button.addEventListener("click", () => switchPanel(button.dataset.panelLink));
+      });
+
+      elements.memberForm.addEventListener("submit", saveMemberFromForm);
+      elements.pageForm.addEventListener("submit", savePageFromForm);
+      elements.firebaseForm.addEventListener("submit", saveFirebaseDraft);
+      elements.rulesEditor.addEventListener("input", () => writeRulesDraft(elements.rulesEditor.value));
+
+      document.querySelector("#newMemberButton").addEventListener("click", resetMemberForm);
+      document.querySelector("#deleteMemberButton").addEventListener("click", deleteSelectedMember);
+      document.querySelector("#newPageButton").addEventListener("click", resetPageForm);
+      document.querySelector("#deletePageButton").addEventListener("click", deleteSelectedPage);
+      document.querySelector("#saveProfilePagesButton").addEventListener("click", saveProfileMatrix);
+      document.querySelector("#exportSettingsButton").addEventListener("click", exportSettings);
+      document.querySelector("#copyMembersButton").addEventListener("click", () => copyText(JSON.stringify(readMembers().map(makeMemberDoc), null, 2), "Member JSON copied."));
+      document.querySelector("#copyFirebaseConfigButton").addEventListener("click", () => copyText(generateFirebaseConfig(), "Firebase config copied."));
+      document.querySelector("#copyRulesButton").addEventListener("click", () => copyText(elements.rulesEditor.value, "Firestore rules copied."));
+      document.querySelector("#downloadRulesButton").addEventListener("click", () => downloadText("firestore.rules", elements.rulesEditor.value));
+      document.querySelector("#resetRulesButton").addEventListener("click", () => {
+        writeRulesDraft(defaultRules);
+        renderRules();
+        setNotice("Rules reset to repository default.", "success");
+      });
+      document.querySelector("#resetFirebaseButton").addEventListener("click", () => {
+        writeFirebaseDraft(sourceFirebaseDraft());
+        renderAll();
+        setNotice("Firebase draft reset to source config.", "success");
+      });
+      document.querySelector("#resetRequirementsButton").addEventListener("click", () => {
+        localStorage.removeItem(STORAGE.requirements);
+        renderAll();
+        setNotice("Requirements reset.", "success");
+      });
+      document.querySelector("#copyDeployButton").addEventListener("click", () => copyText(elements.deployOutput.value, "Deploy commands copied."));
+      document.querySelector("#firebaseEmailLoginButton").addEventListener("click", () => signInFirebaseEmail().catch((error) => setNotice(error.message, "error")));
+      document.querySelector("#firebaseGoogleLoginButton").addEventListener("click", () => signInFirebaseGoogle().catch((error) => setNotice(error.message, "error")));
+      document.querySelector("#firebaseSignOutButton").addEventListener("click", () => signOutFirebase().catch((error) => setNotice(error.message, "error")));
+      document.querySelector("#pushFirestoreButton").addEventListener("click", () => pushFirestoreDrafts().catch((error) => setNotice(error.message, "error")));
+      document.querySelector("#pullFirestoreButton").addEventListener("click", () => pullFirestoreDrafts().catch((error) => setNotice(error.message, "error")));
+      document.querySelector("#importSettingsInput").addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) importSettings(file).catch((error) => setNotice(error.message, "error"));
+        event.target.value = "";
+      });
+
+      elements.memberRole.addEventListener("change", () => {
+        if (!elements.memberEditingId.value) {
+          renderMemberPageChecks(AccessDirectory.getPageIdsForProfile(elements.memberRole.value));
         }
       });
+
+      elements.memberTable.addEventListener("click", (event) => {
+        const id = event.target.closest("[data-edit-member]")?.dataset.editMember;
+        if (!id) return;
+        const member = readMembers().find((entry) => entry.id === id);
+        if (member) fillMemberForm(member);
+      });
+
+      elements.pageTable.addEventListener("click", (event) => {
+        const id = event.target.closest("[data-edit-page]")?.dataset.editPage;
+        if (!id) return;
+        const page = readPagesWithMeta().find((entry) => entry.id === id);
+        if (page) fillPageForm(page);
+      });
+
+      elements.requirementsList.addEventListener("change", (event) => {
+        const doneId = event.target.dataset.requirementDone;
+        if (doneId) {
+          updateRequirement(doneId, { done: event.target.checked });
+          renderAll();
+        }
+      });
+
+      elements.requirementsList.addEventListener("input", (event) => {
+        const notesId = event.target.dataset.requirementNotes;
+        if (notesId) updateRequirement(notesId, { notes: event.target.value });
+      });
+
+      renderRoleOptions(elements.memberRole, "tech");
+      renderRoleOptions(elements.pageMinRole, "viewer");
+      resetMemberForm();
+      resetPageForm();
+      renderAll();
+      setNotice("Access settings are saved locally until Firebase is enabled and pushed.", "success");
     </script>
     <script src="../scripts/local-preview.js?v=preview-1"></script>
   </body>

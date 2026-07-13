@@ -1,5 +1,5 @@
 const COMMAND_CENTER_CONFIG = {
-  folderId: "1ww8rUXsbrb3v_FrbdthnUSENBdDS_Ct4",
+  folderId: "1zja8ZdT4tiZ8-yTSi17JepBez493WkSC",
   fileName: "command-center-data.json",
   backupFolderName: "command-center-backups",
   maxBackups: 40,

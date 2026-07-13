@@ -20,9 +20,9 @@ Static prototype for the FES project management app. It is designed for GitHub P
 
 ## File Repository
 
-Use this Google Drive folder as the shared file repository:
+Use this Google Drive folder for database setup artifacts, legacy JSON state, and backups:
 
-https://drive.google.com/drive/folders/1ww8rUXsbrb3v_FrbdthnUSENBdDS_Ct4?usp=drive_link
+https://drive.google.com/drive/folders/1zja8ZdT4tiZ8-yTSi17JepBez493WkSC?usp=drive_link
 
 The prototype opens this folder from the file toolbar button and attachment-count buttons.
 
@@ -46,14 +46,20 @@ https://www.facilities-engineering.com/commandcenter/
 4. Set the source to the default branch and root folder.
 5. Save, then open the published GitHub Pages URL.
 
-## Google Backend
+## Firebase Backend
 
-The app now supports a Google Drive-backed sync bridge:
+Command Center is prepared for Firebase Authentication plus Cloud Firestore as the production database. Use `FIREBASE_SETUP.md`, `firebase.json`, `firestore.rules`, `firestore.indexes.json`, and `firebase-config.js` to turn on the real database.
+
+Until Firebase is enabled, the page keeps using the Apps Script bridge and local fallback.
+
+## Legacy Google Backend
+
+The app still supports a Google Drive-backed sync bridge:
 
 ```text
 Frontend on GitHub Pages
   -> Google Apps Script Web App
-  -> command-center-data.json in Google Drive folder 1ww8rUXsbrb3v_FrbdthnUSENBdDS_Ct4
+  -> command-center-data.json in Google Drive folder 1zja8ZdT4tiZ8-yTSi17JepBez493WkSC
   -> Google Drive folder for attachments
   -> future Google Calendar due-date sync
 ```

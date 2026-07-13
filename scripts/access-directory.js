@@ -1,26 +1,30 @@
 (function () {
   const usersKey = "facilitiesEngineeringAccessUsers";
   const sessionKey = "facilitiesEngineeringCurrentUser";
+  const pagesKey = "facilitiesEngineeringPages";
   const profileWidgetsKey = "facilitiesEngineeringProfileWidgets";
   const profilePagesKey = "facilitiesEngineeringProfilePages";
+  const pagesVersionKey = "facilitiesEngineeringPagesVersion";
   const profileWidgetsVersionKey = "facilitiesEngineeringProfileWidgetsVersion";
   const profilePagesVersionKey = "facilitiesEngineeringProfilePagesVersion";
-  const currentProfileWidgetsVersion = "facilities-engineering-3";
-  const currentProfilePagesVersion = "facilities-engineering-1";
+  const currentPagesVersion = "facilities-engineering-pages-2";
+  const currentProfileWidgetsVersion = "facilities-engineering-widgets-4";
+  const currentProfilePagesVersion = "facilities-engineering-pages-2";
 
-  const pages = [
+  const defaultPages = [
     { id: "home", label: "Home", path: "../home/", description: "Public Facilities Engineering home page" },
     { id: "dashboard", label: "Facilities Engineering", path: "../dashboard/", description: "Facilities Engineering mission-control dashboard" },
+    { id: "commandcenter", label: "Command Center", path: "../commandcenter/", description: "Project board, workstations, tasks, and shared Firestore data" },
     { id: "hvac-login", label: "Systems", path: "../lion-HopVAC/", description: "Systems workspace for building controls" },
-    { id: "settings", label: "Administration", path: "../settings/", description: "Users, profiles, page access, and widget access" }
+    { id: "settings", label: "Administration", path: "../settings/", description: "Users, roles, Firebase rules, page access, and security requirements" }
   ];
-  const pageIds = new Set(pages.map((page) => page.id));
 
   const profiles = [
-    { id: "engineer", label: "Engineer" },
+    { id: "owner", label: "Owner" },
+    { id: "admin", label: "Admin" },
     { id: "manager", label: "Manager" },
-    { id: "administrator", label: "Administrator" },
-    { id: "asset-manager", label: "Asset Manager" }
+    { id: "tech", label: "Tech" },
+    { id: "viewer", label: "Viewer" }
   ];
   const profileIds = new Set(profiles.map((profile) => profile.id));
 
@@ -53,7 +57,7 @@
       id: "projects",
       label: "Projects",
       description: "Open projects, work orders, PM tasks, and delivery tracking.",
-      url: "https://projects.facilities-engineering.com/"
+      url: "../commandcenter/"
     },
     {
       id: "work-orders",
@@ -101,7 +105,21 @@
   const widgetIds = new Set(widgets.map((widget) => widget.id));
 
   const defaultProfileWidgets = {
-    engineer: [
+    owner: widgets.map((widget) => widget.id),
+    admin: widgets.map((widget) => widget.id),
+    manager: [
+      "dashboard",
+      "assets",
+      "systems",
+      "lighting",
+      "projects",
+      "work-orders",
+      "alarms",
+      "mail",
+      "johny",
+      "administration"
+    ],
+    tech: [
       "dashboard",
       "assets",
       "systems",
@@ -112,36 +130,21 @@
       "mail",
       "johny"
     ],
-    manager: [
-      "dashboard",
-      "lighting",
-      "projects",
-      "work-orders",
-      "analytics",
-      "alarms",
-      "mail",
-      "johny",
-      "administration"
-    ],
-    administrator: widgets.map((widget) => widget.id),
-    "asset-manager": [
+    viewer: [
       "dashboard",
       "assets",
       "systems",
-      "lighting",
       "projects",
-      "work-orders",
-      "analytics",
-      "alarms",
-      "mail"
+      "analytics"
     ]
   };
 
   const defaultProfilePages = {
-    engineer: ["home", "dashboard", "hvac-login"],
-    manager: ["home", "dashboard", "hvac-login"],
-    administrator: ["home", "dashboard", "hvac-login", "settings"],
-    "asset-manager": ["home", "dashboard", "hvac-login"]
+    owner: ["home", "dashboard", "commandcenter", "hvac-login", "settings"],
+    admin: ["home", "dashboard", "commandcenter", "hvac-login", "settings"],
+    manager: ["home", "dashboard", "commandcenter", "hvac-login"],
+    tech: ["home", "dashboard", "commandcenter", "hvac-login"],
+    viewer: ["home", "dashboard", "commandcenter"]
   };
 
   const defaultUsers = [
@@ -150,9 +153,9 @@
       name: "Tim Ulibarri",
       email: "tim.ulibarri@c-openai.com",
       password: "",
-      profile: "administrator",
+      profile: "owner",
       active: true,
-      pages: ["home", "dashboard", "settings"]
+      pages: ["home", "dashboard", "commandcenter", "settings"]
     }
   ];
 
@@ -164,7 +167,92 @@
     return String(password || "").trim();
   }
 
+  function slugify(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function normalizePageRecord(page) {
+    const id = slugify(page.id || page.label || page.path);
+    if (!id) {
+      return null;
+    }
+
+    return {
+      id,
+      label: String(page.label || id).trim(),
+      path: String(page.path || "#").trim(),
+      description: String(page.description || "").trim()
+    };
+  }
+
+  function readPages() {
+    const raw = localStorage.getItem(pagesKey);
+    const shouldAddNewDefaults = localStorage.getItem(pagesVersionKey) !== currentPagesVersion;
+
+    if (!raw) {
+      writePages(defaultPages);
+      return defaultPages.slice();
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const pageMap = new Map();
+        parsed.forEach((page) => {
+          const normalized = normalizePageRecord(page);
+          if (normalized) pageMap.set(normalized.id, normalized);
+        });
+
+        if (shouldAddNewDefaults) {
+          defaultPages.forEach((page) => {
+            const normalized = normalizePageRecord(page);
+            if (normalized && !pageMap.has(normalized.id)) {
+              pageMap.set(normalized.id, normalized);
+            }
+          });
+        }
+
+        const pages = Array.from(pageMap.values());
+        if (JSON.stringify(pages) !== raw || shouldAddNewDefaults) {
+          writePages(pages);
+        }
+        return pages;
+      }
+    } catch (error) {
+      console.warn("Unable to parse page registry", error);
+    }
+
+    writePages(defaultPages);
+    return defaultPages.slice();
+  }
+
+  function writePages(pages) {
+    const pageMap = new Map();
+    (Array.isArray(pages) ? pages : defaultPages).forEach((page) => {
+      const normalized = normalizePageRecord(page);
+      if (normalized) pageMap.set(normalized.id, normalized);
+    });
+
+    defaultPages.forEach((page) => {
+      const normalized = normalizePageRecord(page);
+      if (normalized && !pageMap.has(normalized.id)) {
+        pageMap.set(normalized.id, normalized);
+      }
+    });
+
+    const normalizedPages = Array.from(pageMap.values());
+    localStorage.setItem(pagesKey, JSON.stringify(normalizedPages));
+    localStorage.setItem(pagesVersionKey, currentPagesVersion);
+    return normalizedPages;
+  }
+
   function normalizePages(pageList) {
+    const pageIds = new Set(readPages().map((page) => page.id));
     const migrated = (Array.isArray(pageList) ? pageList : []).map((pageId) => {
       if (pageId === "fms") {
         return "dashboard";
@@ -176,11 +264,23 @@
   }
 
   function normalizeProfile(profile) {
+    const aliases = {
+      administrator: "admin",
+      engineer: "tech",
+      "asset-manager": "manager",
+      operator: "tech",
+      read: "viewer",
+      readonly: "viewer",
+      "read-only": "viewer"
+    };
     const normalized = String(profile || "").trim().toLowerCase().replace(/\s+/g, "-");
+    if (aliases[normalized]) {
+      return aliases[normalized];
+    }
     if (profileIds.has(normalized)) {
       return normalized;
     }
-    return "engineer";
+    return "tech";
   }
 
   function profileLabel(profileId) {
@@ -338,12 +438,12 @@
         const shouldAddNewDefaults = localStorage.getItem(profilePagesVersionKey) !== currentProfilePagesVersion;
         const merged = profiles.reduce((settings, profile) => {
           const pageIds = normalizePages(parsed[profile.id] || defaultProfilePages[profile.id]);
-          if (
-            shouldAddNewDefaults &&
-            defaultProfilePages[profile.id].includes("hvac-login") &&
-            !pageIds.includes("hvac-login")
-          ) {
-            pageIds.push("hvac-login");
+          if (shouldAddNewDefaults) {
+            defaultProfilePages[profile.id].forEach((pageId) => {
+              if (!pageIds.includes(pageId)) {
+                pageIds.push(pageId);
+              }
+            });
           }
           settings[profile.id] = pageIds;
           return settings;
@@ -459,7 +559,7 @@
     }
 
     const allowed = new Set(getPageIdsForProfile(user.profile));
-    return pages.filter((page) => allowed.has(page.id));
+    return readPages().filter((page) => allowed.has(page.id));
   }
 
   function getPageIdsForProfile(profileId) {
@@ -469,7 +569,7 @@
 
   function getPagesForProfile(profileId) {
     const allowed = new Set(getPageIdsForProfile(profileId));
-    return pages.filter((page) => allowed.has(page.id));
+    return readPages().filter((page) => allowed.has(page.id));
   }
 
   function getWidgetsForProfile(profileId) {
@@ -514,9 +614,13 @@
   }
 
   window.AccessDirectory = {
-    pages,
+    get pages() {
+      return readPages();
+    },
     profiles,
     widgets,
+    readPages,
+    writePages,
     readUsers,
     writeUsers,
     readProfileWidgets,

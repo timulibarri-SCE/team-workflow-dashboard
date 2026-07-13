@@ -1,0 +1,86 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberPath(orgId) {
+      return /databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid);
+    }
+
+    function isMember(orgId) {
+      return signedIn() && exists(memberPath(orgId));
+    }
+
+    function memberRole(orgId) {
+      return isMember(orgId) ? get(memberPath(orgId)).data.role : "";
+    }
+
+    function hasAnyRole(orgId, roles) {
+      return memberRole(orgId) in roles;
+    }
+
+    function canReadOrg(orgId) {
+      return hasAnyRole(orgId, ["owner", "admin", "manager", "tech", "viewer"]);
+    }
+
+    function canWriteBoard(orgId) {
+      return hasAnyRole(orgId, ["owner", "admin", "manager", "tech"]);
+    }
+
+    function canAdminOrg(orgId) {
+      return hasAnyRole(orgId, ["owner", "admin"]);
+    }
+
+    match /orgs/{orgId} {
+      allow read: if canReadOrg(orgId);
+      allow create, update, delete: if canAdminOrg(orgId);
+
+      match /members/{uid} {
+        allow read: if canAdminOrg(orgId) || (signedIn() && request.auth.uid == uid);
+        allow create, update, delete: if canAdminOrg(orgId);
+      }
+
+      match /settings/{settingId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update, delete: if canAdminOrg(orgId);
+      }
+
+      match /workstreams/{workstreamId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update: if canWriteBoard(orgId);
+        allow delete: if canAdminOrg(orgId);
+      }
+
+      match /tasks/{taskId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update: if canWriteBoard(orgId);
+        allow delete: if canAdminOrg(orgId);
+      }
+
+      match /commandCenter/{documentId} {
+        allow read: if canReadOrg(orgId);
+        allow create, update: if canWriteBoard(orgId);
+        allow delete: if canAdminOrg(orgId);
+
+        match /backups/{backupId} {
+          allow read: if canAdminOrg(orgId);
+          allow create: if canWriteBoard(orgId);
+          allow update, delete: if canAdminOrg(orgId);
+        }
+      }
+
+      match /activityLog/{eventId} {
+        allow read: if canReadOrg(orgId);
+        allow create: if canWriteBoard(orgId);
+        allow update, delete: if canAdminOrg(orgId);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
