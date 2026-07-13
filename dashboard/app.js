@@ -33,31 +33,19 @@ const siteIconImage = "assets/fes-graphics/ui/site-icon.svg";
 
 const modules = [
   {
-    name: "Systems",
-    image: "assets/fes-graphics/sidebar-with-name/systems-sidebar-with-name.svg",
-    href: "http://192.168.0.6:1881",
-  },
-  {
-    name: "Assets",
-    image: "assets/fes-graphics/sidebar-with-name/assets-sidebar-with-name.svg",
-  },
-  {
-    name: "Lighting",
-    image: "assets/fes-graphics/sidebar-with-name/lighting-sidebar-with-name.svg",
-  },
-  {
-    name: "Projects",
+    name: "Kirk",
     image: "assets/fes-graphics/sidebar-with-name/projects-sidebar-with-name.svg",
-    href: "http://192.168.0.6:8081",
+    href: "https://kirk.facilities-engineering.com",
   },
   {
-    name: "Johnny",
-    image: "assets/fes-graphics/sidebar-with-name/johny-sidebar-with-name.svg",
-    href: "http://192.168.0.6:3000",
+    name: "Scotty",
+    image: "assets/fes-graphics/sidebar-with-name/assets-sidebar-with-name.svg",
+    href: "https://scotty.facilities-engineering.com",
   },
   {
-    name: "Weather",
-    image: "assets/fes-graphics/sidebar-with-name/weather-sidebar-with-name.svg",
+    name: "Spock",
+    image: "assets/fes-graphics/sidebar-with-name/systems-sidebar-with-name.svg",
+    href: "https://spock.facilities-engineering.com",
   },
 ];
 
